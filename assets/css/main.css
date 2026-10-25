@@ -325,7 +325,7 @@ img {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.78);
   position: relative;
   transition: color var(--duration-fast);
   padding: 0.25rem 0;
@@ -401,6 +401,14 @@ img {
   transition: transform 0.4s ease-out;
 }
 
+.hero-backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(0.62) contrast(1.08);
+}
+
 .hero-slide {
   position: absolute;
   inset: 0;
@@ -409,7 +417,7 @@ img {
   opacity: 0;
   transform: scale(1.08);
   transition: opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1), transform 2.2s cubic-bezier(0.16, 1, 0.3, 1);
-  filter: brightness(0.7) contrast(1.05);
+  filter: brightness(0.62) contrast(1.05);
 }
 
 .hero-slide.active {
@@ -420,13 +428,17 @@ img {
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(9, 9, 11, 0.25) 0%,
-    rgba(9, 9, 11, 0.5) 45%,
-    rgba(9, 9, 11, 0.98) 100%
-  );
+  background: 
+    radial-gradient(ellipse 95% 75% at 20% 80%, rgba(9, 9, 11, 0.82) 0%, rgba(9, 9, 11, 0.45) 55%, transparent 90%),
+    linear-gradient(
+      to bottom,
+      rgba(9, 9, 11, 0.5) 0%,
+      rgba(9, 9, 11, 0.15) 30%,
+      rgba(9, 9, 11, 0.55) 65%,
+      rgba(9, 9, 11, 0.98) 100%
+    );
   z-index: 2;
+  pointer-events: none;
 }
 
 .hero-content {
@@ -496,6 +508,8 @@ img {
   text-transform: uppercase;
   letter-spacing: 3px;
   color: var(--accent-warm);
+  font-weight: 500;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
 }
 
 .hero-meta::before {
@@ -503,6 +517,7 @@ img {
   width: 30px;
   height: 1px;
   background-color: var(--accent-warm);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 
 .hero-headline {
@@ -513,6 +528,15 @@ img {
   letter-spacing: -0.5px;
   color: var(--text-pure);
   margin-bottom: 1.5rem;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.9), 0 1px 5px rgba(0, 0, 0, 0.95);
+}
+
+.hero-headline em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent-warm);
+  text-shadow: 0 0 35px rgba(227, 213, 184, 0.45), 0 2px 12px rgba(0, 0, 0, 0.9);
 }
 
 /* Efecto Shimmer de Luz en texto clave */
@@ -532,12 +556,13 @@ img {
 }
 
 .hero-description {
-  font-size: 1.05rem;
-  color: var(--text-muted);
-  max-width: 540px;
+  font-size: 1.1rem;
+  color: #ededed;
+  max-width: 580px;
   line-height: 1.7;
-  font-weight: 300;
+  font-weight: 350;
   margin-bottom: 2rem;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95), 0 1px 4px rgba(0, 0, 0, 0.95);
 }
 
 /* Conmutador de disciplinas en Hero */
