@@ -333,7 +333,7 @@
   }
 
   // Gestión de Foto de Portada (Hero)
-  const DEFAULT_HERO = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2200&q=90';
+  const DEFAULT_HERO = 'assets/images/portada.jpg';
 
   async function getHeroImage() {
     try {
