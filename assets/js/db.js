@@ -332,6 +332,40 @@
     return uMatch && pMatch;
   }
 
+  // Gestión de Foto de Portada (Hero)
+  const DEFAULT_HERO = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2200&q=90';
+
+  async function getHeroImage() {
+    try {
+      const db = await openDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction('settings', 'readonly');
+        const st = tx.objectStore('settings');
+        const req = st.get('hero_image');
+        req.onsuccess = () => resolve(req.result ? req.result.value : DEFAULT_HERO);
+        req.onerror = () => resolve(DEFAULT_HERO);
+      });
+    } catch (e) {
+      return getLS('hero_image', DEFAULT_HERO);
+    }
+  }
+
+  async function saveHeroImage(url) {
+    try {
+      const db = await openDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('settings', 'readwrite');
+        const st = tx.objectStore('settings');
+        const req = st.put({ key: 'hero_image', value: url });
+        req.onsuccess = () => resolve(true);
+        req.onerror = () => reject(req.error);
+      });
+    } catch (e) {
+      setLS('hero_image', url);
+      return true;
+    }
+  }
+
   // Portafolio
   async function getAllPortfolioPhotos() {
     try {
@@ -569,7 +603,9 @@
     saveClientSession,
     deleteClientSession,
     resetToDefaultData,
-    processImageFile
+    processImageFile,
+    getHeroImage,
+    saveHeroImage
   };
 
 })(window);

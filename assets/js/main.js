@@ -579,6 +579,14 @@ async function loadAndRenderSections() {
       allPortfolioPhotos = await db.getAllPortfolioPhotos();
     }
 
+    if (db && db.getHeroImage) {
+      const heroUrl = await db.getHeroImage();
+      const heroImg = document.querySelector('.hero-backdrop img');
+      if (heroImg && heroUrl) {
+        heroImg.src = heroUrl;
+      }
+    }
+
     renderSectionGrid('realestate', '.grid-realestate');
     renderSectionGrid('bodas', '.grid-weddings');
     renderSectionGrid('retratos', '.grid-portraits');

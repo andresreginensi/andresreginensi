@@ -54,8 +54,12 @@
       photoUrlInput: document.getElementById('photo-url-input'),
       photoCategory: document.getElementById('photo-category'),
       photoTitle: document.getElementById('photo-title'),
-      photoTag: document.getElementById('photo-tag'),
       photoAspect: document.getElementById('photo-aspect'),
+
+      // Portada (Hero)
+      adminHeroPreview: document.getElementById('admin-hero-preview'),
+      btnChangeHero: document.getElementById('btn-change-hero'),
+      heroFileInput: document.getElementById('hero-file-input'),
 
       // Sesiones de Clientes (Proofing)
       sessionsGrid: document.getElementById('admin-sessions-grid'),
@@ -118,6 +122,15 @@
   async function showDashboard() {
     if (dom.loginScreen) dom.loginScreen.style.display = 'none';
     if (dom.adminPanel) dom.adminPanel.style.display = 'flex';
+
+    if (db && db.getHeroImage && dom.adminHeroPreview) {
+      try {
+        const heroUrl = await db.getHeroImage();
+        if (heroUrl) dom.adminHeroPreview.src = heroUrl;
+      } catch (err) {
+        console.warn('Could not load hero image:', err);
+      }
+    }
 
     await refreshPortfolio();
     await refreshSessions();
@@ -203,6 +216,27 @@
         renderPortfolioGrid();
       });
     });
+
+    // Portada Hero: Cambiar imagen
+    if (dom.btnChangeHero && dom.heroFileInput) {
+      dom.btnChangeHero.addEventListener('click', () => dom.heroFileInput.click());
+      dom.heroFileInput.addEventListener('change', async (e) => {
+        if (e.target.files && e.target.files[0]) {
+          const file = e.target.files[0];
+          showToast('Procesando fotografía de portada...');
+          try {
+            const processed = await db.processImageFile(file);
+            await db.saveHeroImage(processed.fullUrl);
+            if (dom.adminHeroPreview) {
+              dom.adminHeroPreview.src = processed.thumbUrl || processed.fullUrl;
+            }
+            showToast('¡Foto de portada actualizada con éxito!');
+          } catch (err) {
+            alert('Error al procesar la portada: ' + err.message);
+          }
+        }
+      });
+    }
 
     // Modal Foto: Abrir / Cerrar
     if (dom.btnOpenUploadModal) {
