@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración | Andrés Reginensi Photography</title>
+
+  <!-- Google Fonts: Inter & Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+
+  <!-- ==========================================
+       1. PANTALLA DE ACCESO (LOGIN)
+       ========================================== -->
+  <div class="login-wrapper" id="login-screen">
+    <div class="login-card">
+      <div class="login-header">
+        <span class="login-logo">Andrés Reginensi</span>
+        <span class="login-subtitle">Panel de Gestión</span>
+        <div class="login-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          Área de Administración
+        </div>
+      </div>
+
+      <div class="login-help-box">
+        💡 <strong>Credenciales de acceso:</strong><br>
+        Usuario: <strong>admin</strong><br>
+        Contraseña: <strong>admin2026</strong><br>
+        <span style="font-size: 0.76rem; opacity: 0.85;">(Puedes cambiarlas en cualquier momento dentro de la pestaña "Ajustes").</span>
+      </div>
+
+      <div class="alert-error" id="login-error">
+        Usuario o contraseña incorrectos. Por favor, verifica tus datos.
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-username">Usuario</label>
+          <input type="text" id="login-username" class="form-input" placeholder="admin" required autofocus autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="login-password">Contraseña</label>
+          <input type="password" id="login-password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" id="btn-login-submit" class="btn-primary" style="margin-top: 1rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="10 17 15 12 10 7"></polyline>
+            <line x1="15" y1="12" x2="3" y2="12"></line>
+          </svg>
+          Entrar al Panel
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       2. PANEL DE CONTROL (DASHBOARD)
+       ========================================== -->
+  <div class="admin-layout" id="admin-panel">
+    
+    <!-- Barra Superior -->
+    <header class="admin-topbar">
+      <div class="topbar-inner">
+        <div class="brand-group">
+          <span class="topbar-title">Andrés Reginensi</span>
+          <span class="topbar-tag">Admin</span>
+        </div>
+
+        <div class="topbar-actions">
+          <a href="index.html" target="_blank" class="btn-secondary" title="Abrir página web en nueva pestaña">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            Ver Web Pública
+          </a>
+
+          <a href="proofing.html" target="_blank" class="btn-secondary" title="Abrir área de clientes">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Área Clientes
+          </a>
+
+          <button id="btn-logout" class="btn-danger" title="Cerrar sesión de administrador">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Salir
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Pestañas de Navegación -->
+    <nav class="admin-nav">
+      <div class="nav-tabs">
+        <button class="tab-btn active" data-tab="tab-portfolio">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          Portafolio Público
+        </button>
+
+        <button class="tab-btn" data-tab="tab-sessions">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          Galerías de Clientes (Proofing)
+        </button>
+
+        <button class="tab-btn" data-tab="tab-settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          Ajustes & Contraseña
+        </button>
+      </div>
+    </nav>
+
+    <!-- Contenedor de Vistas -->
+    <main class="admin-main">
+      
+      <!-- ==========================================
+           PESTAÑA 1: PORTAFOLIO PÚBLICO
+           ========================================== -->
+      <section id="tab-portfolio" class="tab-panel active">
+        <div class="section-header">
+          <div>
+            <h1 class="section-title">Portafolio Web Principal</h1>
+            <p class="section-desc">Gestiona las fotos que ven tus visitantes en la página principal según cada disciplina.</p>
+          </div>
+          <button id="btn-open-upload-modal" class="btn-gold">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            + Subir Nueva Foto
+          </button>
+        </div>
+
+        <!-- Filtros por categoría -->
+        <div class="category-filter-bar">
+          <button class="pill-filter active" data-filter="all">Todas (<span id="count-all">0</span>)</button>
+          <button class="pill-filter" data-filter="realestate">Inmobiliaria & Arquitectura (<span id="count-realestate">0</span>)</button>
+          <button class="pill-filter" data-filter="bodas">Bodas & Parejas (<span id="count-bodas">0</span>)</button>
+          <button class="pill-filter" data-filter="retratos">Retratos & Editorial (<span id="count-retratos">0</span>)</button>
+          <button class="pill-filter" data-filter="empresarial">Empresarial & Corporativo (<span id="count-empresarial">0</span>)</button>
+        </div>
+
+        <!-- Cuadrícula de fotos -->
+        <div class="admin-photo-grid" id="admin-photo-grid">
+          <!-- Renderizado dinámico -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           PESTAÑA 2: SESIONES DE CLIENTES (PROOFING)
+           ========================================== -->
+      <section id="tab-sessions" class="tab-panel">
+        <div class="section-header">
+          <div>
+            <h1 class="section-title">Galerías Privadas de Clientes</h1>
+            <p class="section-desc">Crea álbumes privados con contraseña PIN para que tus parejas o empresas revisen y elijan sus fotos.</p>
+          </div>
+          <button id="btn-open-session-modal" class="btn-gold">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            + Crear Nueva Sesión
+          </button>
+        </div>
+
+        <!-- Cuadrícula de sesiones -->
+        <div class="admin-sessions-grid" id="admin-sessions-grid">
+          <!-- Renderizado dinámico -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           PESTAÑA 3: AJUSTES Y SEGURIDAD
+           ========================================== -->
+      <section id="tab-settings" class="tab-panel">
+        <div class="section-header">
+          <div>
+            <h1 class="section-title">Ajustes & Contraseña</h1>
+            <p class="section-desc">Cambia tus credenciales de acceso o haz copias de seguridad de todas tus fotos.</p>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <!-- Tarjeta: Cambiar contraseña -->
+          <div class="settings-card">
+            <h2 class="settings-card-title">Seguridad de Administrador</h2>
+            <p class="settings-card-desc">Modifica el usuario o la clave de acceso a este panel.</p>
+
+            <form id="password-form">
+              <div class="form-group">
+                <label class="form-label" for="setting-username">Nombre de Usuario</label>
+                <input type="text" id="setting-username" class="form-input" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="setting-new-password">Nueva Contraseña</label>
+                <input type="password" id="setting-new-password" class="form-input" placeholder="Mínimo 6 caracteres" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="setting-confirm-password">Confirmar Nueva Contraseña</label>
+                <input type="password" id="setting-confirm-password" class="form-input" placeholder="Repite la contraseña" required>
+              </div>
+
+              <button type="submit" class="btn-primary">
+                Guardar Nuevas Credenciales
+              </button>
+            </form>
+          </div>
+
+          <!-- Tarjeta: Respaldo y mantenimiento -->
+          <div class="settings-card">
+            <h2 class="settings-card-title">Copia de Seguridad</h2>
+            <p class="settings-card-desc">Descarga un archivo con todas tus fotos, títulos y sesiones de clientes para guardarlo en tu ordenador.</p>
+
+            <button id="btn-export-backup" class="btn-secondary" style="width: 100%; margin-bottom: 2rem;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Descargar Copia de Seguridad (.json)
+            </button>
+
+            <h3 style="font-size: 0.95rem; color: #f87171; margin-bottom: 0.4rem;">Zona de Restablecimiento</h3>
+            <p class="settings-card-desc">Si alguna vez quieres borrar todo y volver a las fotos de demostración iniciales:</p>
+
+            <button id="btn-reset-data" class="btn-danger" style="width: 100%;">
+              Restablecer Galería de Fábrica
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==========================================
+       MODAL 1: SUBIR / EDITAR FOTO DEL PORTAFOLIO
+       ========================================== -->
+  <div class="modal-overlay" id="photo-modal">
+    <div class="modal-box">
+      <button class="modal-close-btn" id="btn-close-photo-modal" aria-label="Cerrar">&times;</button>
+      <h2 class="modal-title" id="photo-modal-title">Subir Fotografía al Portafolio</h2>
+      <p class="modal-desc">Elige la imagen desde tu ordenador o pega un enlace de internet.</p>
+
+      <form id="photo-form">
+        <input type="hidden" id="edit-photo-id">
+
+        <!-- Zona de Drag & Drop -->
+        <div class="dropzone-area" id="photo-dropzone">
+          <div class="dropzone-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <div class="dropzone-title">Haz clic aquí para seleccionar tu foto</div>
+          <div class="dropzone-hint">O arrastra tu archivo (JPG, PNG o WebP desde tu Mac)</div>
+          <input type="file" id="photo-file-input" accept="image/*" style="display: none;">
+        </div>
+
+        <div class="upload-preview-box" id="photo-preview-box">
+          <img id="photo-preview-img" src="" alt="Vista previa">
+        </div>
+
+        <div class="form-group" style="margin-top: 1.2rem;">
+          <label class="form-label" for="photo-url-input">O también puedes pegar un enlace (URL) de foto:</label>
+          <input type="url" id="photo-url-input" class="form-input" placeholder="https://ejemplo.com/mifoto.jpg">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="photo-category">Categoría / Especialidad</label>
+          <select id="photo-category" class="form-select" required>
+            <option value="realestate">Inmobiliaria & Arquitectura</option>
+            <option value="bodas">Bodas & Parejas</option>
+            <option value="retratos">Retratos & Editorial</option>
+            <option value="empresarial">Empresarial & Corporativo</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="photo-title">Título de la Fotografía</label>
+          <input type="text" id="photo-title" class="form-input" placeholder="Ej. Villa Pedralbes" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="photo-tag">Subtítulo o Etiqueta</label>
+          <input type="text" id="photo-tag" class="form-input" placeholder="Ej. Arquitectura Exterior o Nombre de los novios">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="photo-aspect">Formato visual</label>
+          <select id="photo-aspect" class="form-select">
+            <option value="landscape">Horizontal (Paisaje / Arquitectura)</option>
+            <option value="portrait">Vertical (Retrato / Boda)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 0.8rem; margin-top: 1.8rem;">
+          <button type="button" class="btn-secondary" id="btn-cancel-photo" style="flex: 1; justify-content: center;">Cancelar</button>
+          <button type="submit" class="btn-gold" id="btn-save-photo" style="flex: 2; justify-content: center;">Guardar y Publicar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 2: CREAR / EDITAR SESIÓN DE CLIENTE
+       ========================================== -->
+  <div class="modal-overlay" id="session-modal">
+    <div class="modal-box" style="max-width: 680px;">
+      <button class="modal-close-btn" id="btn-close-session-modal" aria-label="Cerrar">&times;</button>
+      <h2 class="modal-title" id="session-modal-title">Nueva Sesión de Cliente</h2>
+      <p class="modal-desc">Crea una galería privada y sube las fotos para que tu cliente las revise.</p>
+
+      <form id="session-form">
+        <input type="hidden" id="edit-session-id">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="session-client-name">Nombre del Cliente / Pareja</label>
+            <input type="text" id="session-client-name" class="form-input" placeholder="Ej. Laura Gómez & Carlos" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="session-title-input">Título del Reportaje</label>
+            <input type="text" id="session-title-input" class="form-input" placeholder="Ej. Boda Laura & Carlos" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="session-date">Fecha del Evento</label>
+            <input type="text" id="session-date" class="form-input" placeholder="Ej. 24 de Octubre, 2026">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="session-location">Ubicación</label>
+            <input type="text" id="session-location" class="form-input" placeholder="Ej. Madrid o Mallorca">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="session-pin">PIN de Acceso Privado (4 dígitos)</label>
+            <input type="text" id="session-pin" class="form-input" placeholder="Ej. 4829" required maxlength="8">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Este es el código que le darás a tu cliente.</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="session-max">Máximo de fotos a elegir</label>
+            <input type="number" id="session-max" class="form-input" value="40" min="1">
+          </div>
+        </div>
+
+        <!-- Zona para subir fotos de la sesión -->
+        <div class="form-group" style="margin-top: 1rem;">
+          <label class="form-label">Subir fotos para este cliente (puedes seleccionar varias a la vez)</label>
+          <div class="dropzone-area" id="session-dropzone">
+            <div class="dropzone-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <div class="dropzone-title">Haz clic aquí para seleccionar fotos</div>
+            <div class="dropzone-hint">O arrastra una o varias fotos desde tu carpeta</div>
+            <input type="file" id="session-files-input" accept="image/*" multiple style="display: none;">
+          </div>
+
+          <div id="session-upload-status" style="font-size: 0.82rem; color: var(--accent-gold); margin-bottom: 0.8rem; display: none;"></div>
+
+          <!-- Miniaturas de fotos de la sesión -->
+          <div id="session-photos-preview-strip" style="display: flex; flex-wrap: wrap; gap: 0.5rem; max-height: 150px; overflow-y: auto; padding: 0.5rem; background: var(--bg-card); border-radius: 8px;">
+            <!-- Renderizado dinámico de miniaturas -->
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.8rem; margin-top: 1.8rem;">
+          <button type="button" class="btn-secondary" id="btn-cancel-session" style="flex: 1; justify-content: center;">Cancelar</button>
+          <button type="submit" class="btn-gold" id="btn-save-session" style="flex: 2; justify-content: center;">Guardar Sesión de Cliente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notificación Toast -->
+  <div class="toast" id="toast">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <span id="toast-message">Operación completada con éxito</span>
+  </div>
+
+  <!-- Lógica JavaScript del Panel -->
+  <script src="assets/js/db.js"></script>
+  <script src="assets/js/admin.js"></script>
+</body>
+</html>

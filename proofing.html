@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Área de selección y revisión de fotografías privadas para clientes de Andrés Reginensi.">
+  <title>Área Privada de Clientes | Andrés Reginensi Photography</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/proofing.css">
+
+  <!-- EmailJS Browser SDK (Oficial) -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+  <!-- Fondo Ambiental Vivo & Grano 35mm -->
+  <div class="ambient-glow-container" aria-hidden="true">
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="film-grain"></div>
+  </div>
+
+  <!-- Barra Superior -->
+  <header class="proofing-topbar">
+    <a href="index.html" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Volver al Portafolio
+    </a>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span class="session-badge" id="session-badge">Área de Clientes</span>
+      <a href="admin.html" class="session-badge" style="text-decoration: none; opacity: 0.7;" title="Panel de Administrador">⚙️ Admin</a>
+    </div>
+  </header>
+
+  <!-- Encabezado de Sesión -->
+  <section class="proofing-hero">
+    <h1 id="session-title">Cargando galería...</h1>
+    <p id="session-meta">Haz clic en cada fotografía para añadirla a tu selección final.</p>
+  </section>
+
+  <!-- Controles y Filtros -->
+  <div class="gallery-controls">
+    <button class="filter-pill active" data-filter="all">Todas las Fotos (<span id="total-count">0</span>)</button>
+    <button class="filter-pill" data-filter="selected">Solo Seleccionadas (<span id="filter-selected-count">0</span>)</button>
+  </div>
+
+  <!-- Grid de Fotografías -->
+  <main class="proofing-container">
+    <div class="proofing-grid" id="proofing-grid" aria-live="polite">
+      <!-- Se llena dinámicamente con las fotos -->
+    </div>
+  </main>
+
+  <!-- Barra Flotante de Resumen y Envío -->
+  <footer class="floating-bar">
+    <div class="summary-info">
+      <span class="count-badge" id="selected-badge-count">0</span>
+      <span class="summary-text" id="summary-text">0 fotos elegidas</span>
+    </div>
+    <div class="bar-actions">
+      <button id="btn-clear" class="btn-bar-clear">Limpiar</button>
+      <button id="btn-open-submit" class="btn-bar-submit" disabled>Finalizar Pedido</button>
+    </div>
+  </footer>
+
+  <!-- Modal de Acceso por PIN / Contraseña -->
+  <dialog id="auth-modal" class="modal-dialog">
+    <form id="auth-form" method="dialog">
+      <h2>Acceso Privado a Galería</h2>
+      <p>Introduce las credenciales que te ha facilitado el fotógrafo para acceder a tu sesión.</p>
+
+      <div class="form-field">
+        <label for="auth-session-select">Selecciona tu sesión</label>
+        <select id="auth-session-select" required></select>
+      </div>
+
+      <div class="form-field">
+        <label for="auth-pin-input">Código PIN de acceso</label>
+        <input type="password" id="auth-pin-input" placeholder="Ej. 2026 (para demo)" required autofocus>
+      </div>
+
+      <div id="auth-error" style="color: #ef4444; font-size: 0.85rem; margin-bottom: 1rem; display: none;"></div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn-bar-submit">Desbloquear Galería</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal de Confirmación y Envío -->
+  <dialog id="order-modal" class="modal-dialog">
+    <form id="order-form" method="dialog">
+      <h2>Enviar Selección de Fotos</h2>
+      <p>Vas a remitir <strong id="modal-selected-count">0</strong> imágenes a Andrés Reginensi para su edición y entrega final.</p>
+
+      <div class="form-field">
+        <label for="client-name">Nombre y Apellidos</label>
+        <input type="text" id="client-name" required placeholder="Tu nombre">
+      </div>
+
+      <div class="form-field">
+        <label for="client-email">Correo Electrónico de Contacto</label>
+        <input type="email" id="client-email" required placeholder="tu@email.com">
+      </div>
+
+      <div class="form-field">
+        <label for="order-notes">Notas o Indicaciones de Retoque (Opcional)</label>
+        <textarea id="order-notes" rows="3" placeholder="Ejemplo: 'Nos encanta la foto AR_LC_003 para ampliar en el salón y la AR_LC_007 en blanco y negro'"></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="btn-modal-cancel" class="btn-bar-clear">Volver a revisar</button>
+        <button type="submit" id="btn-modal-submit" class="btn-bar-submit">Confirmar y Enviar Selección</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Lightbox para Ver Foto Ampliada -->
+  <div class="proofing-lightbox" id="proofing-lightbox" aria-hidden="true">
+    <div class="proofing-lightbox-content">
+      <img id="proofing-lightbox-img" src="" alt="Previsualización">
+      <div class="lightbox-bar">
+        <span class="photo-code" id="proofing-lightbox-code">ID</span>
+        <button id="proofing-lightbox-toggle" class="btn-bar-submit">+ Seleccionar foto</button>
+        <button id="proofing-lightbox-close" class="btn-bar-clear" style="padding: 0.4rem 0.8rem;">Cerrar ✕</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/email-service.js"></script>
+  <script src="assets/js/db.js"></script>
+  <script src="assets/js/proofing.js"></script>
+</body>
+</html>
