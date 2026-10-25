@@ -32,6 +32,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/cookies.css">
 </head>
 <body>
 
@@ -325,11 +326,115 @@
       <a href="#retratos">Retratos</a>
       <a href="#empresarial">Empresarial</a>
       <a href="proofing.html">Área de Clientes</a>
+      <a href="cookies.html">Cookies</a>
+      <button type="button" class="btn-cookie-reopen" data-open-cookie-settings title="Configurar preferencias de cookies">Preferencias</button>
       <a href="admin.html" class="footer-admin-link" title="Acceso de Administrador">⚙️ Admin</a>
     </div>
   </footer>
 
+  <!-- ==========================================
+       BANNER DE COOKIES (RGPD / GDPR)
+       ========================================== -->
+  <aside class="cookie-banner" id="cookie-banner" role="dialog" aria-modal="false" aria-label="Aviso de cookies y privacidad" aria-hidden="true">
+    <div class="cookie-banner-inner">
+      <div class="cookie-banner-text">
+        <h2 class="cookie-banner-title">
+          <span>🍪</span> Privacidad & Consentimiento
+        </h2>
+        <p class="cookie-banner-desc">
+          Utilizamos cookies propias y de terceros para garantizar el correcto funcionamiento del portafolio, analizar la interacción con las galerías y personalizar contenidos. Puedes aceptar todas, rechazarlas o configurar tus preferencias. Más información en nuestra <a href="cookies.html">Política de Cookies</a>.
+        </p>
+      </div>
+
+      <div class="cookie-banner-actions">
+        <button type="button" class="cookie-btn cookie-btn-accept" id="cookie-btn-accept-all">
+          Aceptar todas
+        </button>
+        <button type="button" class="cookie-btn cookie-btn-reject" id="cookie-btn-reject-all">
+          Rechazar no esenciales
+        </button>
+        <button type="button" class="cookie-btn cookie-btn-config" id="cookie-btn-open-config">
+          Configurar
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==========================================
+       MODAL DE CONFIGURACIÓN DE COOKIES
+       ========================================== -->
+  <div class="cookie-modal-overlay" id="cookie-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cookie-modal-heading" aria-hidden="true">
+    <div class="cookie-modal" id="cookie-modal">
+      <div class="cookie-modal-header">
+        <div>
+          <h2 class="cookie-modal-title" id="cookie-modal-heading">Panel de Preferencias de Cookies</h2>
+          <p class="cookie-modal-subtitle">
+            Gestiona tu consentimiento según cada finalidad. Las cookies técnicas no se pueden desactivar ya que son necesarias para el funcionamiento del sitio.
+          </p>
+        </div>
+        <button type="button" class="cookie-modal-close" id="cookie-btn-close-modal" aria-label="Cerrar panel de cookies">&times;</button>
+      </div>
+
+      <div class="cookie-modal-body">
+        <!-- Categoría 1: Técnicas / Esenciales -->
+        <article class="cookie-category-item">
+          <div class="cookie-category-header">
+            <span class="cookie-category-name">
+              Técnicas y Esenciales
+              <span class="cookie-badge-required">Siempre activas</span>
+            </span>
+            <label class="cookie-switch" aria-label="Cookies técnicas obligatorias">
+              <input type="checkbox" checked disabled>
+              <span class="cookie-slider"></span>
+            </label>
+          </div>
+          <p class="cookie-category-desc">
+            Permiten la navegación segura, recordar el tamaño de imágenes, el visor a pantalla completa y el acceso a galerías privadas de clientes. No recopilan información personal identificable.
+          </p>
+        </article>
+
+        <!-- Categoría 2: Analíticas -->
+        <article class="cookie-category-item">
+          <div class="cookie-category-header">
+            <span class="cookie-category-name">Analítica y Rendimiento</span>
+            <label class="cookie-switch" aria-label="Permitir cookies analíticas">
+              <input type="checkbox" id="cookie-toggle-analytics">
+              <span class="cookie-slider"></span>
+            </label>
+          </div>
+          <p class="cookie-category-desc">
+            Nos ayudan a comprender de forma anónima cómo interactúan los usuarios con el catálogo fotográfico y qué disciplinas visuales generan mayor interés para optimizar los tiempos de carga y la experiencia.
+          </p>
+        </article>
+
+        <!-- Categoría 3: Marketing y Publicidad -->
+        <article class="cookie-category-item">
+          <div class="cookie-category-header">
+            <span class="cookie-category-name">Marketing y Redes Sociales</span>
+            <label class="cookie-switch" aria-label="Permitir cookies de marketing">
+              <input type="checkbox" id="cookie-toggle-marketing">
+              <span class="cookie-slider"></span>
+            </label>
+          </div>
+          <p class="cookie-category-desc">
+            Permiten medir la efectividad de campañas en plataformas sociales (Instagram, LinkedIn) y ofrecer contenidos visuales adaptados a tus preferencias profesionales.
+          </p>
+        </article>
+      </div>
+
+      <div class="cookie-modal-footer">
+        <button type="button" class="cookie-btn cookie-btn-reject" id="cookie-btn-modal-accept-all">
+          Aceptar todas
+        </button>
+        <button type="button" class="cookie-btn cookie-btn-accept" id="cookie-btn-save-preferences">
+          Guardar mis preferencias
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="assets/js/db.js"></script>
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/cookies.js"></script>
 </body>
 </html>
