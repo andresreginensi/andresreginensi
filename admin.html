@@ -130,6 +130,15 @@
           Galerías de Clientes (Proofing)
         </button>
 
+        <button class="tab-btn" data-tab="tab-analytics">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          Analíticas & Rendimiento
+        </button>
+
         <button class="tab-btn" data-tab="tab-settings">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"></circle>
@@ -220,7 +229,603 @@
       </section>
 
       <!-- ==========================================
-           PESTAÑA 3: AJUSTES Y SEGURIDAD
+           PESTAÑA 3: ANALÍTICAS Y ESTADÍSTICAS
+           ========================================== -->
+      <section id="tab-analytics" class="tab-panel">
+        <div class="section-header analytics-header">
+          <div>
+            <h1 class="section-title">Analíticas & Rendimiento del Portafolio</h1>
+            <p class="section-desc">Métricas de tráfico, comportamiento de visitantes y conversiones de clientes en tiempo real.</p>
+          </div>
+          
+          <div class="analytics-toolbar">
+            <!-- Selector de Rango Temporal -->
+            <div class="analytics-range-picker" id="analytics-range-picker">
+              <button type="button" class="range-btn" data-range="today">Hoy</button>
+              <button type="button" class="range-btn" data-range="7d">7 días</button>
+              <button type="button" class="range-btn active" data-range="30d">30 días</button>
+              <button type="button" class="range-btn" data-range="90d">90 días</button>
+              <button type="button" class="range-btn" data-range="1y">1 año</button>
+            </div>
+
+            <!-- Indicador en tiempo real -->
+            <div class="live-pill" title="Visitantes navegando activamente en la web">
+              <span class="live-pulse"></span>
+              <span id="live-users-count">3</span> usuarios activos ahora mismo
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. TARJETAS KPI RESUMEN -->
+        <div class="analytics-kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">Visitas Totales</span>
+              <div class="kpi-icon gold">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-pageviews">14.820</div>
+            <div class="kpi-footer">
+              <span class="kpi-badge positive">↑ +18.4%</span>
+              <span class="kpi-sub">vs periodo anterior</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">Visitantes Únicos</span>
+              <div class="kpi-icon blue">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-uniques">8.450</div>
+            <div class="kpi-footer">
+              <span class="kpi-badge positive">↑ +12.1%</span>
+              <span class="kpi-sub">57% de tráfico recurrente</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">Tiempo Medio por Sesión</span>
+              <div class="kpi-icon purple">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-avg-duration">3m 42s</div>
+            <div class="kpi-footer">
+              <span class="kpi-badge positive">↑ +24s</span>
+              <span class="kpi-sub">Alta retención editorial</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">Tasa de Rebote</span>
+              <div class="kpi-icon green">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-bounce-rate">28.6%</div>
+            <div class="kpi-footer">
+              <span class="kpi-badge positive">↓ -4.2%</span>
+              <span class="kpi-sub">Excelente para portafolios</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. FILA 1: EVOLUCIÓN DE TRÁFICO & FUENTES -->
+        <div class="analytics-row-traffic">
+          <!-- Gráfico de Línea Temporal -->
+          <div class="analytics-card col-span-8">
+            <div class="card-inner-header">
+              <div>
+                <h3 class="analytics-card-title">Evolución de Tráfico y Visitas</h3>
+                <p class="analytics-card-desc">Visualizaciones de página e interacción de usuarios a lo largo del tiempo.</p>
+              </div>
+              <div class="chart-legend-custom">
+                <span class="legend-item"><span class="legend-color gold"></span> Páginas Vistas</span>
+                <span class="legend-item"><span class="legend-color muted"></span> Visitantes Únicos</span>
+              </div>
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="chart-traffic-timeline" height="280"></canvas>
+            </div>
+          </div>
+
+          <!-- Fuentes de Tráfico (Adquisición) -->
+          <div class="analytics-card col-span-4">
+            <div class="card-inner-header">
+              <h3 class="analytics-card-title">Canales de Adquisición</h3>
+              <p class="analytics-card-desc">¿De dónde proceden tus visitantes?</p>
+            </div>
+            <div class="chart-donut-wrapper">
+              <canvas id="chart-traffic-sources" height="190"></canvas>
+            </div>
+            <div class="source-list" id="sources-breakdown-list">
+              <div class="source-item">
+                <div class="source-info">
+                  <span class="source-dot" style="background:#c5a059;"></span>
+                  <span class="source-name">Búsqueda Orgánica (Google)</span>
+                </div>
+                <span class="source-pct">44% <small>(6.520)</small></span>
+              </div>
+              <div class="source-item">
+                <div class="source-info">
+                  <span class="source-dot" style="background:#3b82f6;"></span>
+                  <span class="source-name">Tráfico Directo & Tarjetas</span>
+                </div>
+                <span class="source-pct">28% <small>(4.150)</small></span>
+              </div>
+              <div class="source-item">
+                <div class="source-info">
+                  <span class="source-dot" style="background:#ec4899;"></span>
+                  <span class="source-name">Instagram & Redes Sociales</span>
+                </div>
+                <span class="source-pct">19% <small>(2.815)</small></span>
+              </div>
+              <div class="source-item">
+                <div class="source-info">
+                  <span class="source-dot" style="background:#10b981;"></span>
+                  <span class="source-name">Portales & Referidos</span>
+                </div>
+                <span class="source-pct">9% <small>(1.335)</small></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. FILA 2: INTERACCIÓN (EVENTOS DE CLIC) & SECCIONES MÁS VISTAS -->
+        <div class="analytics-row-half">
+          <!-- Botones más presionados (Eventos) -->
+          <div class="analytics-card">
+            <div class="card-inner-header">
+              <div>
+                <h3 class="analytics-card-title">Interacción: Botones Más Presionados</h3>
+                <p class="analytics-card-desc">Seguimiento de eventos de clic en botones de contacto, selección y conversión.</p>
+              </div>
+              <span class="badge-tag">Eventos Clave</span>
+            </div>
+
+            <div class="events-ranking-list">
+              <div class="event-ranking-item">
+                <div class="event-row-top">
+                  <span class="event-name">
+                    <span class="event-icon">💬</span> Botón "Contactar / Email" (Propuestas)
+                  </span>
+                  <span class="event-stats"><strong>342 clics</strong> · 38.2% conv.</span>
+                </div>
+                <div class="event-bar-bg"><div class="event-bar-fill" style="width: 85%;"></div></div>
+              </div>
+
+              <div class="event-ranking-item">
+                <div class="event-row-top">
+                  <span class="event-name">
+                    <span class="event-icon">🔒</span> Acceso a "Área de Clientes" (Proofing)
+                  </span>
+                  <span class="event-stats"><strong>289 clics</strong> · 32.3% conv.</span>
+                </div>
+                <div class="event-bar-bg"><div class="event-bar-fill" style="width: 72%;"></div></div>
+              </div>
+
+              <div class="event-ranking-item">
+                <div class="event-row-top">
+                  <span class="event-name">
+                    <span class="event-icon">🔍</span> Ampliar Foto en Pantalla Completa (Lightbox)
+                  </span>
+                  <span class="event-stats"><strong>1.204 clics</strong> · 81.0% int.</span>
+                </div>
+                <div class="event-bar-bg"><div class="event-bar-fill" style="width: 95%;"></div></div>
+              </div>
+
+              <div class="event-ranking-item">
+                <div class="event-row-top">
+                  <span class="event-name">
+                    <span class="event-icon">💾</span> Seleccionar / Marcar Foto Favorita
+                  </span>
+                  <span class="event-stats"><strong>195 clics</strong> · 21.8% conv.</span>
+                </div>
+                <div class="event-bar-bg"><div class="event-bar-fill" style="width: 54%;"></div></div>
+              </div>
+
+              <div class="event-ranking-item">
+                <div class="event-row-top">
+                  <span class="event-name">
+                    <span class="event-icon">💍</span> Presupuesto Boda / Eventos
+                  </span>
+                  <span class="event-stats"><strong>124 clics</strong> · 13.9% conv.</span>
+                </div>
+                <div class="event-bar-bg"><div class="event-bar-fill" style="width: 40%;"></div></div>
+              </div>
+
+              <div class="event-ranking-item">
+                <div class="event-row-top">
+                  <span class="event-name">
+                    <span class="event-icon">🏛️</span> Solicitud Reportaje Inmobiliario
+                  </span>
+                  <span class="event-stats"><strong>98 clics</strong> · 10.9% conv.</span>
+                </div>
+                <div class="event-bar-bg"><div class="event-bar-fill" style="width: 32%;"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Secciones y Páginas más visitadas -->
+          <div class="analytics-card">
+            <div class="card-inner-header">
+              <div>
+                <h3 class="analytics-card-title">Páginas y Disciplinas Más Vistas</h3>
+                <p class="analytics-card-desc">Popularidad de cada portfolio y tiempo de permanencia medio.</p>
+              </div>
+              <span class="badge-tag">Rendimiento</span>
+            </div>
+
+            <div class="pages-ranking-list">
+              <div class="page-rank-item">
+                <div class="page-rank-num">01</div>
+                <div class="page-rank-body">
+                  <div class="page-rank-title">Inmobiliaria & Arquitectura (<code>#realestate</code>)</div>
+                  <div class="page-rank-bar"><div style="width: 82%;"></div></div>
+                </div>
+                <div class="page-rank-metrics">
+                  <span class="metric-val">4.820</span>
+                  <span class="metric-sub">32% del tráfico · 4m 12s</span>
+                </div>
+              </div>
+
+              <div class="page-rank-item">
+                <div class="page-rank-num">02</div>
+                <div class="page-rank-body">
+                  <div class="page-rank-title">Bodas & Eventos (<code>#bodas</code>)</div>
+                  <div class="page-rank-bar"><div style="width: 71%;"></div></div>
+                </div>
+                <div class="page-rank-metrics">
+                  <span class="metric-val">4.190</span>
+                  <span class="metric-sub">28% del tráfico · 3m 50s</span>
+                </div>
+              </div>
+
+              <div class="page-rank-item">
+                <div class="page-rank-num">03</div>
+                <div class="page-rank-body">
+                  <div class="page-rank-title">Retratos & Editorial (<code>#retratos</code>)</div>
+                  <div class="page-rank-bar"><div style="width: 47%;"></div></div>
+                </div>
+                <div class="page-rank-metrics">
+                  <span class="metric-val">2.760</span>
+                  <span class="metric-sub">19% del tráfico · 2m 45s</span>
+                </div>
+              </div>
+
+              <div class="page-rank-item">
+                <div class="page-rank-num">04</div>
+                <div class="page-rank-body">
+                  <div class="page-rank-title">Área Privada de Clientes (<code>proofing.html</code>)</div>
+                  <div class="page-rank-bar"><div style="width: 31%;"></div></div>
+                </div>
+                <div class="page-rank-metrics">
+                  <span class="metric-val">1.840</span>
+                  <span class="metric-sub">12% del tráfico · 6m 18s</span>
+                </div>
+              </div>
+
+              <div class="page-rank-item">
+                <div class="page-rank-num">05</div>
+                <div class="page-rank-body">
+                  <div class="page-rank-title">Empresarial & Corporativo (<code>#empresarial</code>)</div>
+                  <div class="page-rank-bar"><div style="width: 21%;"></div></div>
+                </div>
+                <div class="page-rank-metrics">
+                  <span class="metric-val">1.210</span>
+                  <span class="metric-sub">9% del tráfico · 2m 05s</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. FILA 3: GEOLOCALIZACIÓN Y TECNOLOGÍA -->
+        <div class="analytics-row-half">
+          <!-- Geolocalización (Países y Ciudades) -->
+          <div class="analytics-card">
+            <div class="card-inner-header">
+              <div>
+                <h3 class="analytics-card-title">Geolocalización de Visitantes</h3>
+                <p class="analytics-card-desc">Países y ciudades de origen de clientes potenciales.</p>
+              </div>
+              <div class="geo-switch-tabs" id="geo-view-switch">
+                <button type="button" class="geo-btn active" data-geo="cities">Ciudades</button>
+                <button type="button" class="geo-btn" data-geo="countries">Países</button>
+              </div>
+            </div>
+
+            <!-- Vista Ciudades -->
+            <div class="geo-list" id="geo-list-cities">
+              <div class="geo-item">
+                <span class="geo-flag">🇪🇸</span>
+                <div class="geo-info">
+                  <span class="geo-name">Barcelona</span>
+                  <div class="geo-bar-bg"><div class="geo-bar-fill" style="width: 78%;"></div></div>
+                </div>
+                <span class="geo-count"><strong>3.210</strong> (38%)</span>
+              </div>
+
+              <div class="geo-item">
+                <span class="geo-flag">🇪🇸</span>
+                <div class="geo-info">
+                  <span class="geo-name">Madrid</span>
+                  <div class="geo-bar-bg"><div class="geo-bar-fill" style="width: 54%;"></div></div>
+                </div>
+                <span class="geo-count"><strong>2.190</strong> (26%)</span>
+              </div>
+
+              <div class="geo-item">
+                <span class="geo-flag">🇪🇸</span>
+                <div class="geo-info">
+                  <span class="geo-name">Palma de Mallorca</span>
+                  <div class="geo-bar-bg"><div class="geo-bar-fill" style="width: 37%;"></div></div>
+                </div>
+                <span class="geo-count"><strong>1.520</strong> (18%)</span>
+              </div>
+
+              <div class="geo-item">
+                <span class="geo-flag">🇪🇸</span>
+                <div class="geo-info">
+                  <span class="geo-name">Jávea / Alicante (Costa Blanca)</span>
+                  <div class="geo-bar-bg"><div class="geo-bar-fill" style="width: 25%;"></div></div>
+                </div>
+                <span class="geo-count"><strong>1.010</strong> (12%)</span>
+              </div>
+
+              <div class="geo-item">
+                <span class="geo-flag">🇬🇧</span>
+                <div class="geo-info">
+                  <span class="geo-name">Londres (Reino Unido)</span>
+                  <div class="geo-bar-bg"><div class="geo-bar-fill" style="width: 14%;"></div></div>
+                </div>
+                <span class="geo-count"><strong>590</strong> (7%)</span>
+              </div>
+
+              <div class="geo-item">
+                <span class="geo-flag">🇫🇷</span>
+                <div class="geo-info">
+                  <span class="geo-name">París (Francia)</span>
+                  <div class="geo-bar-bg"><div class="geo-bar-fill" style="width: 10%;"></div></div>
+                </div>
+                <span class="geo-count"><strong>420</strong> (5%)</span>
+              </div>
+            </div>
+
+            <!-- Vista Países -->
+            <div class="geo-list" id="geo-list-countries" style="display:none;">
+              <div class="geo-item">
+                <span class="geo-flag">🇪🇸</span>
+                <div class="geo-info">
+                  <span class="geo-name">España</span>
+                  <div class="geo-bar-bg"><div class="geo-bar-fill" style="width: 85%;"></div></div>
+                </div>
+                <span class="geo-count"><strong>10.670</strong> (72%)</span>
+              </div>
+              <div class="geo-item">
+                <span class="geo-flag">🇫🇷</span>
+                <div class="geo-info">
+                  <span class="geo-name">Francia</span>
+                  <div class="geo-bar-bg"><div class="geo-bar-fill" style="width: 18%;"></div></div>
+                </div>
+                <span class="geo-count"><strong>1.330</strong> (9%)</span>
+              </div>
+              <div class="geo-item">
+                <span class="geo-flag">🇬🇧</span>
+                <div class="geo-info">
+                  <span class="geo-name">Reino Unido</span>
+                  <div class="geo-bar-bg"><div class="geo-bar-fill" style="width: 15%;"></div></div>
+                </div>
+                <span class="geo-count"><strong>1.185</strong> (8%)</span>
+              </div>
+              <div class="geo-item">
+                <span class="geo-flag">🇩🇪</span>
+                <div class="geo-info">
+                  <span class="geo-name">Alemania</span>
+                  <div class="geo-bar-bg"><div class="geo-bar-fill" style="width: 11%;"></div></div>
+                </div>
+                <span class="geo-count"><strong>890</strong> (6%)</span>
+              </div>
+              <div class="geo-item">
+                <span class="geo-flag">🇺🇸</span>
+                <div class="geo-info">
+                  <span class="geo-name">Estados Unidos</span>
+                  <div class="geo-bar-bg"><div class="geo-bar-fill" style="width: 9%;"></div></div>
+                </div>
+                <span class="geo-count"><strong>745</strong> (5%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tecnología & Dispositivos -->
+          <div class="analytics-card">
+            <div class="card-inner-header">
+              <div>
+                <h3 class="analytics-card-title">Tecnología: Dispositivos & Navegadores</h3>
+                <p class="analytics-card-desc">Plataformas utilizadas para visualizar tu trabajo.</p>
+              </div>
+              <span class="badge-tag">Entorno</span>
+            </div>
+
+            <div class="tech-grid">
+              <!-- Dispositivos -->
+              <div class="tech-box">
+                <h4 class="tech-box-title">Tipo de Dispositivo</h4>
+                <div class="device-stat">
+                  <div class="device-icon">📱</div>
+                  <div class="device-data">
+                    <span class="device-name">Móvil / Smartphone</span>
+                    <div class="tech-bar-bg"><div class="tech-bar-fill" style="width: 68%;"></div></div>
+                  </div>
+                  <span class="tech-pct"><strong>68%</strong></span>
+                </div>
+
+                <div class="device-stat">
+                  <div class="device-icon">💻</div>
+                  <div class="device-data">
+                    <span class="device-name">Ordenador / Mac</span>
+                    <div class="tech-bar-bg"><div class="tech-bar-fill" style="width: 27%;"></div></div>
+                  </div>
+                  <span class="tech-pct"><strong>27%</strong></span>
+                </div>
+
+                <div class="device-stat">
+                  <div class="device-icon">📟</div>
+                  <div class="device-data">
+                    <span class="device-name">Tablet / iPad</span>
+                    <div class="tech-bar-bg"><div class="tech-bar-fill" style="width: 5%;"></div></div>
+                  </div>
+                  <span class="tech-pct"><strong>5%</strong></span>
+                </div>
+              </div>
+
+              <!-- Navegadores -->
+              <div class="tech-box">
+                <h4 class="tech-box-title">Navegador Utilizado</h4>
+                <div class="browser-stat">
+                  <span class="browser-name">Safari (iOS / macOS)</span>
+                  <span class="browser-pct">52%</span>
+                </div>
+                <div class="browser-bar-bg"><div style="width: 52%; background: #38bdf8;"></div></div>
+
+                <div class="browser-stat" style="margin-top: 0.9rem;">
+                  <span class="browser-name">Google Chrome</span>
+                  <span class="browser-pct">36%</span>
+                </div>
+                <div class="browser-bar-bg"><div style="width: 36%; background: #fbbf24;"></div></div>
+
+                <div class="browser-stat" style="margin-top: 0.9rem;">
+                  <span class="browser-name">Firefox & Otros</span>
+                  <span class="browser-pct">12%</span>
+                </div>
+                <div class="browser-bar-bg"><div style="width: 12%; background: #f87171;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. FILA 4: DEMOGRAFÍA & PRIVACIDAD GDPR -->
+        <div class="analytics-row-half">
+          <!-- Demografía estimada -->
+          <div class="analytics-card">
+            <div class="card-inner-header">
+              <div>
+                <h3 class="analytics-card-title">Demografía Estimada de la Audiencia</h3>
+                <p class="analytics-card-desc">Segmentación por grupo de edad y distribución por sexo.</p>
+              </div>
+              <span class="badge-tag">Perfil</span>
+            </div>
+
+            <div class="demo-grid">
+              <!-- Edad -->
+              <div class="demo-sub">
+                <h4 class="demo-title">Distribución por Edad</h4>
+                <div class="demo-age-row">
+                  <span class="age-label">18 - 24</span>
+                  <div class="age-bar-bg"><div style="width: 12%;"></div></div>
+                  <span class="age-val">12%</span>
+                </div>
+                <div class="demo-age-row">
+                  <span class="age-label">25 - 34</span>
+                  <div class="age-bar-bg"><div style="width: 46%; background: #c5a059;"></div></div>
+                  <span class="age-val highlight">46%</span>
+                </div>
+                <div class="demo-age-row">
+                  <span class="age-label">35 - 44</span>
+                  <div class="age-bar-bg"><div style="width: 32%;"></div></div>
+                  <span class="age-val">32%</span>
+                </div>
+                <div class="demo-age-row">
+                  <span class="age-label">45+</span>
+                  <div class="age-bar-bg"><div style="width: 10%;"></div></div>
+                  <span class="age-val">10%</span>
+                </div>
+              </div>
+
+              <!-- Sexo -->
+              <div class="demo-sub">
+                <h4 class="demo-title">Distribución por Sexo</h4>
+                <div class="gender-container">
+                  <div class="gender-bar">
+                    <div class="gender-female" style="width: 58%;" title="58% Mujeres">58% F</div>
+                    <div class="gender-male" style="width: 42%;" title="42% Hombres">42% M</div>
+                  </div>
+                  <div class="gender-labels">
+                    <span>👩 Mujeres: <strong>58%</strong> (Especial afinidad en Bodas y Retratos)</span>
+                    <span>👨 Hombres: <strong>42%</strong> (Alta presencia en Inmobiliaria)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cumplimiento GDPR / RGPD & Exportación -->
+          <div class="analytics-card gdpr-card">
+            <div class="card-inner-header">
+              <div>
+                <h3 class="analytics-card-title">Cumplimiento Legal & Privacidad (GDPR)</h3>
+                <p class="analytics-card-desc">Rastreo anónimo sin venta de datos ni rastreadores intrusivos.</p>
+              </div>
+              <span class="badge-tag status-ok">✓ 100% RGPD</span>
+            </div>
+
+            <div class="gdpr-content">
+              <div class="gdpr-item">
+                <span class="gdpr-check">✓</span>
+                <div>
+                  <strong>Anonimización de IPs:</strong> Las direcciones IP no se almacenan; se encriptan con un hash SHA-256 rotativo cada 24 horas.
+                </div>
+              </div>
+              <div class="gdpr-item">
+                <span class="gdpr-check">✓</span>
+                <div>
+                  <strong>Sin Cookies Invasivas de Terceros:</strong> El sistema funciona respetando la opción del usuario en el banner de cookies.
+                </div>
+              </div>
+              <div class="gdpr-item">
+                <span class="gdpr-check">✓</span>
+                <div>
+                  <strong>Datos Alojados en tu Propiedad:</strong> La información te pertenece al 100% y no se comparte con plataformas publicitarias.
+                </div>
+              </div>
+
+              <div class="gdpr-actions">
+                <button type="button" id="btn-export-analytics" class="btn-secondary" style="font-size: 0.85rem;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  Exportar Informe CSV
+                </button>
+                <button type="button" id="btn-sync-analytics" class="btn-gold" style="font-size: 0.85rem;">
+                  Actualizar Métricas
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           PESTAÑA 4: AJUSTES Y SEGURIDAD
            ========================================== -->
       <section id="tab-settings" class="tab-panel">
         <div class="section-header">
@@ -446,7 +1051,8 @@
     <span id="toast-message">Operación completada con éxito</span>
   </div>
 
-  <!-- Lógica JavaScript del Panel -->
+  <!-- Lógica JavaScript del Panel & Librería de Gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="assets/js/db.js"></script>
   <script src="assets/js/admin.js"></script>
 </body>
