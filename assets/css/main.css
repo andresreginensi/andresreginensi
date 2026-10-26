@@ -15,6 +15,9 @@ html {
   background-color: var(--bg-deep);
   color: var(--text-primary);
   text-rendering: optimizeLegibility;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Scrollbar estilizada */
@@ -33,6 +36,8 @@ html {
 }
 
 body {
+  width: 100%;
+  max-width: 100%;
   overflow-x: hidden;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -1948,12 +1953,22 @@ img {
   }
 
   .site-header {
-    top: 0.85rem;
-    width: calc(100% - 1.5rem);
+    top: 0.75rem !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 max(16px, env(safe-area-inset-left)) !important;
+    box-sizing: border-box !important;
   }
 
   .header-inner {
-    padding: 0.55rem 1.15rem;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0.55rem 1.15rem !important;
+    border-radius: 999px !important;
+    box-sizing: border-box !important;
   }
 
   .hero-section {
@@ -2025,11 +2040,105 @@ img {
 /* 3. SMARTPHONES (<= 768px, ej. iPhone 14/15, Pixel, Galaxy S) */
 @media (max-width: 768px) {
   html, body {
-    overflow-x: hidden;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    position: relative;
   }
 
   body {
     padding-bottom: 85px; /* Espacio para que la barra inferior no tape el footer */
+  }
+
+  /* Cabecera Móvil Limpia y Sin Desbordamiento */
+  .site-header {
+    top: 0.75rem !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 max(16px, env(safe-area-inset-left)) !important;
+    box-sizing: border-box !important;
+  }
+
+  .header-inner {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0.55rem 1.15rem !important;
+    border-radius: 999px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Centrado y Encuadre Óptimo de la Foto de Portada (Chica & Caballo Blanco) */
+  .hero-section {
+    min-height: 78vh !important;
+    height: auto !important;
+    padding-top: 6.25rem !important;
+    padding-bottom: 4rem !important;
+    padding-left: max(24px, env(safe-area-inset-left), 6vw) !important;
+    padding-right: max(24px, env(safe-area-inset-right), 6vw) !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+  }
+
+  .hero-backdrop {
+    transform: none !important;
+  }
+
+  .hero-backdrop img {
+    /* Encuadre óptimo: 33% horizontal (entre la chica y el caballo) y 20% vertical (rostro y cabeza del caballo con el cielo) */
+    object-position: 33% 20% !important;
+    transform: none !important;
+  }
+
+  /* Degradado suave que no oscurece el caballo ni la modelo */
+  .hero-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(9, 9, 11, 0.12) 0%,
+      rgba(9, 9, 11, 0.04) 30%,
+      rgba(9, 9, 11, 0.42) 60%,
+      rgba(9, 9, 11, 0.88) 85%,
+      #09090b 100%
+    ) !important;
+  }
+
+  .hero-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .hero-title-group {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  .hero-headline {
+    font-size: clamp(2.1rem, 7.5vw, 3.2rem) !important;
+    line-height: 1.14 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 1.25rem !important;
+    text-align: left !important;
+    word-break: normal;
+  }
+
+  .hero-description {
+    font-size: 1rem !important;
+    line-height: 1.65 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+    text-align: left !important;
   }
 
   .mobile-sticky-bar {
@@ -2037,7 +2146,33 @@ img {
   }
 
   .discipline-section {
-    padding: 4.5rem max(24px, env(safe-area-inset-left), 6vw) 3.5rem;
+    padding: 4.5rem max(24px, env(safe-area-inset-left), 6vw) 3.5rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .discipline-header {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 2rem !important;
+    padding-bottom: 1.5rem !important;
+    text-align: left !important;
+  }
+
+  .discipline-title {
+    font-size: clamp(1.9rem, 6.2vw, 2.7rem) !important;
+    line-height: 1.15 !important;
+    text-align: left !important;
+  }
+
+  .discipline-intro {
+    font-size: 0.98rem !important;
+    line-height: 1.65 !important;
+    max-width: 100% !important;
+    text-align: left !important;
   }
 
   .grid-realestate {

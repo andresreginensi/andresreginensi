@@ -248,6 +248,7 @@ function initHeroParallax() {
   if (!heroSection) return;
 
   heroSection.addEventListener('mousemove', (e) => {
+    if (window.innerWidth < 900) return;
     const rect = heroSection.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
