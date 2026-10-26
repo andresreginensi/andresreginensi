@@ -248,12 +248,34 @@
               <button type="button" class="range-btn" data-range="1y">1 año</button>
             </div>
 
+            <!-- Botón de estado de Base de Datos en la Nube -->
+            <button type="button" class="btn-db-config" id="btn-open-supabase-modal" title="Configurar conexión con base de datos en la nube (Supabase)">
+              <span class="db-status-dot" id="db-status-dot"></span>
+              <span id="db-status-text">Base de Datos: Nube Desconectada</span>
+            </button>
+
             <!-- Indicador en tiempo real -->
             <div class="live-pill" title="Visitantes navegando activamente en la web">
               <span class="live-pulse"></span>
               <span id="live-users-count">3</span> usuarios activos ahora mismo
             </div>
           </div>
+        </div>
+
+        <!-- Banner Informativo del Modo de Datos -->
+        <div class="analytics-mode-banner" id="analytics-mode-banner">
+          <div class="banner-left">
+            <span class="banner-badge" id="banner-mode-badge">Modo Muestra & Local</span>
+            <span class="banner-text" id="banner-mode-text">
+              Mostrando eventos locales y métricas de muestra. Conecta tu base de datos Supabase gratuita para recibir visitas y clics reales de todo el mundo.
+            </span>
+          </div>
+          <button type="button" class="btn-connect-cloud" id="btn-banner-connect">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            </svg>
+            Conectar Base de Datos (Gratis)
+          </button>
         </div>
 
         <!-- 1. TARJETAS KPI RESUMEN -->
@@ -400,7 +422,7 @@
               <span class="badge-tag">Eventos Clave</span>
             </div>
 
-            <div class="events-ranking-list">
+            <div class="events-ranking-list" id="events-ranking-list">
               <div class="event-ranking-item">
                 <div class="event-row-top">
                   <span class="event-name">
@@ -1037,6 +1059,78 @@
         <div style="display: flex; gap: 0.8rem; margin-top: 1.8rem;">
           <button type="button" class="btn-secondary" id="btn-cancel-session" style="flex: 1; justify-content: center;">Cancelar</button>
           <button type="submit" class="btn-gold" id="btn-save-session" style="flex: 2; justify-content: center;">Guardar Sesión de Cliente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 3: CONECTAR BASE DE DATOS SUPABASE
+       ========================================== -->
+  <div class="modal-overlay" id="modal-supabase-config">
+    <div class="modal-box" style="max-width: 580px;">
+      <button class="modal-close-btn" id="btn-close-supabase-modal" aria-label="Cerrar">&times;</button>
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+        <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(62, 207, 142, 0.15); display: flex; align-items: center; justify-content: center; color: #3ecf8e;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+          </svg>
+        </div>
+        <div>
+          <h2 class="modal-title" style="margin: 0; font-size: 1.25rem;">Base de Datos en la Nube (Supabase)</h2>
+          <span style="font-size: 0.75rem; color: #10b981; font-weight: 500;">100% Gratuita, Privada y Conforme con el RGPD</span>
+        </div>
+      </div>
+      
+      <p class="modal-desc" style="margin-bottom: 1.2rem;">
+        Conecta tu proyecto gratuito de Supabase para almacenar las visitas reales y los clics de tus clientes desde cualquier país y dispositivo sin usar cookies invasivas.
+      </p>
+
+      <div class="supabase-steps-card">
+        <div class="supabase-step">
+          <span class="step-num">1</span>
+          <div>
+            <strong>Crea tu proyecto gratis en <a href="https://supabase.com" target="_blank" rel="noopener" style="color: #c5a059; text-decoration: underline;">supabase.com</a></strong>
+            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0 0;">Haz clic en "Start your project" e inicia sesión con tu email o GitHub.</p>
+          </div>
+        </div>
+
+        <div class="supabase-step">
+          <span class="step-num">2</span>
+          <div>
+            <strong>Crea la tabla de eventos en el "SQL Editor"</strong>
+            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0.4rem 0;">Copia el código SQL de la tabla y pégalo en el editor de Supabase:</p>
+            <button type="button" class="btn-copy-sql" id="btn-copy-sql">📋 Copiar Código SQL de la Tabla</button>
+          </div>
+        </div>
+
+        <div class="supabase-step">
+          <span class="step-num">3</span>
+          <div>
+            <strong>Pega tus 2 credenciales de Supabase:</strong>
+            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0 0;">Las encuentras en <em>Project Settings &gt; API</em>.</p>
+          </div>
+        </div>
+      </div>
+
+      <form id="supabase-config-form" style="margin-top: 1.2rem;">
+        <div class="form-group">
+          <label class="form-label" for="sb-project-url">Project URL de Supabase</label>
+          <input type="url" id="sb-project-url" class="form-input" placeholder="https://tu-proyecto.supabase.co" required>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Ejemplo: https://abcdefghijklm.supabase.co</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="sb-anon-key">Anon / Public API Key</label>
+          <input type="password" id="sb-anon-key" class="form-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Tu clave pública (anon public). Es 100% segura para uso en navegador.</span>
+        </div>
+
+        <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem;">
+          <button type="button" class="btn-secondary" id="btn-disconnect-supabase" style="flex: 1;">Desconectar</button>
+          <button type="submit" class="btn-gold" id="btn-save-supabase" style="flex: 2; justify-content: center;">
+            Probar y Guardar Conexión
+          </button>
         </div>
       </form>
     </div>

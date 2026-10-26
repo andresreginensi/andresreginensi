@@ -12,9 +12,18 @@
   const CONFIG = {
     storageKey: 'andres_analytics_events',
     sessionKey: 'andres_analytics_session',
-    backendEndpoint: null, // Cambiar a 'https://api.andresreginensi.es/track' cuando se active el backend
-    maxLocalEvents: 200
+    supabaseKey: 'andres_supabase_config',
+    maxLocalEvents: 500
   };
+
+  // Obtener configuración de Supabase si existe
+  function getSupabaseConfig() {
+    try {
+      return JSON.parse(localStorage.getItem(CONFIG.supabaseKey) || 'null');
+    } catch (e) {
+      return null;
+    }
+  }
 
   // Generador de ID de sesión anónimo (válido por 30 minutos de inactividad)
   function getSessionId() {
@@ -45,14 +54,61 @@
     return 'desktop';
   }
 
+  // Detección simple de navegador
+  function getBrowserName() {
+    const ua = navigator.userAgent;
+    if (ua.includes('Firefox')) return 'Firefox';
+    if (ua.includes('Edg')) return 'Edge';
+    if (ua.includes('Chrome')) return 'Chrome';
+    if (ua.includes('Safari')) return 'Safari';
+    return 'Otro';
+  }
+
   // Comprobar si el usuario consintió analítica en el banner RGPD
   function isAnalyticsAllowed() {
     try {
       const consent = JSON.parse(localStorage.getItem('andres_cookie_consent') || 'null');
       if (consent && consent.analytics === false) return false;
-      return true; // Permitido por defecto en modo anónimo sin cookies
+      return true; // Permitido en modo anónimo sin cookies según RGPD
     } catch (e) {
       return true;
+    }
+  }
+
+  // Enviar evento a Supabase en la nube
+  function sendToSupabase(payload) {
+    const sb = getSupabaseConfig();
+    if (!sb || !sb.url || !sb.key) return;
+
+    const endpoint = `${sb.url.replace(/\/$/, '')}/rest/v1/site_events`;
+    const record = {
+      session_id: payload.sessionId,
+      event_category: payload.category,
+      event_action: payload.action,
+      event_label: payload.label || '',
+      page_path: payload.path,
+      referrer: payload.referrer,
+      device_type: payload.device,
+      browser_name: payload.browser,
+      screen_width: payload.screenWidth,
+      language: payload.language,
+      created_at: new Date(payload.timestamp).toISOString()
+    };
+
+    try {
+      fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'apikey': sb.key,
+          'Authorization': `Bearer ${sb.key}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(record),
+        keepalive: true
+      }).catch(() => {});
+    } catch (err) {
+      // Ignorar fallos de red
     }
   }
 
@@ -64,12 +120,13 @@
       sessionId: getSessionId(),
       timestamp: Date.now(),
       category: category,    // 'navigation', 'conversion', 'interaction'
-      action: action,        // 'view_page', 'click_contact', 'open_lightbox'
+      action: action,        // 'page_view', 'click_whatsapp', 'select_photo'
       label: label,          // '#bodas', 'Villa Galileu', 'WhatsApp'
       value: value,
       path: window.location.pathname + window.location.hash,
       referrer: document.referrer || 'direct',
       device: getDeviceType(),
+      browser: getBrowserName(),
       screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
       language: navigator.language || 'es'
@@ -78,20 +135,8 @@
     // 1. Guardar en almacenamiento local para el Dashboard del Admin
     saveLocalEvent(eventPayload);
 
-    // 2. Enviar a backend si está configurado
-    if (CONFIG.backendEndpoint && navigator.sendBeacon) {
-      try {
-        navigator.sendBeacon(CONFIG.backendEndpoint, JSON.stringify(eventPayload));
-      } catch (err) {
-        // Fallback fetch silencioso
-        fetch(CONFIG.backendEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(eventPayload),
-          keepalive: true
-        }).catch(() => {});
-      }
-    }
+    // 2. Enviar a Supabase en la nube si está configurado
+    sendToSupabase(eventPayload);
   }
 
   function saveLocalEvent(event) {
@@ -160,6 +205,20 @@
       } catch (e) {
         return [];
       }
+    },
+    clearLocalEvents: () => {
+      localStorage.removeItem(CONFIG.storageKey);
+    },
+    getSupabaseConfig: getSupabaseConfig,
+    setSupabaseConfig: (url, key) => {
+      if (!url || !key) {
+        localStorage.removeItem(CONFIG.supabaseKey);
+      } else {
+        localStorage.setItem(CONFIG.supabaseKey, JSON.stringify({ url: url.trim(), key: key.trim() }));
+      }
+    },
+    clearSupabaseConfig: () => {
+      localStorage.removeItem(CONFIG.supabaseKey);
     }
   };
 
