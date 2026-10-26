@@ -39,24 +39,91 @@
         <span class="brand-subtitle">Fotografía</span>
       </a>
 
-      <!-- Menú directo por secciones -->
-      <nav class="main-nav" aria-label="Navegación principal">
+      <!-- Menú directo por secciones para escritorio -->
+      <nav class="main-nav desktop-nav" aria-label="Navegación principal">
         <a href="#realestate" class="nav-link">Inmobiliaria</a>
         <a href="#bodas" class="nav-link">Bodas</a>
         <a href="#retratos" class="nav-link">Retratos</a>
         <a href="#empresarial" class="nav-link">Empresarial</a>
         <a href="#sobre-mi" class="nav-link">Sobre Mí</a>
+        <a href="#contacto" class="nav-link">Contacto</a>
       </nav>
 
-      <a href="proofing.html" class="btn-client-access">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-        Área de Clientes
-      </a>
+      <div class="header-actions">
+        <a href="proofing.html" class="btn-client-access desktop-only">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          Área de Clientes
+        </a>
+
+        <!-- Botón Hamburguesa Móvil -->
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Abrir menú" aria-expanded="false">
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+        </button>
+      </div>
     </div>
   </header>
+
+  <!-- Cajón / Menú Móvil Fullscreen -->
+  <div class="mobile-nav-drawer" id="mobile-nav-drawer" aria-hidden="true">
+    <div class="mobile-nav-backdrop" id="mobile-nav-backdrop"></div>
+    <div class="mobile-nav-panel">
+      <div class="mobile-nav-top">
+        <div class="brand-logo">
+          <span class="brand-title">Andrés Reginensi</span>
+          <span class="brand-subtitle">Fotografía</span>
+        </div>
+        <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Cerrar menú">&times;</button>
+      </div>
+
+      <nav class="mobile-nav-links">
+        <a href="#realestate" class="mobile-nav-link">
+          <span class="nav-idx">01</span>
+          <span class="nav-name">Inmobiliaria & Arquitectura</span>
+        </a>
+        <a href="#bodas" class="mobile-nav-link">
+          <span class="nav-idx">02</span>
+          <span class="nav-name">Bodas & Eventos</span>
+        </a>
+        <a href="#retratos" class="mobile-nav-link">
+          <span class="nav-idx">03</span>
+          <span class="nav-name">Retratos & Editorial</span>
+        </a>
+        <a href="#empresarial" class="mobile-nav-link">
+          <span class="nav-idx">04</span>
+          <span class="nav-name">Empresarial & Corporativo</span>
+        </a>
+        <a href="#sobre-mi" class="mobile-nav-link">
+          <span class="nav-idx">05</span>
+          <span class="nav-name">Sobre Mí</span>
+        </a>
+        <a href="#contacto" class="mobile-nav-link">
+          <span class="nav-idx">06</span>
+          <span class="nav-name">Contacto</span>
+        </a>
+      </nav>
+
+      <div class="mobile-nav-actions">
+        <a href="proofing.html" class="btn-mobile-client">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          Área de Clientes (Selección)
+        </a>
+        <a href="https://wa.me/34600000000?text=Hola%20Andr%C3%A9s,%20me%20gustar%C3%ADa%20consultar%20un%20presupuesto" class="btn-mobile-whatsapp" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.067-2.072-.502-1.637-.677-2.704-2.34-2.787-2.451-.082-.111-.664-.882-.664-1.682 0-.8.419-1.194.568-1.354.149-.16.326-.2.435-.2.11 0 .219.001.315.006.102.005.239-.039.373.284.144.35.49 1.194.533 1.282.043.088.072.19.014.305-.058.115-.087.187-.174.289-.087.102-.183.228-.261.306-.088.087-.179.182-.077.357.102.175.454.748.974 1.211.669.596 1.233.78 1.408.868.175.088.277.073.38-.044.102-.117.437-.51.554-.685.117-.175.233-.146.393-.087.16.058 1.017.48 1.192.568.175.088.291.131.335.204.044.073.044.423-.1 1.028z"/>
+          </svg>
+          Chatear por WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
 
   <main>
     <!-- HERO CINEMÁTICO INMERSIVO -->
@@ -290,19 +357,56 @@
     </section>
 
     <!-- CONTACTO -->
+    <!-- CONTACTO -->
     <section id="contacto" class="contact-section">
       <div class="contact-container reveal">
-        <span class="discipline-index contact-tag">Contacto</span>
+        <span class="discipline-index contact-tag">Contacto & Encargos</span>
         <h2 class="discipline-title contact-title">Hablemos de tu próximo encargo</h2>
         <p class="contact-desc">
-          Cuéntame acerca de las fechas, localización o necesidades de tu proyecto.
+          Cuéntame acerca de las fechas, localización o necesidades de tu proyecto. Respuesta garantizada en menos de 24 horas.
         </p>
-        <a href="mailto:hola@andresreginensi.com" class="btn-client-access btn-contact-email">
-          hola@andresreginensi.com
-        </a>
+        <div class="contact-buttons-group">
+          <a href="mailto:hola@andresreginensi.com" class="btn-client-access btn-contact-email" data-track="contact_email">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            hola@andresreginensi.com
+          </a>
+          <a href="https://wa.me/34600000000?text=Hola%20Andr%C3%A9s,%20me%20gustar%C3%ADa%20consultar%20un%20presupuesto" class="btn-whatsapp-action" target="_blank" rel="noopener" data-track="contact_whatsapp">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.067-2.072-.502-1.637-.677-2.704-2.34-2.787-2.451-.082-.111-.664-.882-.664-1.682 0-.8.419-1.194.568-1.354.149-.16.326-.2.435-.2.11 0 .219.001.315.006.102.005.239-.039.373.284.144.35.49 1.194.533 1.282.043.088.072.19.014.305-.058.115-.087.187-.174.289-.087.102-.183.228-.261.306-.088.087-.179.182-.077.357.102.175.454.748.974 1.211.669.596 1.233.78 1.408.868.175.088.277.073.38-.044.102-.117.437-.51.554-.685.117-.175.233-.146.393-.087.16.058 1.017.48 1.192.568.175.088.291.131.335.204.044.073.044.423-.1 1.028z"/>
+            </svg>
+            Contactar por WhatsApp
+          </a>
+        </div>
       </div>
     </section>
   </main>
+
+  <!-- Barra Flotante Inferior de Contacto Rápido (Optimizado para Móvil) -->
+  <div class="mobile-sticky-bar" id="mobile-sticky-bar">
+    <a href="https://wa.me/34600000000?text=Hola%20Andr%C3%A9s,%20me%20gustar%C3%ADa%20informaci%C3%B3n" class="sticky-action-btn sticky-whatsapp" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.067-2.072-.502-1.637-.677-2.704-2.34-2.787-2.451-.082-.111-.664-.882-.664-1.682 0-.8.419-1.194.568-1.354.149-.16.326-.2.435-.2.11 0 .219.001.315.006.102.005.239-.039.373.284.144.35.49 1.194.533 1.282.043.088.072.19.014.305-.058.115-.087.187-.174.289-.087.102-.183.228-.261.306-.088.087-.179.182-.077.357.102.175.454.748.974 1.211.669.596 1.233.78 1.408.868.175.088.277.073.38-.044.102-.117.437-.51.554-.685.117-.175.233-.146.393-.087.16.058 1.017.48 1.192.568.175.088.291.131.335.204.044.073.044.423-.1 1.028z"/>
+      </svg>
+      <span>WhatsApp</span>
+    </a>
+    <a href="mailto:hola@andresreginensi.com" class="sticky-action-btn sticky-email">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+        <polyline points="22,6 12,13 2,6"></polyline>
+      </svg>
+      <span>Email</span>
+    </a>
+    <a href="proofing.html" class="sticky-action-btn sticky-client">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <span>Clientes</span>
+    </a>
+  </div>
 
   <!-- Lightbox Cinemático Accesible -->
   <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Visor de fotografía a pantalla completa">

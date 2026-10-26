@@ -695,20 +695,112 @@ function setupPhotoLightboxEvents() {
 }
 
 // =======================================================
-// 11. INICIALIZACIÓN
+// 11. NAVEGACIÓN MÓVIL Y GESTOS TÁCTILES
 // =======================================================
-document.addEventListener('DOMContentLoaded', () => {
+function initMobileNavigation() {
+  const toggleBtn = document.getElementById('mobile-menu-toggle');
+  const drawer = document.getElementById('mobile-nav-drawer');
+  const closeBtn = document.getElementById('mobile-nav-close');
+  const backdrop = document.getElementById('mobile-nav-backdrop');
+  const links = document.querySelectorAll('.mobile-nav-link, .btn-mobile-client, .btn-mobile-whatsapp');
+
+  if (!toggleBtn || !drawer) return;
+
+  function openDrawer() {
+    drawer.classList.add('is-active');
+    drawer.setAttribute('aria-hidden', 'false');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('is-active');
+    drawer.setAttribute('aria-hidden', 'true');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (drawer.classList.contains('is-active')) {
+      closeDrawer();
+    } else {
+      openDrawer();
+    }
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+  if (backdrop) backdrop.addEventListener('click', closeDrawer);
+
+  links.forEach((link) => {
+    link.addEventListener('click', () => {
+      closeDrawer();
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer.classList.contains('is-active')) {
+      closeDrawer();
+    }
+  });
+}
+
+function initLightboxTouchGestures() {
+  const lb = document.getElementById('lightbox');
+  if (!lb) return;
+
+  // Cerrar al tocar el fondo oscuro (fuera de la imagen)
+  lb.addEventListener('click', (e) => {
+    if (e.target === lb || e.target.classList.contains('lightbox-content')) {
+      lb.classList.remove('active');
+      lb.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+  });
+
+  // Gestos táctiles de deslizamiento (Swipe down para cerrar)
+  let touchStartY = 0;
+  let touchStartX = 0;
+
+  lb.addEventListener('touchstart', (e) => {
+    if (e.touches && e.touches.length === 1) {
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
+    }
+  }, { passive: true });
+
+  lb.addEventListener('touchend', (e) => {
+    if (!lb.classList.contains('active')) return;
+    if (e.changedTouches && e.changedTouches.length === 1) {
+      const diffY = e.changedTouches[0].clientY - touchStartY;
+      const diffX = Math.abs(e.changedTouches[0].clientX - touchStartX);
+
+      // Si desliza hacia abajo más de 90px y no es un swipe horizontal
+      if (diffY > 90 && diffX < 80) {
+        lb.classList.remove('active');
+        lb.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+    }
+  }, { passive: true });
+}
+
+// =======================================================
+// 12. INICIALIZACIÓN
+// =======================================================
+function initAll() {
   initCustomCursor();
   initHeroParallax();
   initBeforeAfterSlider();
   setupScrollReveal();
   loadAndRenderSections();
-});
+  initMobileNavigation();
+  initLightboxTouchGestures();
+}
 
-// Respaldo de inicialización inmediata por si DOMContentLoaded ya disparó
-initCustomCursor();
-initHeroParallax();
-initBeforeAfterSlider();
-setupScrollReveal();
-loadAndRenderSections();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAll);
+} else {
+  initAll();
+}
 

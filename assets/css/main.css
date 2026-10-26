@@ -1392,55 +1392,367 @@ img {
 }
 
 /* =======================================================
-   15. RESPONSIVE
+   15. SECCIONES DE ESPECIALIDAD & FOTOGRAFÍAS (DISCIPLINAS)
    ======================================================= */
-@media (max-width: 992px) {
-  .hero-section {
-    padding: 0 2rem 4rem;
-  }
-  .hero-content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2.5rem;
-  }
-  .scroll-indicator {
-    display: none;
-  }
-  .col-span-8, .col-span-7, .col-span-6, .col-span-5, .col-span-4 {
-    grid-column: span 12;
-  }
-  .manifesto-container {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-  .section-top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
-  }
-  .filter-bar {
-    width: 100%;
-    overflow-x: auto;
-  }
-  .lightbox-prev {
-    left: 1rem;
-  }
-  .lightbox-next {
-    right: 1rem;
-  }
+.discipline-section {
+  padding: 7rem 2.5rem 5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.discipline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 3.5rem;
+  border-bottom: 1px solid var(--border-hairline);
+  padding-bottom: 2rem;
+  gap: 2.5rem;
+}
+
+.discipline-index {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent-warm);
+  margin-bottom: 0.6rem;
+  display: block;
+}
+
+.discipline-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.1rem, 4.5vw, 3.4rem);
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  color: var(--text-pure);
+  line-height: 1.15;
+}
+
+.discipline-intro {
+  max-width: 500px;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+/* Grids de Fotos */
+.photo-item {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-hairline);
+  cursor: pointer;
+  transition: transform 0.4s var(--ease-smooth), border-color 0.4s ease, box-shadow 0.4s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.photo-item:hover {
+  transform: translateY(-5px);
+  border-color: rgba(227, 213, 184, 0.35);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8), 0 0 30px rgba(197, 160, 89, 0.12);
+}
+
+.photo-item .img-box {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  background: #0d0d10;
+}
+
+.photo-item.aspect-landscape .img-box {
+  aspect-ratio: 16 / 10;
+}
+
+.photo-item.aspect-portrait .img-box {
+  aspect-ratio: 4 / 5;
+}
+
+.photo-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+  filter: brightness(0.93) contrast(1.02);
+}
+
+.photo-item:hover img {
+  transform: scale(1.04);
+  filter: brightness(1) contrast(1.04);
+}
+
+.photo-info {
+  padding: 1rem 1.35rem 1.15rem;
+  background: linear-gradient(180deg, rgba(22, 22, 26, 0.9) 0%, rgba(14, 14, 18, 0.98) 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.photo-name {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text-pure);
+  letter-spacing: 0.2px;
+}
+
+.photo-tag {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--accent-warm);
+  white-space: nowrap;
+}
+
+/* 1. Real Estate Grid */
+.grid-realestate {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+
+.realestate-subgrid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* 2. Bodas & Eventos Grid */
+.grid-weddings {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+/* 3. Retratos & Editorial Grid */
+.grid-portraits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+/* 4. Corporativo & Empresarial Grid */
+.grid-corporate {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
 }
 
 /* =======================================================
-   16. SECCIÓN DE CONTACTO & BOTONES SEMÁNTICOS
+   16. NAVEGACIÓN MÓVIL (HAMBURGUESA & DRAWER EDITORIAL)
+   ======================================================= */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-hairline);
+  border-radius: 999px;
+  width: 42px;
+  height: 42px;
+  padding: 11px 9px;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.25s ease;
+  z-index: 101;
+}
+
+.mobile-menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--accent-warm);
+}
+
+.hamburger-bar {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background-color: var(--text-pure);
+  border-radius: 2px;
+  transition: all 0.3s var(--ease-smooth);
+}
+
+/* Menú Móvil Fullscreen / Drawer */
+.mobile-nav-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0.35s ease, opacity 0.35s ease;
+}
+
+.mobile-nav-drawer.is-active {
+  visibility: visible;
+  opacity: 1;
+}
+
+.mobile-nav-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 8, 10, 0.85);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+}
+
+.mobile-nav-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 420px;
+  background: rgba(14, 14, 18, 0.98);
+  border-left: 1px solid var(--border-hairline);
+  box-shadow: -20px 0 50px rgba(0, 0, 0, 0.9);
+  padding: 2rem 1.75rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+
+.mobile-nav-drawer.is-active .mobile-nav-panel {
+  transform: translateX(0);
+}
+
+.mobile-nav-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.mobile-nav-close {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-hairline);
+  color: var(--text-pure);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--accent-warm);
+  transform: rotate(90deg);
+}
+
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.8rem 0;
+}
+
+.mobile-nav-link {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.85rem 0.5rem;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link:active {
+  background: rgba(255, 255, 255, 0.04);
+  padding-left: 0.75rem;
+}
+
+.mobile-nav-link .nav-idx {
+  font-size: 0.72rem;
+  font-family: var(--font-sans);
+  color: var(--accent-warm);
+  letter-spacing: 2px;
+}
+
+.mobile-nav-link .nav-name {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 300;
+  color: var(--text-pure);
+}
+
+.mobile-nav-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.btn-mobile-client {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.25rem;
+  border-radius: 10px;
+  background: rgba(197, 160, 89, 0.15);
+  border: 1px solid var(--accent-warm);
+  color: var(--accent-warm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-mobile-whatsapp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.25rem;
+  border-radius: 10px;
+  background: #25d366;
+  color: #000000;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-mobile-whatsapp:hover {
+  background: #20ba59;
+}
+
+/* =======================================================
+   17. SECCIÓN DE CONTACTO & BOTONES DUALES
    ======================================================= */
 .contact-section {
-  padding: 9rem 2rem;
+  padding: 8rem 2rem 7rem;
   text-align: center;
   border-top: 1px solid var(--border-hairline);
 }
 
 .contact-container {
-  max-width: 650px;
+  max-width: 680px;
   margin: 0 auto;
 }
 
@@ -1457,12 +1769,46 @@ img {
   color: var(--text-muted);
   margin-bottom: 2.5rem;
   font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.contact-buttons-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
 }
 
 .btn-contact-email {
   padding: 0.9rem 2.2rem;
   font-size: 0.85rem;
   display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-whatsapp-action {
+  background: #25d366;
+  color: #000000;
+  padding: 0.9rem 2.2rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  transition: all var(--duration-fast) var(--ease-out-expo);
+  box-shadow: 0 10px 25px rgba(37, 211, 102, 0.25);
+}
+
+.btn-whatsapp-action:hover {
+  background: #20ba59;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(37, 211, 102, 0.35);
 }
 
 .btn-manifesto-action {
@@ -1478,4 +1824,302 @@ img {
 
 .footer-admin-link:hover {
   opacity: 1;
+}
+
+/* =======================================================
+   18. BARRA FLOTANTE DE CONTACTO RÁPIDO MÓVIL
+   ======================================================= */
+.mobile-sticky-bar {
+  display: none;
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 2rem);
+  max-width: 420px;
+  background: rgba(18, 18, 22, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-hairline);
+  border-radius: 999px;
+  padding: 0.45rem 0.6rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(197, 160, 89, 0.08);
+  z-index: 9999;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.sticky-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  min-height: 40px;
+}
+
+.sticky-whatsapp {
+  background: rgba(37, 211, 102, 0.15);
+  color: #25d366;
+  border: 1px solid rgba(37, 211, 102, 0.3);
+}
+
+.sticky-email {
+  color: var(--text-primary);
+}
+
+.sticky-client {
+  color: var(--accent-warm);
+}
+
+/* =======================================================
+   19. RESPONSIVE DESIGN COMPLETO (TABLETS & SMARTPHONES)
+   ======================================================= */
+
+/* 1. TABLETS (Entre 769px y 1024px, ej. iPad, Galaxy Tab) */
+@media (max-width: 1024px) {
+  .site-header {
+    width: calc(100% - 2rem);
+    top: 1rem;
+  }
+  
+  .header-inner {
+    padding: 0.65rem 1.4rem;
+  }
+
+  .main-nav.desktop-nav {
+    gap: 1.25rem;
+  }
+
+  .nav-link {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+  }
+
+  .discipline-section {
+    padding: 5.5rem 2rem 4rem;
+  }
+
+  .grid-realestate {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .realestate-subgrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .grid-weddings,
+  .grid-corporate {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .grid-portraits {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .manifesto-container {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+/* 2. SMARTPHONES & TABLETS VERTICALES (<= 900px) */
+@media (max-width: 900px) {
+  .desktop-nav {
+    display: none !important;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  .site-header {
+    top: 0.75rem;
+    width: calc(100% - 1.5rem);
+  }
+
+  .header-inner {
+    padding: 0.55rem 1.15rem;
+  }
+
+  .hero-section {
+    padding: 0 1.75rem 4rem;
+    min-height: 560px;
+  }
+
+  .hero-headline {
+    font-size: clamp(2rem, 7vw, 3.2rem);
+    line-height: 1.18;
+  }
+
+  .scroll-indicator {
+    display: none;
+  }
+
+  .discipline-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    margin-bottom: 2.25rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .discipline-intro {
+    max-width: 100%;
+    font-size: 0.92rem;
+  }
+
+  /* Desactivar transformaciones pesadas en móvil para máxima fluidez a 60fps */
+  .photo-item:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .photo-item:hover img {
+    transform: none;
+  }
+}
+
+/* 3. SMARTPHONES (<= 768px, ej. iPhone 14/15, Pixel, Galaxy S) */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+  }
+
+  body {
+    padding-bottom: 80px; /* Espacio para que la barra inferior no tape el footer */
+  }
+
+  .mobile-sticky-bar {
+    display: flex;
+  }
+
+  .discipline-section {
+    padding: 4rem 1.25rem 3rem;
+  }
+
+  .grid-realestate {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .realestate-subgrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .grid-weddings,
+  .grid-corporate,
+  .grid-portraits {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .contact-section {
+    padding: 5rem 1.25rem;
+  }
+
+  .contact-buttons-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-contact-email,
+  .btn-whatsapp-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .site-footer {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.25rem;
+    padding: 2.5rem 1.25rem;
+  }
+
+  .footer-nav {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+  }
+
+  /* Lightbox optimizado para pantalla táctil */
+  .lightbox-content {
+    max-width: 96vw;
+    max-height: 85vh;
+  }
+
+  .lightbox-content img {
+    max-height: 72vh;
+  }
+
+  .lightbox-close {
+    top: 1rem;
+    right: 1rem;
+    width: 44px;
+    height: 44px;
+    font-size: 1.6rem;
+  }
+}
+
+/* 4. SMARTPHONES PEQUEÑOS (<= 480px, ej. iPhone SE / mini) */
+@media (max-width: 480px) {
+  .brand-title {
+    font-size: 1.02rem;
+  }
+
+  .brand-subtitle {
+    font-size: 0.58rem;
+    letter-spacing: 2px;
+  }
+
+  .hero-section {
+    padding: 0 1.2rem 3rem;
+    min-height: 500px;
+  }
+
+  .hero-headline {
+    font-size: 1.95rem;
+  }
+
+  .hero-description {
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .discipline-title {
+    font-size: 1.85rem;
+  }
+
+  .photo-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 0.85rem 1rem 1rem;
+  }
+
+  .photo-name {
+    font-size: 1rem;
+  }
+
+  .photo-tag {
+    font-size: 0.68rem;
+  }
+
+  .sticky-action-btn span {
+    font-size: 0.72rem;
+  }
 }
