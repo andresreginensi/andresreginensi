@@ -130,38 +130,33 @@ const FALLBACK_DATA = {
   'boda-laura-carlos': {
     "id": "boda-laura-carlos",
     "pin": "2026",
-    "title": "Boda Laura & Carlos",
+    "title": "Boda Laura & Carlos — Reportaje Documental",
     "date": "18 de Octubre, 2026",
     "location": "Finca Bellver, Mallorca",
     "clientName": "Laura Gómez & Carlos Martínez",
     "maxSelectable": 50,
     "photos": [
-      { "id": "AR_LC_001", "thumbUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_LC_002", "thumbUrl": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_LC_003", "thumbUrl": "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_LC_004", "thumbUrl": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_LC_005", "thumbUrl": "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_LC_006", "thumbUrl": "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_LC_007", "thumbUrl": "https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_LC_008", "thumbUrl": "https://images.unsplash.com/photo-1529636798458-92182e662485?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1529636798458-92182e662485?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_LC_009", "thumbUrl": "https://images.unsplash.com/photo-1519228498843-1579d45e0fb1?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1519228498843-1579d45e0fb1?auto=format&fit=crop&w=1800&q=90" }
+      { "id": "AR_LC_001", "thumbUrl": "assets/images/bodas/boda-salida-arroz-thumb.jpg", "fullUrl": "assets/images/bodas/boda-salida-arroz.jpg" },
+      { "id": "AR_LC_002", "thumbUrl": "assets/images/bodas/boda-editorial-calle-thumb.jpg", "fullUrl": "assets/images/bodas/boda-editorial-calle.jpg" },
+      { "id": "AR_LC_003", "thumbUrl": "assets/images/bodas/boda-playa-orilla-thumb.jpg", "fullUrl": "assets/images/bodas/boda-playa-orilla.jpg" },
+      { "id": "AR_LC_004", "thumbUrl": "assets/images/bodas/boda-alianzas-manos-thumb.jpg", "fullUrl": "assets/images/bodas/boda-alianzas-manos.jpg" }
     ]
   },
   'inmobiliaria-villa-mediterranea': {
     "id": "inmobiliaria-villa-mediterranea",
     "pin": "1234",
-    "title": "Villa Mediterránea - Reportaje Inmobiliario",
+    "title": "Villa Galileu - Reportaje Arquitectura & Lujo",
     "date": "20 de Octubre, 2026",
     "location": "Jávea, Alicante",
     "clientName": "Habitat Luxury Real Estate",
     "maxSelectable": 25,
     "photos": [
-      { "id": "AR_VM_001", "thumbUrl": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_VM_002", "thumbUrl": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_VM_003", "thumbUrl": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_VM_004", "thumbUrl": "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_VM_005", "thumbUrl": "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1800&q=90" },
-      { "id": "AR_VM_006", "thumbUrl": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=700&q=80", "fullUrl": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1800&q=90" }
+      { "id": "AR_VM_001", "thumbUrl": "assets/images/realestate/galileu-piscina-thumb.jpg", "fullUrl": "assets/images/realestate/galileu-piscina.jpg" },
+      { "id": "AR_VM_002", "thumbUrl": "assets/images/realestate/galileu-salon-thumb.jpg", "fullUrl": "assets/images/realestate/galileu-salon.jpg" },
+      { "id": "AR_VM_003", "thumbUrl": "assets/images/realestate/galileu-cocina-thumb.jpg", "fullUrl": "assets/images/realestate/galileu-cocina.jpg" },
+      { "id": "AR_VM_004", "thumbUrl": "assets/images/realestate/galileu-escalera-thumb.jpg", "fullUrl": "assets/images/realestate/galileu-escalera.jpg" },
+      { "id": "AR_VM_005", "thumbUrl": "assets/images/realestate/galileu-exterior-noche-thumb.jpg", "fullUrl": "assets/images/realestate/galileu-exterior-noche.jpg" },
+      { "id": "AR_VM_006", "thumbUrl": "assets/images/realestate/burgueras-fachada-thumb.jpg", "fullUrl": "assets/images/realestate/burgueras-fachada.jpg" }
     ]
   }
 };

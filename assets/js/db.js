@@ -9,188 +9,189 @@
   'use strict';
 
   const DB_NAME = 'AndresPhotographyDB';
-  const DB_VERSION = 1;
+  const DB_VERSION = 2;
 
-  // Fotos iniciales por defecto para el portafolio
+  // Fotos iniciales por defecto para el portafolio (Fotos auténticas de Andrés Reginensi)
   const DEFAULT_PORTFOLIO = [
     {
       id: 'port-real-1',
       category: 'realestate',
       categoryLabel: 'Inmobiliaria & Real Estate',
-      title: 'Villa Pedralbes',
-      tag: 'Arquitectura Exterior',
-      caption: 'Villa Pedralbes — Geometría en Concreto & Luz Natural',
+      title: 'Villa Galileu',
+      tag: 'Arquitectura Exterior & Piscina',
+      caption: 'Villa Galileu — Arquitectura Contemporánea & Piscina',
       aspect: 'landscape',
-      thumbUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85',
-      fullUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2200&q=95',
+      thumbUrl: 'assets/images/realestate/galileu-piscina-thumb.jpg',
+      fullUrl: 'assets/images/realestate/galileu-piscina.jpg',
       createdAt: 1700000000001
     },
     {
       id: 'port-real-2',
       category: 'realestate',
       categoryLabel: 'Inmobiliaria & Real Estate',
-      title: 'Ático Diagonal',
-      tag: 'Interiorismo',
-      caption: 'Ático Contemporáneo — Interiorismo & Iluminación Cenital',
+      title: 'Villa Galileu — Foyer',
+      tag: 'Interiorismo de Lujo',
+      caption: 'Villa Galileu — Foyer de Entrada & Diseño Interior',
       aspect: 'landscape',
-      thumbUrl: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=85',
-      fullUrl: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=95',
+      thumbUrl: 'assets/images/realestate/galileu-salon-thumb.jpg',
+      fullUrl: 'assets/images/realestate/galileu-salon.jpg',
       createdAt: 1700000000002
     },
     {
       id: 'port-real-3',
       category: 'realestate',
       categoryLabel: 'Inmobiliaria & Real Estate',
-      title: 'Pabellón de Cristal',
-      tag: 'Residencial',
-      caption: 'Pabellón de Cristal — Transparencia y Concreto',
+      title: 'Villa Galileu — Cocina',
+      tag: 'Espacios Residenciales',
+      caption: 'Villa Galileu — Cocina de Autor & Isla de Mármol',
       aspect: 'landscape',
-      thumbUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=85',
-      fullUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1800&q=95',
+      thumbUrl: 'assets/images/realestate/galileu-cocina-thumb.jpg',
+      fullUrl: 'assets/images/realestate/galileu-cocina.jpg',
       createdAt: 1700000000003
     },
     {
       id: 'port-boda-1',
       category: 'bodas',
       categoryLabel: 'Bodas & Eventos',
-      title: 'Finca Bellver',
-      tag: 'Sofía & Mateo',
-      caption: 'Finca Bellver — Sofía & Mateo',
-      aspect: 'portrait',
-      thumbUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=85',
-      fullUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=2000&q=95',
+      title: 'La Salida',
+      tag: 'Ceremonia B&N',
+      caption: 'Celebración & Alegría — Salida de Ceremonia en Confeti',
+      aspect: 'landscape',
+      thumbUrl: 'assets/images/bodas/boda-salida-arroz-thumb.jpg',
+      fullUrl: 'assets/images/bodas/boda-salida-arroz.jpg',
       createdAt: 1700000000004
     },
     {
       id: 'port-boda-2',
       category: 'bodas',
       categoryLabel: 'Bodas & Eventos',
-      title: 'Votos al Ocaso',
-      tag: 'Ceremonia',
-      caption: 'Votos al Atardecer — Mallorca',
-      aspect: 'portrait',
-      thumbUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=900&q=85',
-      fullUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=2000&q=95',
+      title: 'Paseo Urbano',
+      tag: 'Documental Editorial',
+      caption: 'Paseo Urbano — Retrato Editorial de Novios',
+      aspect: 'landscape',
+      thumbUrl: 'assets/images/bodas/boda-editorial-calle-thumb.jpg',
+      fullUrl: 'assets/images/bodas/boda-editorial-calle.jpg',
       createdAt: 1700000000005
     },
     {
       id: 'port-boda-3',
       category: 'bodas',
       categoryLabel: 'Bodas & Eventos',
-      title: 'El Brindis',
-      tag: 'Celebración',
-      caption: 'Recepción & Celebración — Ambiente Nocturno',
-      aspect: 'portrait',
-      thumbUrl: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=900&q=85',
-      fullUrl: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=2000&q=95',
+      title: 'Orilla Dorada',
+      tag: 'Atardecer & Pareja',
+      caption: 'Orilla del Mar — Atardecer Mediterráneo',
+      aspect: 'landscape',
+      thumbUrl: 'assets/images/bodas/boda-playa-orilla-thumb.jpg',
+      fullUrl: 'assets/images/bodas/boda-playa-orilla.jpg',
       createdAt: 1700000000006
     },
     {
       id: 'port-ret-1',
       category: 'retratos',
       categoryLabel: 'Retratos & Editorial',
-      title: 'Elena',
-      tag: 'Estudio B&N',
-      caption: 'Elena — Estudio Monocromo',
+      title: 'Steffa',
+      tag: 'Editorial Nocturno',
+      caption: 'Steffa — Noche Urbana, Rascacielos & Bokeh',
       aspect: 'portrait',
-      thumbUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=900&q=85',
-      fullUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1800&q=95',
+      thumbUrl: 'assets/images/retratos/retrato-steffa-noche-thumb.jpg',
+      fullUrl: 'assets/images/retratos/retrato-steffa-noche.jpg',
       createdAt: 1700000000007
     },
     {
       id: 'port-ret-2',
       category: 'retratos',
       categoryLabel: 'Retratos & Editorial',
-      title: 'Perfil Natural',
-      tag: 'Luz Continua',
-      caption: 'Perfil Editorial — Luz Natural en Estudio',
+      title: 'Luz Dorada',
+      tag: 'Luz Natural en Exterior',
+      caption: 'Luz Dorada — Atardecer & Flare Natural',
       aspect: 'portrait',
-      thumbUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=85',
-      fullUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1800&q=95',
+      thumbUrl: 'assets/images/retratos/retrato-golden-hour-thumb.jpg',
+      fullUrl: 'assets/images/retratos/retrato-golden-hour.jpg',
       createdAt: 1700000000008
     },
     {
       id: 'port-ret-3',
       category: 'retratos',
       categoryLabel: 'Retratos & Editorial',
-      title: 'Serie Miradas',
-      tag: 'Editorial',
-      caption: 'Mirada — Enfoque Editorial Minimalista',
+      title: 'Brisa Marina',
+      tag: 'Luz Suave & Atmósfera',
+      caption: 'Serenidad Marina — Retrato en la Playa',
       aspect: 'portrait',
-      thumbUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=85',
-      fullUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1800&q=95',
+      thumbUrl: 'assets/images/retratos/retrato-playa-sombrero-thumb.jpg',
+      fullUrl: 'assets/images/retratos/retrato-playa-sombrero.jpg',
       createdAt: 1700000000009
     },
     {
       id: 'port-corp-1',
       category: 'empresarial',
       categoryLabel: 'Empresarial & Corporativo',
-      title: 'Equipo Directivo',
-      tag: 'Headshots Ejecutivos',
-      caption: 'Retrato Ejecutivo — Liderazgo y Presencia de Marca',
-      aspect: 'portrait',
-      thumbUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=900&q=85',
-      fullUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1800&q=95',
+      title: 'Presencia de Marca',
+      tag: 'Headshot Profesional',
+      caption: 'Identidad Corporativa — Retrato Profesional en Estudio',
+      aspect: 'landscape',
+      thumbUrl: 'assets/images/retratos/retrato-corporativo-estudio-thumb.jpg',
+      fullUrl: 'assets/images/retratos/retrato-corporativo-estudio.jpg',
       createdAt: 1700000000010
     },
     {
       id: 'port-corp-2',
       category: 'empresarial',
       categoryLabel: 'Empresarial & Corporativo',
-      title: 'Identidad Profesional',
-      tag: 'Perfil de Empresa',
-      caption: 'Retrato Profesional — Consultoría & Finanzas',
-      aspect: 'portrait',
-      thumbUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=900&q=85',
-      fullUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1800&q=95',
+      title: 'Liderazgo',
+      tag: 'Perfil Ejecutivo',
+      caption: 'Liderazgo Corporativo — Retrato de Negocios',
+      aspect: 'landscape',
+      thumbUrl: 'assets/images/retratos/retrato-ejecutivo-profesional-thumb.jpg',
+      fullUrl: 'assets/images/retratos/retrato-ejecutivo-profesional.jpg',
       createdAt: 1700000000011
     },
     {
       id: 'port-corp-3',
       category: 'empresarial',
       categoryLabel: 'Empresarial & Corporativo',
-      title: 'Sede Central',
-      tag: 'Instalaciones & Cultura',
-      caption: 'Sede Corporativa — Arquitectura de Oficinas y Entornos de Trabajo',
+      title: 'Edificio Burgueras',
+      tag: 'Sede & Arquitectura Comercial',
+      caption: 'Edificio Burgueras — Geometría, Cristales & Fachada Moderna',
       aspect: 'landscape',
-      thumbUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=85',
-      fullUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=2200&q=95',
+      thumbUrl: 'assets/images/realestate/burgueras-fachada-thumb.jpg',
+      fullUrl: 'assets/images/realestate/burgueras-fachada.jpg',
       createdAt: 1700000000012
     }
   ];
 
-  // Sesiones de clientes iniciales
+  // Sesiones de clientes iniciales con fotos auténticas
   const DEFAULT_SESSIONS = [
     {
       id: 'boda-laura-carlos',
       pin: '2026',
-      title: 'Boda Laura & Carlos',
+      title: 'Boda Laura & Carlos — Reportaje Documental',
       date: '18 de Octubre, 2026',
       location: 'Finca Bellver, Mallorca',
       clientName: 'Laura Gómez & Carlos Martínez',
       maxSelectable: 50,
       photos: [
-        { id: 'AR_LC_001', thumbUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=80', fullUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1800&q=90' },
-        { id: 'AR_LC_002', thumbUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=700&q=80', fullUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1800&q=90' },
-        { id: 'AR_LC_003', thumbUrl: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=700&q=80', fullUrl: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=1800&q=90' },
-        { id: 'AR_LC_004', thumbUrl: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=700&q=80', fullUrl: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1800&q=90' },
-        { id: 'AR_LC_005', thumbUrl: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=700&q=80', fullUrl: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1800&q=90' },
-        { id: 'AR_LC_006', thumbUrl: 'https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=700&q=80', fullUrl: 'https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=1800&q=90' }
+        { id: 'AR_LC_001', thumbUrl: 'assets/images/bodas/boda-salida-arroz-thumb.jpg', fullUrl: 'assets/images/bodas/boda-salida-arroz.jpg' },
+        { id: 'AR_LC_002', thumbUrl: 'assets/images/bodas/boda-editorial-calle-thumb.jpg', fullUrl: 'assets/images/bodas/boda-editorial-calle.jpg' },
+        { id: 'AR_LC_003', thumbUrl: 'assets/images/bodas/boda-playa-orilla-thumb.jpg', fullUrl: 'assets/images/bodas/boda-playa-orilla.jpg' },
+        { id: 'AR_LC_004', thumbUrl: 'assets/images/bodas/boda-alianzas-manos-thumb.jpg', fullUrl: 'assets/images/bodas/boda-alianzas-manos.jpg' }
       ],
       createdAt: 1700000000001
     },
     {
       id: 'inmobiliaria-villa-mediterranea',
       pin: '1234',
-      title: 'Villa Mediterránea - Reportaje Inmobiliario',
+      title: 'Villa Galileu - Reportaje Arquitectura & Lujo',
       date: '20 de Octubre, 2026',
       location: 'Jávea, Alicante',
       clientName: 'Habitat Luxury Real Estate',
       maxSelectable: 25,
       photos: [
-        { id: 'AR_VM_001', thumbUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=700&q=80', fullUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1800&q=90' },
-        { id: 'AR_VM_002', thumbUrl: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=700&q=80', fullUrl: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=90' },
-        { id: 'AR_VM_003', thumbUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=700&q=80', fullUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1800&q=90' }
+        { id: 'AR_VM_001', thumbUrl: 'assets/images/realestate/galileu-piscina-thumb.jpg', fullUrl: 'assets/images/realestate/galileu-piscina.jpg' },
+        { id: 'AR_VM_002', thumbUrl: 'assets/images/realestate/galileu-salon-thumb.jpg', fullUrl: 'assets/images/realestate/galileu-salon.jpg' },
+        { id: 'AR_VM_003', thumbUrl: 'assets/images/realestate/galileu-cocina-thumb.jpg', fullUrl: 'assets/images/realestate/galileu-cocina.jpg' },
+        { id: 'AR_VM_004', thumbUrl: 'assets/images/realestate/galileu-escalera-thumb.jpg', fullUrl: 'assets/images/realestate/galileu-escalera.jpg' },
+        { id: 'AR_VM_005', thumbUrl: 'assets/images/realestate/galileu-exterior-noche-thumb.jpg', fullUrl: 'assets/images/realestate/galileu-exterior-noche.jpg' },
+        { id: 'AR_VM_006', thumbUrl: 'assets/images/realestate/burgueras-fachada-thumb.jpg', fullUrl: 'assets/images/realestate/burgueras-fachada.jpg' }
       ],
       createdAt: 1700000000002
     }
@@ -254,24 +255,32 @@
     }
   }
 
-  // Inicialización
+  // Inicialización con migración automática de imágenes antiguas (Unsplash -> Fotos de Andrés)
   async function initStorage() {
     try {
       const db = await openDB();
 
-      const count = await new Promise((res) => {
+      const existingPhotos = await new Promise((res) => {
         const tx = db.transaction('portfolio', 'readonly');
         const st = tx.objectStore('portfolio');
-        const r = st.count();
-        r.onsuccess = () => res(r.result);
-        r.onerror = () => res(0);
+        const r = st.getAll();
+        r.onsuccess = () => res(r.result || []);
+        r.onerror = () => res([]);
       });
 
-      if (count === 0) {
+      // Si no hay fotos o contienen URLs antiguas de Unsplash, actualizamos al portafolio de Andrés
+      const hasOldPlaceholders = existingPhotos.some(p => p.thumbUrl && p.thumbUrl.includes('unsplash.com'));
+
+      if (existingPhotos.length === 0 || hasOldPlaceholders) {
         const tx = db.transaction(['portfolio', 'sessions', 'settings'], 'readwrite');
         const pStore = tx.objectStore('portfolio');
         const sStore = tx.objectStore('sessions');
         const setStore = tx.objectStore('settings');
+
+        if (hasOldPlaceholders) {
+          pStore.clear();
+          sStore.clear();
+        }
 
         DEFAULT_PORTFOLIO.forEach((p) => pStore.put(p));
         DEFAULT_SESSIONS.forEach((s) => sStore.put(s));
@@ -279,10 +288,15 @@
       }
     } catch (err) {
       useLocalStorageFallback = true;
-      if (!getLS('portfolio', null)) {
+      const lsPort = getLS('portfolio', null);
+      const hasLsPlaceholders = Array.isArray(lsPort) && lsPort.some(p => p.thumbUrl && p.thumbUrl.includes('unsplash.com'));
+
+      if (!lsPort || hasLsPlaceholders) {
         setLS('portfolio', DEFAULT_PORTFOLIO);
       }
-      if (!getLS('sessions', null)) {
+      const lsSessions = getLS('sessions', null);
+      const hasLsSessionPlaceholders = Array.isArray(lsSessions) && lsSessions.some(s => s.photos && s.photos.some(p => p.thumbUrl && p.thumbUrl.includes('unsplash.com')));
+      if (!lsSessions || hasLsSessionPlaceholders) {
         setLS('sessions', DEFAULT_SESSIONS);
       }
       if (!getLS('admin_auth', null)) {

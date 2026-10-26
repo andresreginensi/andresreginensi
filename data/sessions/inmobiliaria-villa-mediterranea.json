@@ -1,7 +1,7 @@
 {
   "id": "inmobiliaria-villa-mediterranea",
   "pin": "1234",
-  "title": "Villa Mediterránea - Reportaje Inmobiliario",
+  "title": "Villa Galileu - Reportaje Arquitectura & Lujo",
   "date": "20 de Octubre, 2026",
   "location": "Jávea, Alicante",
   "clientName": "Habitat Luxury Real Estate",
@@ -9,33 +9,33 @@
   "photos": [
     {
       "id": "AR_VM_001",
-      "thumbUrl": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=700&q=80",
-      "fullUrl": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1800&q=90"
+      "thumbUrl": "assets/images/realestate/galileu-piscina-thumb.jpg",
+      "fullUrl": "assets/images/realestate/galileu-piscina.jpg"
     },
     {
       "id": "AR_VM_002",
-      "thumbUrl": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=700&q=80",
-      "fullUrl": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=90"
+      "thumbUrl": "assets/images/realestate/galileu-salon-thumb.jpg",
+      "fullUrl": "assets/images/realestate/galileu-salon.jpg"
     },
     {
       "id": "AR_VM_003",
-      "thumbUrl": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=700&q=80",
-      "fullUrl": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1800&q=90"
+      "thumbUrl": "assets/images/realestate/galileu-cocina-thumb.jpg",
+      "fullUrl": "assets/images/realestate/galileu-cocina.jpg"
     },
     {
       "id": "AR_VM_004",
-      "thumbUrl": "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=700&q=80",
-      "fullUrl": "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1800&q=90"
+      "thumbUrl": "assets/images/realestate/galileu-escalera-thumb.jpg",
+      "fullUrl": "assets/images/realestate/galileu-escalera.jpg"
     },
     {
       "id": "AR_VM_005",
-      "thumbUrl": "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=700&q=80",
-      "fullUrl": "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1800&q=90"
+      "thumbUrl": "assets/images/realestate/galileu-exterior-noche-thumb.jpg",
+      "fullUrl": "assets/images/realestate/galileu-exterior-noche.jpg"
     },
     {
       "id": "AR_VM_006",
-      "thumbUrl": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=700&q=80",
-      "fullUrl": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1800&q=90"
+      "thumbUrl": "assets/images/realestate/burgueras-fachada-thumb.jpg",
+      "fullUrl": "assets/images/realestate/burgueras-fachada.jpg"
     }
   ]
 }
