@@ -1934,7 +1934,8 @@ img {
 
 /* 2. SMARTPHONES & TABLETS VERTICALES (<= 900px) */
 @media (max-width: 900px) {
-  .desktop-nav {
+  .desktop-nav,
+  .main-nav {
     display: none !important;
   }
 
@@ -1943,11 +1944,11 @@ img {
   }
 
   .mobile-menu-toggle {
-    display: flex;
+    display: flex !important;
   }
 
   .site-header {
-    top: 0.75rem;
+    top: 0.85rem;
     width: calc(100% - 1.5rem);
   }
 
@@ -1956,17 +1957,36 @@ img {
   }
 
   .hero-section {
-    padding: 0 1.75rem 4rem;
-    min-height: 560px;
+    padding: 0 max(24px, env(safe-area-inset-left), 6vw) 4.5rem;
+    min-height: 580px;
+  }
+
+  .hero-content {
+    width: 100%;
+    max-width: 100%;
   }
 
   .hero-headline {
-    font-size: clamp(2rem, 7vw, 3.2rem);
-    line-height: 1.18;
+    font-size: clamp(2.1rem, 7.5vw, 3.2rem);
+    line-height: 1.14;
+    margin-bottom: 1.25rem;
+    text-align: left;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+    line-height: 1.65;
+    max-width: 100%;
+    margin-bottom: 1.75rem;
+    text-align: left;
   }
 
   .scroll-indicator {
     display: none;
+  }
+
+  .discipline-section {
+    padding: 5rem max(24px, env(safe-area-inset-left), 6vw) 4rem;
   }
 
   .discipline-header {
@@ -1975,11 +1995,20 @@ img {
     gap: 1.25rem;
     margin-bottom: 2.25rem;
     padding-bottom: 1.5rem;
+    text-align: left;
+  }
+
+  .discipline-title {
+    font-size: clamp(1.9rem, 6.2vw, 2.7rem);
+    line-height: 1.15;
+    text-align: left;
   }
 
   .discipline-intro {
     max-width: 100%;
-    font-size: 0.92rem;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    text-align: left;
   }
 
   /* Desactivar transformaciones pesadas en móvil para máxima fluidez a 60fps */
@@ -2000,7 +2029,7 @@ img {
   }
 
   body {
-    padding-bottom: 80px; /* Espacio para que la barra inferior no tape el footer */
+    padding-bottom: 85px; /* Espacio para que la barra inferior no tape el footer */
   }
 
   .mobile-sticky-bar {
@@ -2008,24 +2037,24 @@ img {
   }
 
   .discipline-section {
-    padding: 4rem 1.25rem 3rem;
+    padding: 4.5rem max(24px, env(safe-area-inset-left), 6vw) 3.5rem;
   }
 
   .grid-realestate {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.75rem;
   }
 
   .realestate-subgrid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.75rem;
   }
 
   .grid-weddings,
   .grid-corporate,
   .grid-portraits {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.75rem;
   }
 
   .contact-section {
@@ -2087,8 +2116,12 @@ img {
   }
 
   .hero-section {
-    padding: 0 1.2rem 3rem;
-    min-height: 500px;
+    padding: 0 max(20px, env(safe-area-inset-left), 5vw) 3.5rem;
+    min-height: 520px;
+  }
+
+  .discipline-section {
+    padding: 4rem max(20px, env(safe-area-inset-left), 5vw) 3rem;
   }
 
   .hero-headline {
