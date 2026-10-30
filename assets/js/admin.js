@@ -119,23 +119,55 @@
     if (dom.loginError) dom.loginError.style.display = 'none';
   }
 
+  async function loadCurrentSettings() {
+    try {
+      if (db && db.getAdminCredentials && dom.settingUsername) {
+        const creds = await db.getAdminCredentials();
+        if (creds && creds.username) {
+          dom.settingUsername.value = creds.username;
+        }
+      }
+    } catch (err) {
+      console.warn('Could not load admin credentials:', err);
+    }
+  }
+
   async function showDashboard() {
     if (dom.loginScreen) dom.loginScreen.style.display = 'none';
     if (dom.adminPanel) dom.adminPanel.style.display = 'flex';
 
-    if (db && db.getHeroImage && dom.adminHeroPreview) {
-      try {
+    try {
+      if (db && db.getHeroImage && dom.adminHeroPreview) {
         const heroUrl = await db.getHeroImage();
         if (heroUrl) dom.adminHeroPreview.src = heroUrl;
-      } catch (err) {
-        console.warn('Could not load hero image:', err);
       }
+    } catch (err) {
+      console.warn('Could not load hero image:', err);
     }
 
-    await refreshPortfolio();
-    await refreshSessions();
-    await loadCurrentSettings();
-    initAnalyticsDashboard();
+    try {
+      await refreshPortfolio();
+    } catch (err) {
+      console.warn('Could not refresh portfolio:', err);
+    }
+
+    try {
+      await refreshSessions();
+    } catch (err) {
+      console.warn('Could not refresh sessions:', err);
+    }
+
+    try {
+      await loadCurrentSettings();
+    } catch (err) {
+      console.warn('Could not load current settings:', err);
+    }
+
+    try {
+      initAnalyticsDashboard();
+    } catch (err) {
+      console.error('Could not initialize analytics dashboard:', err);
+    }
   }
 
   function showToast(message) {
@@ -207,6 +239,7 @@
         if (panel) panel.classList.add('active');
 
         if (targetId === 'tab-analytics') {
+          processLocalAnalyticsEvents();
           setTimeout(renderAnalyticsCharts, 50);
         }
       });
@@ -950,10 +983,16 @@ FOR SELECT
 TO anon 
 USING (true);`;
 
+  let analyticsListenersInitialized = false;
+
   function initAnalyticsDashboard() {
-    setupAnalyticsEventListeners();
-    initSupabaseIntegration();
+    if (!analyticsListenersInitialized) {
+      setupAnalyticsEventListeners();
+      initSupabaseIntegration();
+      analyticsListenersInitialized = true;
+    }
     checkSupabaseState();
+    processLocalAnalyticsEvents();
     updateKPICards(activeAnalyticsRange);
     renderAnalyticsCharts();
     updateLiveUsersCount();
@@ -1400,15 +1439,24 @@ USING (true);`;
     // Actualizar aviso de geolocalización
     const citiesList = document.getElementById('geo-list-cities');
     const countriesList = document.getElementById('geo-list-countries');
-    const geoNotice = `
-      <div style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.88rem; line-height: 1.6;">
-        <span style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;">🌍</span>
-        <strong>Geolocalización activa en Cloudflare</strong><br>
-        La distribución geográfica global de tus visitantes por país y ciudad se registra en tiempo real con 100% de precisión en tu panel de <a href="https://dash.cloudflare.com" target="_blank" style="color: var(--accent-gold); text-decoration: underline;">Cloudflare Analytics</a>.
-      </div>
-    `;
-    if (citiesList) citiesList.innerHTML = geoNotice;
-    if (countriesList) countriesList.innerHTML = geoNotice;
+    if (citiesList) {
+      citiesList.innerHTML = `
+        <div style="padding: 1.5rem 0.5rem; text-align: center; color: var(--text-muted); font-size: 0.88rem; line-height: 1.6;">
+          <span style="font-size: 1.8rem; display: block; margin-bottom: 0.5rem;">🏙️</span>
+          <strong>Ciudades de tus visitantes (0 registradas)</strong><br>
+          <span>Aún no hay visitas acumuladas. En <a href="https://dash.cloudflare.com" target="_blank" style="color: var(--accent-gold); text-decoration: underline;">Cloudflare Analytics</a> puedes consultar la procedencia por ciudades en tiempo real con IP de servidor.</span>
+        </div>
+      `;
+    }
+    if (countriesList) {
+      countriesList.innerHTML = `
+        <div style="padding: 1.5rem 0.5rem; text-align: center; color: var(--text-muted); font-size: 0.88rem; line-height: 1.6;">
+          <span style="font-size: 1.8rem; display: block; margin-bottom: 0.5rem;">🌍</span>
+          <strong>Países de tus visitantes (0 registrados)</strong><br>
+          <span>Aún no hay visitas acumuladas. En <a href="https://dash.cloudflare.com" target="_blank" style="color: var(--accent-gold); text-decoration: underline;">Cloudflare Analytics</a> puedes consultar la distribución geográfica por países en tiempo real.</span>
+        </div>
+      `;
+    }
   }
 
   function setupAnalyticsEventListeners() {
@@ -1426,24 +1474,28 @@ USING (true);`;
     });
 
     // Conmutador de vista de geolocalización (Ciudades / Países)
-    const geoBtns = document.querySelectorAll('#geo-view-switch .geo-btn');
-    const citiesList = document.getElementById('geo-list-cities');
-    const countriesList = document.getElementById('geo-list-countries');
+    const geoSwitch = document.getElementById('geo-view-switch');
+    if (geoSwitch) {
+      const geoBtns = geoSwitch.querySelectorAll('.geo-btn');
+      const citiesList = document.getElementById('geo-list-cities');
+      const countriesList = document.getElementById('geo-list-countries');
 
-    geoBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        geoBtns.forEach((b) => b.classList.remove('active'));
-        btn.classList.add('active');
-        const view = btn.dataset.geo;
-        if (view === 'countries') {
-          if (citiesList) citiesList.style.display = 'none';
-          if (countriesList) countriesList.style.display = 'flex';
-        } else {
-          if (citiesList) citiesList.style.display = 'flex';
-          if (countriesList) countriesList.style.display = 'none';
-        }
+      geoBtns.forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          geoBtns.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          const view = btn.dataset.geo;
+          if (view === 'countries') {
+            if (citiesList) citiesList.style.display = 'none';
+            if (countriesList) countriesList.style.display = 'flex';
+          } else {
+            if (citiesList) citiesList.style.display = 'flex';
+            if (countriesList) countriesList.style.display = 'none';
+          }
+        });
       });
-    });
+    }
 
     // Botón de exportación a CSV
     const btnExport = document.getElementById('btn-export-analytics');
@@ -1468,8 +1520,14 @@ USING (true);`;
     // Botón de refresco manual
     const btnSync = document.getElementById('btn-sync-analytics');
     if (btnSync) {
-      btnSync.addEventListener('click', () => {
-        processLocalAnalyticsEvents();
+      btnSync.addEventListener('click', async () => {
+        showToast('Actualizando métricas...');
+        const savedConfig = getSupabaseSavedConfig();
+        if (savedConfig && savedConfig.url && savedConfig.key) {
+          await fetchSupabaseAnalytics(savedConfig);
+        } else {
+          processLocalAnalyticsEvents();
+        }
         showToast('✓ Métricas actualizadas con los eventos más recientes');
       });
     }
