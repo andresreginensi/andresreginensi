@@ -686,6 +686,11 @@
       const card = document.createElement('div');
       card.className = 'session-card';
 
+      let slug = 'cliente-1';
+      if (session.id === 'boda-laura-carlos') slug = 'boda-laura-carlos';
+      else if (session.id === 'inmobiliaria-villa-mediterranea') slug = 'cliente-1';
+      else slug = session.id;
+
       const photosCount = session.photos ? session.photos.length : 0;
       const previewThumbs = (session.photos || []).slice(0, 5).map((p) => `
         <img src="${p.thumbUrl || p.fullUrl}" class="session-preview-thumb" alt="Foto">
@@ -707,6 +712,7 @@
           <span>📅 ${session.date || 'Sin fecha'}</span>
           <span>📍 ${session.location || 'Local'}</span>
           <span>🖼️ ${photosCount} fotos</span>
+          <span style="color: var(--accent-gold); font-weight: 500;">🔗 /galeria/${slug}</span>
         </div>
 
         <div class="session-preview-strip">
@@ -714,18 +720,15 @@
         </div>
 
         <div class="session-actions-bar">
-          <button class="btn-copy-link" data-session-id="${session.id}" data-pin="${session.pin}">
-            📋 Copiar Enlace para el Cliente
+          <button class="btn-copy-link" data-slug="${slug}" data-pin="${session.pin}">
+            📋 Copiar Enlace Directo (/galeria/${slug})
           </button>
 
           <div class="session-btn-row">
-            <a href="proofing.html?session=${session.id}&pin=${session.pin}" target="_blank" class="btn-secondary" style="flex: 1; justify-content: center; font-size: 0.78rem; padding: 0.5rem;">
-              👁️ Probar
+            <a href="galeria/${slug}/" target="_blank" class="btn-secondary" style="flex: 1; justify-content: center; font-size: 0.78rem; padding: 0.5rem; text-decoration: none;">
+              👁️ Probar Galería
             </a>
-            <button class="btn-secondary btn-edit-session" data-id="${session.id}" style="flex: 1; justify-content: center; font-size: 0.78rem; padding: 0.5rem;">
-              ✏️ Editar
-            </button>
-            <button class="btn-danger btn-delete-session" data-id="${session.id}" style="padding: 0.5rem 0.8rem; font-size: 0.78rem;">
+            <button class="btn-danger btn-delete-session" data-id="${session.id}" style="padding: 0.5rem 0.8rem; font-size: 0.78rem;" title="Eliminar">
               🗑️
             </button>
           </div>
@@ -733,17 +736,13 @@
       `;
 
       card.querySelector('.btn-copy-link').addEventListener('click', () => {
-        const baseUrl = window.location.href.split('admin.html')[0];
-        const clientUrl = `${baseUrl}proofing.html?session=${session.id}&pin=${session.pin}`;
+        const baseUrl = window.location.href.split('admin.html')[0].split('admin')[0];
+        const clientUrl = `${baseUrl}galeria/${slug}/`;
         navigator.clipboard.writeText(clientUrl).then(() => {
-          showToast(`¡Enlace copiado! Listo para enviar por WhatsApp o correo a ${session.clientName}.`);
+          showToast(`¡Enlace copiado! ${clientUrl} (PIN: ${session.pin})`);
         }).catch(() => {
-          prompt('Copia este enlace para tu cliente:', clientUrl);
+          prompt(`Copia este enlace para tu cliente (PIN: ${session.pin}):`, clientUrl);
         });
-      });
-
-      card.querySelector('.btn-edit-session').addEventListener('click', () => {
-        openSessionModal(session);
       });
 
       card.querySelector('.btn-delete-session').addEventListener('click', async () => {
@@ -757,6 +756,28 @@
 
       dom.sessionsGrid.appendChild(card);
     });
+
+    // Tarjeta para nueva plantilla estática
+    const templateCard = document.createElement('div');
+    templateCard.className = 'session-card';
+    templateCard.style.border = '1px dashed rgba(197, 160, 89, 0.5)';
+    templateCard.innerHTML = `
+      <div class="session-card-header">
+        <div>
+          <h3 class="session-card-title" style="color: var(--accent-gold);">+ Añadir Nueva Galería</h3>
+          <span class="session-card-client">Sistema Estático Cloudflare Pages</span>
+        </div>
+      </div>
+      <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; margin: 0.75rem 0 1rem;">
+        Para crear una nueva galería privada, duplica la carpeta <code>galeria/plantilla</code> con el nombre que elijas (ej. <code>galeria/cliente-2</code>) y define su PIN y fotos en su <code>index.html</code>.
+      </div>
+      <div class="session-actions-bar">
+        <a href="galeria/plantilla/" target="_blank" class="btn-secondary" style="width: 100%; text-align: center; justify-content: center; text-decoration: none; font-size: 0.8rem; padding: 0.6rem;">
+          👁️ Ver Plantilla (/galeria/plantilla)
+        </a>
+      </div>
+    `;
+    dom.sessionsGrid.appendChild(templateCard);
   }
 
   function openSessionModal(sessionToEdit = null) {

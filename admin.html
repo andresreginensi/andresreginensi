@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/admin.css?v=2">
 </head>
 <body>
 
@@ -127,7 +127,7 @@
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
-          Galerías de Clientes (Proofing)
+          Galerías Privadas (/galeria)
         </button>
 
         <button class="tab-btn" data-tab="tab-analytics">
@@ -205,21 +205,23 @@
       </section>
 
       <!-- ==========================================
-           PESTAÑA 2: SESIONES DE CLIENTES (PROOFING)
+           PESTAÑA 2: GALERÍAS PRIVADAS DE CLIENTES (/galeria/)
            ========================================== -->
       <section id="tab-sessions" class="tab-panel">
         <div class="section-header">
           <div>
-            <h1 class="section-title">Galerías Privadas de Clientes</h1>
-            <p class="section-desc">Crea álbumes privados con contraseña PIN para que tus parejas o empresas revisen y elijan sus fotos.</p>
+            <h1 class="section-title">Galerías Privadas de Clientes (/galeria/)</h1>
+            <p class="section-desc">Rutas ocultas individuales con acceso directo por PIN y descarga de fotos en Cloudflare Pages.</p>
           </div>
-          <button id="btn-open-session-modal" class="btn-gold">
+          <a href="galeria/plantilla/" target="_blank" class="btn-gold" style="text-decoration:none;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <line x1="9" y1="15" x2="15" y2="15"></line>
             </svg>
-            + Crear Nueva Sesión
-          </button>
+            Ver Plantilla (/galeria/plantilla)
+          </a>
         </div>
 
         <!-- Cuadrícula de sesiones -->
@@ -1042,7 +1044,7 @@
 
   <!-- Lógica JavaScript del Panel & Librería de Gráficos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="assets/js/db.js"></script>
-  <script src="assets/js/admin.js"></script>
+  <script src="assets/js/db.js?v=2"></script>
+  <script src="assets/js/admin.js?v=2"></script>
 </body>
 </html>
