@@ -36,7 +36,6 @@
     </a>
     <div style="display: flex; align-items: center; gap: 0.75rem;">
       <span class="session-badge" id="session-badge">Área de Clientes</span>
-      <a href="admin.html" class="session-badge" style="text-decoration: none; opacity: 0.7;" title="Panel de Administrador">⚙️ Admin</a>
     </div>
   </header>
 
@@ -78,19 +77,20 @@
       <p>Introduce las credenciales que te ha facilitado el fotógrafo para acceder a tu sesión.</p>
 
       <div class="form-field">
-        <label for="auth-session-select">Selecciona tu sesión</label>
-        <select id="auth-session-select" required></select>
+        <label for="auth-code-input">Identificador de Galería</label>
+        <input type="text" id="auth-code-input" placeholder="Ej. cliente-1" required autofocus autocomplete="off">
       </div>
 
       <div class="form-field">
         <label for="auth-pin-input">Código PIN de acceso</label>
-        <input type="password" id="auth-pin-input" placeholder="Introduce tu código PIN" required autofocus>
+        <input type="password" id="auth-pin-input" placeholder="Introduce tu código PIN" required>
       </div>
 
       <div id="auth-error" style="color: #ef4444; font-size: 0.85rem; margin-bottom: 1rem; display: none;"></div>
 
-      <div class="modal-footer">
-        <button type="submit" class="btn-bar-submit">Desbloquear Galería</button>
+      <div class="modal-footer" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <button type="submit" class="btn-bar-submit" style="width: 100%;">Acceder a mi Galería</button>
+        <a href="https://wa.me/34664848096?text=Hola%20Andr%C3%A9s,%20necesito%20acceder%20a%20mi%20galer%C3%ADa%20privada" target="_blank" class="btn-bar-clear" style="text-align: center; text-decoration: none; font-size: 0.82rem; padding: 0.6rem;">💬 Solicitar mi enlace directo por WhatsApp</a>
       </div>
     </form>
   </dialog>

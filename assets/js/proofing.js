@@ -40,6 +40,7 @@ const dom = {
   // Modal de PIN / Acceso
   authModal: document.getElementById('auth-modal'),
   authForm: document.getElementById('auth-form'),
+  authCodeInput: document.getElementById('auth-code-input'),
   authSessionSelect: document.getElementById('auth-session-select'),
   authPinInput: document.getElementById('auth-pin-input'),
   authError: document.getElementById('auth-error'),
@@ -86,44 +87,57 @@ async function init() {
 }
 
 function showAuthModal(preselectedId = '') {
-  if (dynamicSessions.length === 0) {
-    dom.authSessionSelect.innerHTML = '<option value="">No hay sesiones disponibles</option>';
-  } else {
-    dom.authSessionSelect.innerHTML = dynamicSessions
-      .map((s) => {
-        const isSelected = s.id === preselectedId ? 'selected' : '';
-        return `<option value="${s.id}" ${isSelected}>${s.title} (${s.clientName || 'Cliente'})</option>`;
-      })
-      .join('');
+  if (dom.authCodeInput && preselectedId) {
+    dom.authCodeInput.value = preselectedId;
   }
-
-  dom.authModal.showModal();
+  if (dom.authModal) {
+    dom.authModal.showModal();
+  }
 }
 
-dom.authForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const selectedSessionId = dom.authSessionSelect.value;
-  const enteredPin = dom.authPinInput.value.trim();
+if (dom.authForm) {
+  dom.authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const enteredCode = (dom.authCodeInput ? dom.authCodeInput.value.trim() : '').toLowerCase();
+    const enteredPin = dom.authPinInput ? dom.authPinInput.value.trim() : '';
 
-  try {
-    const sessionData = await getSessionData(selectedSessionId);
-    if (!sessionData) {
-      throw new Error('Sesión no encontrada');
-    }
-
-    if (sessionData.pin && sessionData.pin !== enteredPin) {
-      dom.authError.textContent = 'Código PIN incorrecto. Por favor verifícalo con el fotógrafo.';
-      dom.authError.style.display = 'block';
+    // Si coincide con alguna de las rutas de galería directa, redirigir
+    const directSlugs = ['cliente-1', 'villa-galileu', 'boda-laura-carlos'];
+    if (directSlugs.includes(enteredCode)) {
+      window.location.href = `galeria/${enteredCode}/`;
       return;
     }
 
-    dom.authModal.close();
-    unlockSession(sessionData);
-  } catch (err) {
-    dom.authError.textContent = 'Error al cargar la sesión seleccionada.';
-    dom.authError.style.display = 'block';
-  }
-});
+    try {
+      const selectedSessionId = enteredCode || (dom.authSessionSelect ? dom.authSessionSelect.value : '');
+      const sessionData = await getSessionData(selectedSessionId);
+      if (!sessionData) {
+        // Redirigir a la carpeta si existe
+        if (enteredCode) {
+          window.location.href = `galeria/${enteredCode}/`;
+          return;
+        }
+        throw new Error('Sesión no encontrada');
+      }
+
+      if (sessionData.pin && sessionData.pin !== enteredPin) {
+        if (dom.authError) {
+          dom.authError.textContent = 'Código PIN incorrecto. Por favor verifícalo con el fotógrafo.';
+          dom.authError.style.display = 'block';
+        }
+        return;
+      }
+
+      if (dom.authModal) dom.authModal.close();
+      unlockSession(sessionData);
+    } catch (err) {
+      if (dom.authError) {
+        dom.authError.textContent = 'Galería no encontrada o código PIN no válido.';
+        dom.authError.style.display = 'block';
+      }
+    }
+  });
+}
 
 // Datos embebidos como fallback si se abre con doble clic (protocolo file:// sin servidor local)
 const FALLBACK_DATA = {
