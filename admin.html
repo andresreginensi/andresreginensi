@@ -254,10 +254,19 @@
               <span id="db-status-text">Base de Datos: Nube Desconectada</span>
             </button>
 
+            <!-- Botón de Reset de Analíticas -->
+            <button type="button" class="btn-db-config" id="btn-reset-analytics" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;" title="Reiniciar todas las estadísticas a 0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+              </svg>
+              Resetear a 0
+            </button>
+
             <!-- Indicador en tiempo real -->
             <div class="live-pill" title="Visitantes navegando activamente en la web">
               <span class="live-pulse"></span>
-              <span id="live-users-count">3</span> usuarios activos ahora mismo
+              <span id="live-users-count">0</span> usuarios activos ahora mismo
             </div>
           </div>
         </div>
@@ -265,16 +274,16 @@
         <!-- Banner Informativo del Modo de Datos -->
         <div class="analytics-mode-banner" id="analytics-mode-banner">
           <div class="banner-left">
-            <span class="banner-badge" id="banner-mode-badge">Modo Muestra & Local</span>
+            <span class="banner-badge" id="banner-mode-badge">Modo Real</span>
             <span class="banner-text" id="banner-mode-text">
-              Mostrando eventos locales y métricas de muestra. Conecta tu base de datos Supabase gratuita para recibir visitas y clics reales de todo el mundo.
+              Mostrando eventos y visitas reales registrados en tu web. También puedes consultar tus estadísticas en tiempo real en Cloudflare Web Analytics.
             </span>
           </div>
           <button type="button" class="btn-connect-cloud" id="btn-banner-connect">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
             </svg>
-            Conectar Base de Datos (Gratis)
+            Conectar Base de Datos (Opcional)
           </button>
         </div>
 
@@ -290,10 +299,10 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-value" id="kpi-pageviews">14.820</div>
+            <div class="kpi-value" id="kpi-pageviews">0</div>
             <div class="kpi-footer">
-              <span class="kpi-badge positive">↑ +18.4%</span>
-              <span class="kpi-sub">vs periodo anterior</span>
+              <span class="kpi-badge">En Vivo</span>
+              <span class="kpi-sub">visitas registradas</span>
             </div>
           </div>
 
@@ -307,10 +316,10 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-value" id="kpi-uniques">8.450</div>
+            <div class="kpi-value" id="kpi-uniques">0</div>
             <div class="kpi-footer">
-              <span class="kpi-badge positive">↑ +12.1%</span>
-              <span class="kpi-sub">57% de tráfico recurrente</span>
+              <span class="kpi-badge">En Vivo</span>
+              <span class="kpi-sub">dispositivos únicos</span>
             </div>
           </div>
 
@@ -324,10 +333,10 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-value" id="kpi-avg-duration">3m 42s</div>
+            <div class="kpi-value" id="kpi-avg-duration">0s</div>
             <div class="kpi-footer">
-              <span class="kpi-badge positive">↑ +24s</span>
-              <span class="kpi-sub">Alta retención editorial</span>
+              <span class="kpi-badge">En Vivo</span>
+              <span class="kpi-sub">tiempo de navegación</span>
             </div>
           </div>
 
@@ -341,10 +350,10 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-value" id="kpi-bounce-rate">28.6%</div>
+            <div class="kpi-value" id="kpi-bounce-rate">0%</div>
             <div class="kpi-footer">
-              <span class="kpi-badge positive">↓ -4.2%</span>
-              <span class="kpi-sub">Excelente para portafolios</span>
+              <span class="kpi-badge">En Vivo</span>
+              <span class="kpi-sub">sesiones de 1 página</span>
             </div>
           </div>
         </div>
@@ -495,7 +504,7 @@
               <span class="badge-tag">Rendimiento</span>
             </div>
 
-            <div class="pages-ranking-list">
+            <div class="pages-ranking-list" id="pages-ranking-list">
               <div class="page-rank-item">
                 <div class="page-rank-num">01</div>
                 <div class="page-rank-body">
@@ -688,7 +697,7 @@
 
             <div class="tech-grid">
               <!-- Dispositivos -->
-              <div class="tech-box">
+              <div class="tech-box" id="tech-box-devices">
                 <h4 class="tech-box-title">Tipo de Dispositivo</h4>
                 <div class="device-stat">
                   <div class="device-icon">📱</div>
@@ -719,7 +728,7 @@
               </div>
 
               <!-- Navegadores -->
-              <div class="tech-box">
+              <div class="tech-box" id="tech-box-browsers">
                 <h4 class="tech-box-title">Navegador Utilizado</h4>
                 <div class="browser-stat">
                   <span class="browser-name">Safari (iOS / macOS)</span>

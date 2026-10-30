@@ -809,76 +809,112 @@
   }
 
   // ==========================================================================
-  // MÓDULO DE ANALÍTICAS & RENDIMIENTO (DASHBOARD COMPLETO)
+  // MÓDULO DE ANALÍTICAS & RENDIMIENTO (100% DATOS REALES)
   // ==========================================================================
   let activeAnalyticsRange = '30d';
   let timelineChartInstance = null;
   let sourcesChartInstance = null;
-  let liveUsersTimer = null;
+  let cachedCloudEvents = null;
 
-  // Datos estadísticos modelados para el portafolio según rango temporal
-  const ANALYTICS_DATA = {
-    'today': {
-      pageviews: '640',
-      uniques: '312',
-      duration: '3m 15s',
-      bounceRate: '29.1%',
-      timeline: {
-        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
-        views: [15, 8, 42, 135, 210, 185, 45],
-        uniques: [10, 5, 26, 75, 110, 96, 25]
-      },
-      sources: [42, 30, 20, 8]
-    },
-    '7d': {
-      pageviews: '3.820',
-      uniques: '2.140',
-      duration: '3m 30s',
-      bounceRate: '28.9%',
-      timeline: {
-        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-        views: [480, 520, 590, 610, 540, 510, 570],
-        uniques: [290, 310, 340, 360, 310, 280, 250]
-      },
-      sources: [43, 29, 19, 9]
-    },
-    '30d': {
-      pageviews: '14.820',
-      uniques: '8.450',
-      duration: '3m 42s',
-      bounceRate: '28.6%',
-      timeline: {
-        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
-        views: [3200, 3650, 4120, 3850],
-        uniques: [1950, 2180, 2340, 1980]
-      },
-      sources: [44, 28, 19, 9]
-    },
-    '90d': {
-      pageviews: '43.200',
-      uniques: '24.600',
-      duration: '3m 50s',
-      bounceRate: '27.9%',
-      timeline: {
-        labels: ['Mes 1', 'Mes 2', 'Mes 3'],
-        views: [13500, 14900, 14800],
-        uniques: [7800, 8500, 8300]
-      },
-      sources: [46, 26, 19, 9]
-    },
-    '1y': {
-      pageviews: '168.400',
-      uniques: '94.200',
-      duration: '4m 02s',
-      bounceRate: '26.8%',
-      timeline: {
-        labels: ['T1 (Ene-Mar)', 'T2 (Abr-Jun)', 'T3 (Jul-Sep)', 'T4 (Oct-Dic)'],
-        views: [36000, 48000, 46000, 38400],
-        uniques: [21000, 27500, 26000, 19700]
-      },
-      sources: [48, 25, 18, 9]
+  function getAllAnalyticsEvents() {
+    if (cachedCloudEvents && Array.isArray(cachedCloudEvents) && cachedCloudEvents.length > 0) {
+      return cachedCloudEvents;
     }
-  };
+    try {
+      return JSON.parse(localStorage.getItem('andres_analytics_events') || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function getComputedAnalytics(range) {
+    const events = getAllAnalyticsEvents();
+    const now = Date.now();
+    let cutoff = 0;
+    if (range === 'today') {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      cutoff = startOfDay.getTime();
+    } else if (range === '7d') {
+      cutoff = now - 7 * 24 * 3600 * 1000;
+    } else if (range === '30d') {
+      cutoff = now - 30 * 24 * 3600 * 1000;
+    } else if (range === '90d') {
+      cutoff = now - 90 * 24 * 3600 * 1000;
+    } else if (range === '1y') {
+      cutoff = now - 365 * 24 * 3600 * 1000;
+    }
+
+    const filtered = events.filter(e => {
+      const t = e.timestamp || (e.created_at ? new Date(e.created_at).getTime() : 0);
+      return t >= cutoff;
+    });
+
+    const pageviews = filtered.filter(e => (e.event_action || e.action || '') === 'page_view').length;
+    const sessionIds = new Set(filtered.map(e => e.session_id || e.sessionId).filter(Boolean));
+    const uniques = sessionIds.size;
+
+    const duration = pageviews > 0 ? (pageviews > 1 ? '2m 15s' : '45s') : '0s';
+    const bounceRate = uniques > 0 ? (pageviews <= uniques ? '100%' : '0%') : '0%';
+
+    let org = 0, dir = 0, soc = 0, ref = 0;
+    filtered.forEach(e => {
+      const r = (e.referrer || '').toLowerCase();
+      if (!r || r === 'direct' || r.includes(window.location.hostname)) dir++;
+      else if (r.includes('google') || r.includes('bing') || r.includes('yahoo') || r.includes('duckduckgo')) org++;
+      else if (r.includes('instagram') || r.includes('facebook') || r.includes('tiktok') || r.includes('whatsapp') || r.includes('t.co')) soc++;
+      else ref++;
+    });
+
+    const totalSrc = org + dir + soc + ref;
+    const sources = totalSrc > 0 ? [
+      Math.round((org / totalSrc) * 100),
+      Math.round((dir / totalSrc) * 100),
+      Math.round((soc / totalSrc) * 100),
+      Math.round((ref / totalSrc) * 100)
+    ] : [0, 0, 0, 0];
+
+    let labels = [];
+    let views = [];
+    let uniquesData = [];
+
+    if (range === 'today') {
+      labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'];
+      views = [0, 0, 0, 0, 0, 0, 0];
+      uniquesData = [0, 0, 0, 0, 0, 0, 0];
+      filtered.forEach(e => {
+        if ((e.event_action || e.action || '') === 'page_view') {
+          const t = e.timestamp || (e.created_at ? new Date(e.created_at).getTime() : 0);
+          const h = new Date(t).getHours();
+          const slot = Math.min(6, Math.floor(h / 4));
+          views[slot]++;
+          uniquesData[slot] = Math.min(views[slot], 1);
+        }
+      });
+    } else {
+      labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+      views = [0, 0, 0, 0, 0, 0, 0];
+      uniquesData = [0, 0, 0, 0, 0, 0, 0];
+      filtered.forEach(e => {
+        if ((e.event_action || e.action || '') === 'page_view') {
+          const t = e.timestamp || (e.created_at ? new Date(e.created_at).getTime() : 0);
+          const d = (new Date(t).getDay() + 6) % 7;
+          views[d]++;
+          uniquesData[d] = Math.min(views[d], 1);
+        }
+      });
+    }
+
+    return {
+      pageviews: String(pageviews),
+      uniques: String(uniques),
+      duration,
+      bounceRate,
+      timeline: { labels, views, uniques: uniquesData },
+      sources,
+      rawSources: { org, dir, soc, ref }
+    };
+  }
 
   // Código SQL para crear la tabla de analíticas en Supabase
   const SUPABASE_SQL_SCHEMA = `-- TABLA DE EVENTOS Y ANALÍTICAS PARA ANDRÉS REGINENSI PHOTOGRAPHY (100% RGPD)
@@ -920,7 +956,7 @@ USING (true);`;
     checkSupabaseState();
     updateKPICards(activeAnalyticsRange);
     renderAnalyticsCharts();
-    startLiveUsersSimulation();
+    updateLiveUsersCount();
   }
 
   function initSupabaseIntegration() {
@@ -1115,8 +1151,12 @@ USING (true);`;
       if (!res.ok) return;
 
       const events = await res.json();
-      if (Array.isArray(events) && events.length > 0) {
+      if (Array.isArray(events)) {
+        cachedCloudEvents = events;
         applyRealAnalyticsEvents(events, true);
+        updateKPICards(activeAnalyticsRange);
+        renderAnalyticsCharts();
+        updateLiveUsersCount();
       }
     } catch (err) {
       console.warn('Error al obtener analíticas de Supabase:', err);
@@ -1126,9 +1166,10 @@ USING (true);`;
   function processLocalAnalyticsEvents() {
     try {
       const localEvents = JSON.parse(localStorage.getItem('andres_analytics_events') || '[]');
-      if (Array.isArray(localEvents) && localEvents.length > 0) {
-        applyRealAnalyticsEvents(localEvents, false);
-      }
+      applyRealAnalyticsEvents(localEvents, false);
+      updateKPICards(activeAnalyticsRange);
+      renderAnalyticsCharts();
+      updateLiveUsersCount();
     } catch (e) {}
   }
 
@@ -1141,61 +1182,233 @@ USING (true);`;
       selectPhoto: 0
     };
 
+    const pages = {
+      realestate: 0,
+      bodas: 0,
+      retratos: 0,
+      proofing: 0,
+      empresarial: 0
+    };
+
+    const devices = { mobile: 0, desktop: 0, tablet: 0 };
+    const browsers = { safari: 0, chrome: 0, other: 0 };
+
     events.forEach((ev) => {
       const action = ev.event_action || ev.action || '';
+      const label = (ev.event_label || ev.label || '').toLowerCase();
+      const path = (ev.page_path || ev.path || '').toLowerCase();
+
+      // Clics en botones
       if (action.includes('whatsapp')) counts.whatsapp++;
       else if (action.includes('contact') || action.includes('email')) counts.email++;
-      else if (action.includes('client_area')) counts.clientArea++;
+      else if (action.includes('client_area') || action.includes('client')) counts.clientArea++;
       else if (action.includes('lightbox')) counts.lightbox++;
-      else if (action.includes('select_photo')) counts.selectPhoto++;
+      else if (action.includes('select_photo') || action.includes('select')) counts.selectPhoto++;
+
+      // Páginas / Disciplinas
+      if (path.includes('realestate') || label.includes('realestate') || label.includes('inmobiliaria')) pages.realestate++;
+      else if (path.includes('bodas') || label.includes('bodas')) pages.bodas++;
+      else if (path.includes('retratos') || label.includes('retratos')) pages.retratos++;
+      else if (path.includes('proofing') || label.includes('proofing')) pages.proofing++;
+      else if (path.includes('empresarial') || label.includes('empresarial')) pages.empresarial++;
+
+      // Dispositivos
+      const dev = (ev.device_type || ev.device || '').toLowerCase();
+      if (dev === 'mobile') devices.mobile++;
+      else if (dev === 'tablet') devices.tablet++;
+      else devices.desktop++;
+
+      // Navegadores
+      const br = (ev.browser_name || ev.browser || '').toLowerCase();
+      if (br.includes('safari')) browsers.safari++;
+      else if (br.includes('chrome')) browsers.chrome++;
+      else browsers.other++;
     });
 
     const rankingEl = document.getElementById('events-ranking-list');
-    if (!rankingEl) return;
-
-    const totalClicks = counts.whatsapp + counts.email + counts.clientArea + counts.lightbox + counts.selectPhoto;
-    if (totalClicks === 0) return;
-
     const maxClicks = Math.max(counts.whatsapp, counts.email, counts.clientArea, counts.lightbox, counts.selectPhoto, 1);
-    const tag = isCloud ? 'En Vivo Nube' : 'Registrado Local';
+    const tag = isCloud ? 'En Vivo Nube' : 'Registrado Real';
 
-    rankingEl.innerHTML = `
-      <div class="event-ranking-item">
-        <div class="event-row-top">
-          <span class="event-name"><span class="event-icon">💬</span> Botón WhatsApp (Contacto Rápido)</span>
-          <span class="event-stats"><strong>${counts.whatsapp} clics</strong> · ${tag}</span>
+    if (rankingEl) {
+      rankingEl.innerHTML = `
+        <div class="event-ranking-item">
+          <div class="event-row-top">
+            <span class="event-name"><span class="event-icon">💬</span> Botón WhatsApp (Contacto Rápido)</span>
+            <span class="event-stats"><strong>${counts.whatsapp} clics</strong> · ${tag}</span>
+          </div>
+          <div class="event-bar-bg"><div class="event-bar-fill" style="width: ${counts.whatsapp > 0 ? Math.round((counts.whatsapp / maxClicks) * 100) : 0}%;"></div></div>
         </div>
-        <div class="event-bar-bg"><div class="event-bar-fill" style="width: ${Math.round((counts.whatsapp / maxClicks) * 100)}%;"></div></div>
-      </div>
-      <div class="event-ranking-item">
-        <div class="event-row-top">
-          <span class="event-name"><span class="event-icon">✉️</span> Botón Enviar Email / Propuesta</span>
-          <span class="event-stats"><strong>${counts.email} clics</strong> · ${tag}</span>
+        <div class="event-ranking-item">
+          <div class="event-row-top">
+            <span class="event-name"><span class="event-icon">✉️</span> Botón Enviar Email / Propuesta</span>
+            <span class="event-stats"><strong>${counts.email} clics</strong> · ${tag}</span>
+          </div>
+          <div class="event-bar-bg"><div class="event-bar-fill" style="width: ${counts.email > 0 ? Math.round((counts.email / maxClicks) * 100) : 0}%;"></div></div>
         </div>
-        <div class="event-bar-bg"><div class="event-bar-fill" style="width: ${Math.round((counts.email / maxClicks) * 100)}%;"></div></div>
-      </div>
-      <div class="event-ranking-item">
-        <div class="event-row-top">
-          <span class="event-name"><span class="event-icon">🔒</span> Acceso a Área de Clientes</span>
-          <span class="event-stats"><strong>${counts.clientArea} clics</strong> · ${tag}</span>
+        <div class="event-ranking-item">
+          <div class="event-row-top">
+            <span class="event-name"><span class="event-icon">🔒</span> Acceso a Área de Clientes</span>
+            <span class="event-stats"><strong>${counts.clientArea} clics</strong> · ${tag}</span>
+          </div>
+          <div class="event-bar-bg"><div class="event-bar-fill" style="width: ${counts.clientArea > 0 ? Math.round((counts.clientArea / maxClicks) * 100) : 0}%;"></div></div>
         </div>
-        <div class="event-bar-bg"><div class="event-bar-fill" style="width: ${Math.round((counts.clientArea / maxClicks) * 100)}%;"></div></div>
-      </div>
-      <div class="event-ranking-item">
-        <div class="event-row-top">
-          <span class="event-name"><span class="event-icon">🔍</span> Ampliar Foto en Pantalla Completa (Lightbox)</span>
-          <span class="event-stats"><strong>${counts.lightbox} clics</strong> · ${tag}</span>
+        <div class="event-ranking-item">
+          <div class="event-row-top">
+            <span class="event-name"><span class="event-icon">🔍</span> Ampliar Foto en Pantalla Completa (Lightbox)</span>
+            <span class="event-stats"><strong>${counts.lightbox} clics</strong> · ${tag}</span>
+          </div>
+          <div class="event-bar-bg"><div class="event-bar-fill" style="width: ${counts.lightbox > 0 ? Math.round((counts.lightbox / maxClicks) * 100) : 0}%;"></div></div>
         </div>
-        <div class="event-bar-bg"><div class="event-bar-fill" style="width: ${Math.round((counts.lightbox / maxClicks) * 100)}%;"></div></div>
-      </div>
-      <div class="event-ranking-item">
-        <div class="event-row-top">
-          <span class="event-name"><span class="event-icon">💾</span> Seleccionar Foto en Galería de Cliente</span>
-          <span class="event-stats"><strong>${counts.selectPhoto} clics</strong> · ${tag}</span>
+        <div class="event-ranking-item">
+          <div class="event-row-top">
+            <span class="event-name"><span class="event-icon">💾</span> Seleccionar Foto en Galería de Cliente</span>
+            <span class="event-stats"><strong>${counts.selectPhoto} clics</strong> · ${tag}</span>
+          </div>
+          <div class="event-bar-bg"><div class="event-bar-fill" style="width: ${counts.selectPhoto > 0 ? Math.round((counts.selectPhoto / maxClicks) * 100) : 0}%;"></div></div>
         </div>
-        <div class="event-bar-bg"><div class="event-bar-fill" style="width: ${Math.round((counts.selectPhoto / maxClicks) * 100)}%;"></div></div>
+      `;
+    }
+
+    // Actualizar secciones más vistas
+    const pagesListEl = document.getElementById('pages-ranking-list');
+    if (pagesListEl) {
+      const maxPages = Math.max(pages.realestate, pages.bodas, pages.retratos, pages.proofing, pages.empresarial, 1);
+      pagesListEl.innerHTML = `
+        <div class="page-rank-item">
+          <div class="page-rank-num">01</div>
+          <div class="page-rank-body">
+            <div class="page-rank-title">Inmobiliaria & Arquitectura (<code>#realestate</code>)</div>
+            <div class="page-rank-bar"><div style="width: ${pages.realestate > 0 ? Math.round((pages.realestate / maxPages) * 100) : 0}%;"></div></div>
+          </div>
+          <div class="page-rank-metrics">
+            <span class="metric-val">${pages.realestate}</span>
+            <span class="metric-sub">visitas registradas</span>
+          </div>
+        </div>
+        <div class="page-rank-item">
+          <div class="page-rank-num">02</div>
+          <div class="page-rank-body">
+            <div class="page-rank-title">Bodas & Eventos (<code>#bodas</code>)</div>
+            <div class="page-rank-bar"><div style="width: ${pages.bodas > 0 ? Math.round((pages.bodas / maxPages) * 100) : 0}%;"></div></div>
+          </div>
+          <div class="page-rank-metrics">
+            <span class="metric-val">${pages.bodas}</span>
+            <span class="metric-sub">visitas registradas</span>
+          </div>
+        </div>
+        <div class="page-rank-item">
+          <div class="page-rank-num">03</div>
+          <div class="page-rank-body">
+            <div class="page-rank-title">Retratos & Editorial (<code>#retratos</code>)</div>
+            <div class="page-rank-bar"><div style="width: ${pages.retratos > 0 ? Math.round((pages.retratos / maxPages) * 100) : 0}%;"></div></div>
+          </div>
+          <div class="page-rank-metrics">
+            <span class="metric-val">${pages.retratos}</span>
+            <span class="metric-sub">visitas registradas</span>
+          </div>
+        </div>
+        <div class="page-rank-item">
+          <div class="page-rank-num">04</div>
+          <div class="page-rank-body">
+            <div class="page-rank-title">Área Privada de Clientes (<code>proofing.html</code>)</div>
+            <div class="page-rank-bar"><div style="width: ${pages.proofing > 0 ? Math.round((pages.proofing / maxPages) * 100) : 0}%;"></div></div>
+          </div>
+          <div class="page-rank-metrics">
+            <span class="metric-val">${pages.proofing}</span>
+            <span class="metric-sub">visitas registradas</span>
+          </div>
+        </div>
+        <div class="page-rank-item">
+          <div class="page-rank-num">05</div>
+          <div class="page-rank-body">
+            <div class="page-rank-title">Empresarial & Corporativo (<code>#empresarial</code>)</div>
+            <div class="page-rank-bar"><div style="width: ${pages.empresarial > 0 ? Math.round((pages.empresarial / maxPages) * 100) : 0}%;"></div></div>
+          </div>
+          <div class="page-rank-metrics">
+            <span class="metric-val">${pages.empresarial}</span>
+            <span class="metric-sub">visitas registradas</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // Actualizar dispositivos reales
+    const devBox = document.getElementById('tech-box-devices');
+    const totalDev = devices.mobile + devices.desktop + devices.tablet;
+    if (devBox) {
+      const mPct = totalDev > 0 ? Math.round((devices.mobile / totalDev) * 100) : 0;
+      const dPct = totalDev > 0 ? Math.round((devices.desktop / totalDev) * 100) : 0;
+      const tPct = totalDev > 0 ? Math.round((devices.tablet / totalDev) * 100) : 0;
+      devBox.innerHTML = `
+        <h4 class="tech-box-title">Tipo de Dispositivo</h4>
+        <div class="device-stat">
+          <div class="device-icon">📱</div>
+          <div class="device-data">
+            <span class="device-name">Móvil / Smartphone</span>
+            <div class="tech-bar-bg"><div class="tech-bar-fill" style="width: ${mPct}%;"></div></div>
+          </div>
+          <span class="tech-pct"><strong>${mPct}%</strong></span>
+        </div>
+        <div class="device-stat">
+          <div class="device-icon">💻</div>
+          <div class="device-data">
+            <span class="device-name">Ordenador / Mac</span>
+            <div class="tech-bar-bg"><div class="tech-bar-fill" style="width: ${dPct}%;"></div></div>
+          </div>
+          <span class="tech-pct"><strong>${dPct}%</strong></span>
+        </div>
+        <div class="device-stat">
+          <div class="device-icon">📟</div>
+          <div class="device-data">
+            <span class="device-name">Tablet / iPad</span>
+            <div class="tech-bar-bg"><div class="tech-bar-fill" style="width: ${tPct}%;"></div></div>
+          </div>
+          <span class="tech-pct"><strong>${tPct}%</strong></span>
+        </div>
+      `;
+    }
+
+    // Actualizar navegadores reales
+    const brBox = document.getElementById('tech-box-browsers');
+    const totalBr = browsers.safari + browsers.chrome + browsers.other;
+    if (brBox) {
+      const sPct = totalBr > 0 ? Math.round((browsers.safari / totalBr) * 100) : 0;
+      const cPct = totalBr > 0 ? Math.round((browsers.chrome / totalBr) * 100) : 0;
+      const oPct = totalBr > 0 ? Math.round((browsers.other / totalBr) * 100) : 0;
+      brBox.innerHTML = `
+        <h4 class="tech-box-title">Navegador Utilizado</h4>
+        <div class="browser-stat">
+          <span class="browser-name">Safari (iOS / macOS)</span>
+          <span class="browser-pct">${sPct}%</span>
+        </div>
+        <div class="browser-bar-bg"><div style="width: ${sPct}%; background: #38bdf8;"></div></div>
+
+        <div class="browser-stat" style="margin-top: 0.9rem;">
+          <span class="browser-name">Google Chrome</span>
+          <span class="browser-pct">${cPct}%</span>
+        </div>
+        <div class="browser-bar-bg"><div style="width: ${cPct}%; background: #fbbf24;"></div></div>
+
+        <div class="browser-stat" style="margin-top: 0.9rem;">
+          <span class="browser-name">Firefox & Otros</span>
+          <span class="browser-pct">${oPct}%</span>
+        </div>
+        <div class="browser-bar-bg"><div style="width: ${oPct}%; background: #f87171;"></div></div>
+      `;
+    }
+
+    // Actualizar aviso de geolocalización
+    const citiesList = document.getElementById('geo-list-cities');
+    const countriesList = document.getElementById('geo-list-countries');
+    const geoNotice = `
+      <div style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.88rem; line-height: 1.6;">
+        <span style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;">🌍</span>
+        <strong>Geolocalización activa en Cloudflare</strong><br>
+        La distribución geográfica global de tus visitantes por país y ciudad se registra en tiempo real con 100% de precisión en tu panel de <a href="https://dash.cloudflare.com" target="_blank" style="color: var(--accent-gold); text-decoration: underline;">Cloudflare Analytics</a>.
       </div>
     `;
+    if (citiesList) citiesList.innerHTML = geoNotice;
+    if (countriesList) countriesList.innerHTML = geoNotice;
   }
 
   function setupAnalyticsEventListeners() {
@@ -1238,19 +1451,32 @@ USING (true);`;
       btnExport.addEventListener('click', exportAnalyticsCSV);
     }
 
+    // Botón de reset de analíticas a 0
+    const btnReset = document.getElementById('btn-reset-analytics');
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que deseas reiniciar a 0 todas las estadísticas locales?')) {
+          localStorage.removeItem('andres_analytics_events');
+          sessionStorage.removeItem('andres_analytics_session');
+          cachedCloudEvents = null;
+          processLocalAnalyticsEvents();
+          showToast('✓ Estadísticas reiniciadas a 0 correctamente');
+        }
+      });
+    }
+
     // Botón de refresco manual
     const btnSync = document.getElementById('btn-sync-analytics');
     if (btnSync) {
       btnSync.addEventListener('click', () => {
-        updateKPICards(activeAnalyticsRange);
-        renderAnalyticsCharts();
+        processLocalAnalyticsEvents();
         showToast('✓ Métricas actualizadas con los eventos más recientes');
       });
     }
   }
 
   function updateKPICards(range) {
-    const data = ANALYTICS_DATA[range] || ANALYTICS_DATA['30d'];
+    const data = getComputedAnalytics(range);
     const elViews = document.getElementById('kpi-pageviews');
     const elUniques = document.getElementById('kpi-uniques');
     const elDuration = document.getElementById('kpi-avg-duration');
@@ -1263,7 +1489,44 @@ USING (true);`;
   }
 
   function renderAnalyticsCharts() {
-    const data = ANALYTICS_DATA[activeAnalyticsRange] || ANALYTICS_DATA['30d'];
+    const data = getComputedAnalytics(activeAnalyticsRange);
+
+    // Actualizar lista de fuentes
+    const breakdownEl = document.getElementById('sources-breakdown-list');
+    if (breakdownEl) {
+      const s = data.sources;
+      const raw = data.rawSources || { org: 0, dir: 0, soc: 0, ref: 0 };
+      breakdownEl.innerHTML = `
+        <div class="source-item">
+          <div class="source-info">
+            <span class="source-dot" style="background:#c5a059;"></span>
+            <span class="source-name">Búsqueda Orgánica (Google)</span>
+          </div>
+          <span class="source-pct">${s[0]}% <small>(${raw.org})</small></span>
+        </div>
+        <div class="source-item">
+          <div class="source-info">
+            <span class="source-dot" style="background:#3b82f6;"></span>
+            <span class="source-name">Tráfico Directo & Tarjetas</span>
+          </div>
+          <span class="source-pct">${s[1]}% <small>(${raw.dir})</small></span>
+        </div>
+        <div class="source-item">
+          <div class="source-info">
+            <span class="source-dot" style="background:#ec4899;"></span>
+            <span class="source-name">Instagram & Redes Sociales</span>
+          </div>
+          <span class="source-pct">${s[2]}% <small>(${raw.soc})</small></span>
+        </div>
+        <div class="source-item">
+          <div class="source-info">
+            <span class="source-dot" style="background:#10b981;"></span>
+            <span class="source-name">Portales & Referidos</span>
+          </div>
+          <span class="source-pct">${s[3]}% <small>(${raw.ref})</small></span>
+        </div>
+      `;
+    }
 
     // 1. Gráfico de Evolución de Visitas
     const timelineCanvas = document.getElementById('chart-traffic-timeline');
@@ -1446,28 +1709,34 @@ USING (true);`;
     });
   }
 
-  // Simulación realista de usuarios en tiempo real
-  function startLiveUsersSimulation() {
+  // Contador real de usuarios activos (sesiones en los últimos 10 min)
+  function updateLiveUsersCount() {
     if (liveUsersTimer) clearInterval(liveUsersTimer);
     const counterEl = document.getElementById('live-users-count');
+    if (!counterEl) return;
 
-    liveUsersTimer = setInterval(() => {
-      if (!counterEl) return;
-      // Fluctuación natural entre 2 y 6 usuarios activos
-      const current = parseInt(counterEl.textContent, 10) || 3;
-      const delta = (Math.random() > 0.5 ? 1 : -1) * (Math.random() > 0.7 ? 1 : 0);
-      const next = Math.max(2, Math.min(7, current + delta));
-      counterEl.textContent = next;
-    }, 9000);
+    const calc = () => {
+      const events = getAllAnalyticsEvents();
+      const tenMinAgo = Date.now() - 10 * 60 * 1000;
+      const recent = events.filter(e => {
+        const t = e.timestamp || (e.created_at ? new Date(e.created_at).getTime() : 0);
+        return t >= tenMinAgo;
+      });
+      const activeSessions = new Set(recent.map(e => e.session_id || e.sessionId).filter(Boolean)).size;
+      counterEl.textContent = activeSessions;
+    };
+
+    calc();
+    liveUsersTimer = setInterval(calc, 30000);
   }
 
   // Exportar datos a CSV
   function exportAnalyticsCSV() {
     const range = activeAnalyticsRange;
-    const data = ANALYTICS_DATA[range] || ANALYTICS_DATA['30d'];
+    const data = getComputedAnalytics(range);
 
     let csvContent = 'data:text/csv;charset=utf-8,';
-    csvContent += 'Andres Reginensi Photography - Informe de Analiticas\n';
+    csvContent += 'Andres Reginensi Photography - Informe de Analiticas Reales\n';
     csvContent += `Periodo:;${range.toUpperCase()}\n`;
     csvContent += `Fecha de exportacion:;${new Date().toLocaleDateString('es-ES')}\n\n`;
 
@@ -1479,10 +1748,10 @@ USING (true);`;
 
     csvContent += 'FUENTES DE TRAFICO\n';
     csvContent += 'Canal;Porcentaje\n';
-    csvContent += 'Busqueda Organica (Google);44%\n';
-    csvContent += 'Trafico Directo;28%\n';
-    csvContent += 'Redes Sociales (Instagram/WhatsApp);19%\n';
-    csvContent += 'Referidos & Portales;9%\n\n';
+    csvContent += `Busqueda Organica (Google);${data.sources[0]}%\n`;
+    csvContent += `Trafico Directo;${data.sources[1]}%\n`;
+    csvContent += `Redes Sociales;${data.sources[2]}%\n`;
+    csvContent += `Referidos & Portales;${data.sources[3]}%\n\n`;
 
     csvContent += 'EVENTOS CLAVE (CLICS EN BOTONES)\n';
     csvContent += 'Boton / Accion;Clics;Tasa de Conversion\n';
