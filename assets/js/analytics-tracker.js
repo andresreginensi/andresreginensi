@@ -16,13 +16,22 @@
     maxLocalEvents: 500
   };
 
-  // Obtener configuración de Supabase si existe
+  // Obtener configuración de Supabase si existe (localStorage o supabase-config.js global)
   function getSupabaseConfig() {
     try {
-      return JSON.parse(localStorage.getItem(CONFIG.supabaseKey) || 'null');
-    } catch (e) {
-      return null;
+      const localCfg = JSON.parse(localStorage.getItem(CONFIG.supabaseKey) || 'null');
+      if (localCfg && localCfg.url && localCfg.key) {
+        return { url: localCfg.url.trim().replace(/\/$/, ''), key: localCfg.key.trim() };
+      }
+    } catch (e) {}
+
+    if (window.SUPABASE_PUBLIC_CONFIG && window.SUPABASE_PUBLIC_CONFIG.url && window.SUPABASE_PUBLIC_CONFIG.key) {
+      return {
+        url: window.SUPABASE_PUBLIC_CONFIG.url.trim().replace(/\/$/, ''),
+        key: window.SUPABASE_PUBLIC_CONFIG.key.trim()
+      };
     }
+    return null;
   }
 
   // Generador de ID de sesión anónimo (válido por 30 minutos de inactividad)

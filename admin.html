@@ -79,6 +79,11 @@
         </div>
 
         <div class="topbar-actions">
+          <button type="button" class="btn-db-config" id="btn-topbar-supabase" title="Configurar base de datos en la nube (Supabase)">
+            <span class="db-status-dot" id="topbar-db-dot"></span>
+            <span id="topbar-db-text">Nube: Desconectada</span>
+          </button>
+
           <a href="index.html" target="_blank" class="btn-secondary" title="Abrir página web en nueva pestaña">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
@@ -168,6 +173,27 @@
             </svg>
             + Subir Nueva Foto
           </button>
+        </div>
+
+        <!-- Banner Estado Nube en Portafolio -->
+        <div class="analytics-mode-banner" id="portfolio-cloud-banner" style="margin-bottom: 1.5rem;">
+          <div class="banner-left">
+            <span class="banner-badge" id="portfolio-cloud-badge">Modo Local</span>
+            <span class="banner-text" id="portfolio-cloud-text">
+              Actualmente tus cambios se guardan solo en este navegador. Conecta <strong>Supabase (Gratis)</strong> para publicar tus fotos y portada en vivo en todos los móviles y dispositivos.
+            </span>
+          </div>
+          <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+            <button type="button" class="btn-secondary" id="btn-sync-local-to-cloud" style="display: none; font-size: 0.78rem; padding: 0.45rem 0.85rem;">
+              🔄 Sincronizar Fotos de este Mac
+            </button>
+            <button type="button" class="btn-connect-cloud" id="btn-portfolio-connect-cloud">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+              </svg>
+              Conectar Nube (Supabase)
+            </button>
+          </div>
         </div>
 
         <!-- Tarjeta de Portada Principal (Hero) -->
@@ -980,7 +1006,7 @@
       </div>
       
       <p class="modal-desc" style="margin-bottom: 1.2rem;">
-        Conecta tu proyecto gratuito de Supabase para almacenar las visitas reales y los clics de tus clientes desde cualquier país y dispositivo sin usar cookies invasivas.
+        Conecta tu proyecto gratuito de Supabase para que tus <strong>fotografías de portafolio, foto de portada, galerías privadas y analíticas</strong> se sincronicen automáticamente en todos los móviles y ordenadores del mundo.
       </p>
 
       <div class="supabase-steps-card">
@@ -995,9 +1021,9 @@
         <div class="supabase-step">
           <span class="step-num">2</span>
           <div>
-            <strong>Crea la tabla de eventos en el "SQL Editor"</strong>
-            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0.4rem 0;">Copia el código SQL de la tabla y pégalo en el editor de Supabase:</p>
-            <button type="button" class="btn-copy-sql" id="btn-copy-sql">📋 Copiar Código SQL de la Tabla</button>
+            <strong>Ejecuta el esquema completo en "SQL Editor"</strong>
+            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0.4rem 0;">Copia el código SQL completo (crea tablas de Fotos, Portada, Sesiones, Analíticas y CDN), pégalo en Supabase y pulsa <strong>RUN</strong>:</p>
+            <button type="button" class="btn-copy-sql" id="btn-copy-sql">📋 Copiar Código SQL Completo</button>
           </div>
         </div>
 
@@ -1005,7 +1031,7 @@
           <span class="step-num">3</span>
           <div>
             <strong>Pega tus 2 credenciales de Supabase:</strong>
-            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0 0;">Las encuentras en <em>Project Settings &gt; API</em>.</p>
+            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0 0;">Las encuentras en <em>Project Settings &gt; API</em> (Project URL y clave <code>anon public</code>).</p>
           </div>
         </div>
       </div>
@@ -1044,7 +1070,8 @@
 
   <!-- Lógica JavaScript del Panel & Librería de Gráficos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="assets/js/db.js?v=3"></script>
-  <script src="assets/js/admin.js?v=3"></script>
+  <script src="assets/js/supabase-config.js?v=4"></script>
+  <script src="assets/js/db.js?v=4"></script>
+  <script src="assets/js/admin.js?v=4"></script>
 </body>
 </html>

@@ -346,10 +346,151 @@
     return uMatch && pMatch;
   }
 
+  // =======================================================
+  // CONECTOR NUBE SUPABASE (REST + STORAGE CDN)
+  // =======================================================
+  const SUPABASE_LS_KEY = 'andres_supabase_config';
+
+  function getSupabaseConfig() {
+    try {
+      const localCfg = JSON.parse(localStorage.getItem(SUPABASE_LS_KEY) || 'null');
+      if (localCfg && localCfg.url && localCfg.key) {
+        return { url: localCfg.url.trim().replace(/\/$/, ''), key: localCfg.key.trim() };
+      }
+    } catch (e) {}
+
+    if (window.SUPABASE_PUBLIC_CONFIG && window.SUPABASE_PUBLIC_CONFIG.url && window.SUPABASE_PUBLIC_CONFIG.key) {
+      return {
+        url: window.SUPABASE_PUBLIC_CONFIG.url.trim().replace(/\/$/, ''),
+        key: window.SUPABASE_PUBLIC_CONFIG.key.trim()
+      };
+    }
+    return null;
+  }
+
+  function isCloudEnabled() {
+    const cfg = getSupabaseConfig();
+    return Boolean(cfg && cfg.url && cfg.key);
+  }
+
+  function dataUrlToBlob(dataUrl) {
+    const parts = dataUrl.split(',');
+    const mimeMatch = parts[0].match(/:(.*?);/);
+    const contentType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const ext = contentType.includes('webp') ? 'webp' : contentType.includes('png') ? 'png' : 'jpg';
+    const raw = window.atob(parts[1]);
+    const rawLength = raw.length;
+    const uInt8Array = new Uint8Array(rawLength);
+    for (let i = 0; i < rawLength; i++) {
+      uInt8Array[i] = raw.charCodeAt(i);
+    }
+    return {
+      blob: new Blob([uInt8Array], { type: contentType }),
+      ext,
+      contentType
+    };
+  }
+
+  // Sube una imagen base64 al CDN público de Supabase Storage ("portfolio")
+  // Si el bucket no existe aún, hace fallback transparente al dataUrl comprimido
+  async function uploadImageToCloudStorage(urlOrData, folderPrefix, customCfg) {
+    if (!urlOrData || typeof urlOrData !== 'string' || !urlOrData.startsWith('data:')) {
+      return urlOrData;
+    }
+    const cfg = customCfg || getSupabaseConfig();
+    if (!cfg || !cfg.url || !cfg.key) return urlOrData;
+
+    try {
+      const { blob, ext, contentType } = dataUrlToBlob(urlOrData);
+      const rand = Math.random().toString(36).substring(2, 7);
+      const safePrefix = (folderPrefix || 'img').replace(/[^a-zA-Z0-9/_-]/g, '-');
+      const filePath = `${safePrefix}-${Date.now()}-${rand}.${ext}`;
+      const uploadEndpoint = `${cfg.url}/storage/v1/object/portfolio/${filePath}`;
+
+      const res = await fetch(uploadEndpoint, {
+        method: 'POST',
+        headers: {
+          'apikey': cfg.key,
+          'Authorization': `Bearer ${cfg.key}`,
+          'Content-Type': contentType,
+          'x-upsert': 'true'
+        },
+        body: blob
+      });
+
+      if (res.ok) {
+        return `${cfg.url}/storage/v1/object/public/portfolio/${filePath}`;
+      }
+      console.warn('Supabase Storage fallback a tabla directa (código ' + res.status + ')');
+      return urlOrData;
+    } catch (err) {
+      console.warn('No se pudo subir a Supabase Storage, usando respaldo directo:', err);
+      return urlOrData;
+    }
+  }
+
+  function mapDbRowToPhoto(row) {
+    return {
+      id: row.id,
+      category: row.category,
+      categoryLabel: row.category_label || '',
+      title: row.title,
+      tag: row.tag || '',
+      caption: row.caption || `${row.title} — ${row.tag || ''}`,
+      aspect: row.aspect || 'landscape',
+      thumbUrl: row.thumb_url || row.full_url,
+      fullUrl: row.full_url,
+      createdAt: Number(row.created_at) || Date.now()
+    };
+  }
+
+  function mapPhotoToDbRow(photo) {
+    return {
+      id: photo.id,
+      category: photo.category,
+      category_label: photo.categoryLabel || '',
+      title: photo.title,
+      tag: photo.tag || '',
+      caption: photo.caption || `${photo.title} — ${photo.tag || ''}`,
+      aspect: photo.aspect || 'landscape',
+      thumb_url: photo.thumbUrl || photo.fullUrl,
+      full_url: photo.fullUrl,
+      created_at: Number(photo.createdAt) || Date.now()
+    };
+  }
+
+  function mapDbRowToSession(row) {
+    return {
+      id: row.id,
+      pin: row.pin,
+      title: row.title,
+      clientName: row.client_name || '',
+      date: row.session_date || '',
+      location: row.location || '',
+      maxSelectable: Number(row.max_selectable) || 40,
+      photos: Array.isArray(row.photos) ? row.photos : [],
+      createdAt: Number(row.created_at) || Date.now()
+    };
+  }
+
+  function mapSessionToDbRow(session) {
+    return {
+      id: session.id,
+      pin: String(session.pin || ''),
+      title: session.title,
+      client_name: session.clientName || '',
+      session_date: session.date || '',
+      location: session.location || '',
+      max_selectable: Number(session.maxSelectable) || 40,
+      photos: Array.isArray(session.photos) ? session.photos : [],
+      created_at: Number(session.createdAt) || Date.now()
+    };
+  }
+
   // Gestión de Foto de Portada (Hero)
   const DEFAULT_HERO = 'assets/images/portada.jpg';
 
-  async function getHeroImage() {
+  async function getLocalHeroImage() {
     try {
       const db = await openDB();
       return new Promise((resolve) => {
@@ -364,7 +505,7 @@
     }
   }
 
-  async function saveHeroImage(url) {
+  async function saveLocalHeroImage(url) {
     try {
       const db = await openDB();
       return new Promise((resolve, reject) => {
@@ -380,8 +521,61 @@
     }
   }
 
-  // Portafolio
-  async function getAllPortfolioPhotos() {
+  async function getHeroImage() {
+    const cfg = getSupabaseConfig();
+    if (cfg && cfg.url && cfg.key) {
+      try {
+        const res = await fetch(`${cfg.url}/rest/v1/site_settings?key=eq.hero_image&select=value&limit=1`, {
+          headers: {
+            'apikey': cfg.key,
+            'Authorization': `Bearer ${cfg.key}`
+          }
+        });
+        if (res.ok) {
+          const rows = await res.json();
+          if (Array.isArray(rows) && rows.length > 0 && rows[0].value) {
+            const val = rows[0].value;
+            const cloudUrl = typeof val === 'string' ? val : val.url;
+            if (cloudUrl) return cloudUrl;
+          }
+        }
+      } catch (err) {
+        console.warn('Fallback local para Hero image:', err);
+      }
+    }
+    return getLocalHeroImage();
+  }
+
+  async function saveHeroImage(url) {
+    let finalUrl = url;
+    const cfg = getSupabaseConfig();
+    if (cfg && cfg.url && cfg.key) {
+      finalUrl = await uploadImageToCloudStorage(url, 'hero/portada', cfg);
+      const res = await fetch(`${cfg.url}/rest/v1/site_settings?on_conflict=key`, {
+        method: 'POST',
+        headers: {
+          'apikey': cfg.key,
+          'Authorization': `Bearer ${cfg.key}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates,return=representation'
+        },
+        body: JSON.stringify({
+          key: 'hero_image',
+          value: { url: finalUrl },
+          updated_at: new Date().toISOString()
+        })
+      });
+      if (!res.ok) {
+        const errTxt = await res.text().catch(() => '');
+        throw new Error(`Error al guardar portada en Supabase (${res.status}): ${errTxt}`);
+      }
+    }
+    await saveLocalHeroImage(finalUrl);
+    return finalUrl;
+  }
+
+  // Portafolio Local + Nube
+  async function getLocalPortfolioPhotos() {
     try {
       const db = await openDB();
       return new Promise((resolve) => {
@@ -400,14 +594,7 @@
     }
   }
 
-  async function savePortfolioPhoto(photo) {
-    if (!photo.id) {
-      photo.id = 'photo-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
-    }
-    if (!photo.createdAt) {
-      photo.createdAt = Date.now();
-    }
-
+  async function saveLocalPortfolioPhoto(photo) {
     try {
       const db = await openDB();
       return new Promise((resolve, reject) => {
@@ -427,10 +614,111 @@
     }
   }
 
+  // Garantiza que la tabla portfolio_photos de Supabase tenga las fotos base antes de editar/borrar 1 sola
+  async function ensureCloudPortfolioSeeded(cfg) {
+    if (!cfg || !cfg.url || !cfg.key) return;
+    try {
+      const checkRes = await fetch(`${cfg.url}/rest/v1/portfolio_photos?select=id&limit=1`, {
+        headers: {
+          'apikey': cfg.key,
+          'Authorization': `Bearer ${cfg.key}`
+        }
+      });
+      if (checkRes.ok) {
+        const existing = await checkRes.json();
+        if (Array.isArray(existing) && existing.length === 0) {
+          await syncLocalDataToSupabase(cfg);
+        }
+      }
+    } catch (e) {
+      console.warn('No se pudo verificar estado inicial de portfolio_photos:', e);
+    }
+  }
+
+  async function getAllPortfolioPhotos() {
+    const cfg = getSupabaseConfig();
+    if (cfg && cfg.url && cfg.key) {
+      try {
+        const res = await fetch(`${cfg.url}/rest/v1/portfolio_photos?select=*&order=created_at.desc`, {
+          headers: {
+            'apikey': cfg.key,
+            'Authorization': `Bearer ${cfg.key}`
+          }
+        });
+        if (res.ok) {
+          const rows = await res.json();
+          if (Array.isArray(rows) && rows.length > 0) {
+            return rows.map(mapDbRowToPhoto);
+          }
+        }
+      } catch (err) {
+        console.warn('Fallback local para portafolio:', err);
+      }
+    }
+    return getLocalPortfolioPhotos();
+  }
+
+  async function savePortfolioPhoto(photo) {
+    const existingList = await getAllPortfolioPhotos().catch(() => []);
+    const existingItem = photo.id ? existingList.find((p) => p.id === photo.id) : null;
+
+    if (!photo.id) {
+      photo.id = 'photo-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    }
+    if (!photo.createdAt) {
+      photo.createdAt = existingItem && existingItem.createdAt ? existingItem.createdAt : Date.now();
+    }
+
+    const cfg = getSupabaseConfig();
+    if (cfg && cfg.url && cfg.key) {
+      await ensureCloudPortfolioSeeded(cfg);
+
+      const safeTitleSlug = slugify(photo.title || photo.category || 'foto');
+      photo.fullUrl = await uploadImageToCloudStorage(photo.fullUrl, `${photo.category || 'general'}/${safeTitleSlug}-full`, cfg);
+      photo.thumbUrl = await uploadImageToCloudStorage(photo.thumbUrl || photo.fullUrl, `${photo.category || 'general'}/${safeTitleSlug}-thumb`, cfg);
+
+      const dbRow = mapPhotoToDbRow(photo);
+      const res = await fetch(`${cfg.url}/rest/v1/portfolio_photos?on_conflict=id`, {
+        method: 'POST',
+        headers: {
+          'apikey': cfg.key,
+          'Authorization': `Bearer ${cfg.key}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates,return=representation'
+        },
+        body: JSON.stringify(dbRow)
+      });
+
+      if (!res.ok) {
+        const errTxt = await res.text().catch(() => '');
+        throw new Error(`Error al guardar foto en Supabase (${res.status}): ${errTxt}`);
+      }
+    }
+
+    await saveLocalPortfolioPhoto(photo);
+    return photo;
+  }
+
   async function deletePortfolioPhoto(id) {
+    const cfg = getSupabaseConfig();
+    if (cfg && cfg.url && cfg.key) {
+      await ensureCloudPortfolioSeeded(cfg);
+      const res = await fetch(`${cfg.url}/rest/v1/portfolio_photos?id=eq.${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': cfg.key,
+          'Authorization': `Bearer ${cfg.key}`
+        }
+      });
+      if (!res.ok) {
+        const errTxt = await res.text().catch(() => '');
+        throw new Error(`Error al eliminar foto en Supabase (${res.status}): ${errTxt}`);
+      }
+    }
+
     try {
       const db = await openDB();
-      return new Promise((resolve, reject) => {
+      await new Promise((resolve, reject) => {
         const tx = db.transaction('portfolio', 'readwrite');
         const st = tx.objectStore('portfolio');
         const req = st.delete(id);
@@ -441,12 +729,12 @@
       let list = getLS('portfolio', [...DEFAULT_PORTFOLIO]);
       list = list.filter((p) => p.id !== id);
       setLS('portfolio', list);
-      return true;
     }
+    return true;
   }
 
-  // Sesiones de Clientes (Proofing)
-  async function getAllClientSessions() {
+  // Sesiones de Clientes (Proofing Local + Nube)
+  async function getLocalClientSessions() {
     try {
       const db = await openDB();
       return new Promise((resolve) => {
@@ -465,7 +753,48 @@
     }
   }
 
+  async function getAllClientSessions() {
+    const cfg = getSupabaseConfig();
+    if (cfg && cfg.url && cfg.key) {
+      try {
+        const res = await fetch(`${cfg.url}/rest/v1/client_sessions?select=*&order=created_at.desc`, {
+          headers: {
+            'apikey': cfg.key,
+            'Authorization': `Bearer ${cfg.key}`
+          }
+        });
+        if (res.ok) {
+          const rows = await res.json();
+          if (Array.isArray(rows) && rows.length > 0) {
+            return rows.map(mapDbRowToSession);
+          }
+        }
+      } catch (err) {
+        console.warn('Fallback local para sesiones de clientes:', err);
+      }
+    }
+    return getLocalClientSessions();
+  }
+
   async function getClientSessionById(id) {
+    const cfg = getSupabaseConfig();
+    if (cfg && cfg.url && cfg.key) {
+      try {
+        const res = await fetch(`${cfg.url}/rest/v1/client_sessions?id=eq.${encodeURIComponent(id)}&select=*&limit=1`, {
+          headers: {
+            'apikey': cfg.key,
+            'Authorization': `Bearer ${cfg.key}`
+          }
+        });
+        if (res.ok) {
+          const rows = await res.json();
+          if (Array.isArray(rows) && rows.length > 0) {
+            return mapDbRowToSession(rows[0]);
+          }
+        }
+      } catch (err) {}
+    }
+
     try {
       const db = await openDB();
       return new Promise((resolve) => {
@@ -489,6 +818,37 @@
       session.createdAt = Date.now();
     }
 
+    const cfg = getSupabaseConfig();
+    if (cfg && cfg.url && cfg.key) {
+      if (Array.isArray(session.photos)) {
+        const uploadedPhotos = [];
+        for (let i = 0; i < session.photos.length; i++) {
+          const p = { ...session.photos[i] };
+          p.fullUrl = await uploadImageToCloudStorage(p.fullUrl, `sessions/${session.id}/foto-${i + 1}-full`, cfg);
+          p.thumbUrl = await uploadImageToCloudStorage(p.thumbUrl || p.fullUrl, `sessions/${session.id}/foto-${i + 1}-thumb`, cfg);
+          uploadedPhotos.push(p);
+        }
+        session.photos = uploadedPhotos;
+      }
+
+      const dbRow = mapSessionToDbRow(session);
+      const res = await fetch(`${cfg.url}/rest/v1/client_sessions?on_conflict=id`, {
+        method: 'POST',
+        headers: {
+          'apikey': cfg.key,
+          'Authorization': `Bearer ${cfg.key}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates,return=representation'
+        },
+        body: JSON.stringify(dbRow)
+      });
+
+      if (!res.ok) {
+        const errTxt = await res.text().catch(() => '');
+        console.warn(`Aviso al guardar sesión en Supabase (${res.status}): ${errTxt}`);
+      }
+    }
+
     try {
       const db = await openDB();
       return new Promise((resolve, reject) => {
@@ -509,6 +869,19 @@
   }
 
   async function deleteClientSession(id) {
+    const cfg = getSupabaseConfig();
+    if (cfg && cfg.url && cfg.key) {
+      try {
+        await fetch(`${cfg.url}/rest/v1/client_sessions?id=eq.${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': cfg.key,
+            'Authorization': `Bearer ${cfg.key}`
+          }
+        });
+      } catch (err) {}
+    }
+
     try {
       const db = await openDB();
       return new Promise((resolve, reject) => {
@@ -526,22 +899,125 @@
     }
   }
 
+  // Sincroniza todas las fotos locales (incluyendo cambios que Andrés ya hizo en su Mac) hacia Supabase
+  async function syncLocalDataToSupabase(customCfg) {
+    const cfg = customCfg || getSupabaseConfig();
+    if (!cfg || !cfg.url || !cfg.key) {
+      throw new Error('No hay credenciales de Supabase configuradas.');
+    }
+
+    // 1. Sincronizar fotos del portafolio local
+    const localPhotos = await getLocalPortfolioPhotos();
+    const rowsToUpsert = [];
+    for (const p of localPhotos) {
+      const copy = { ...p };
+      const safeSlug = slugify(copy.title || copy.id || 'foto');
+      copy.fullUrl = await uploadImageToCloudStorage(copy.fullUrl, `${copy.category || 'general'}/${safeSlug}-full`, cfg);
+      copy.thumbUrl = await uploadImageToCloudStorage(copy.thumbUrl || copy.fullUrl, `${copy.category || 'general'}/${safeSlug}-thumb`, cfg);
+      rowsToUpsert.push(mapPhotoToDbRow(copy));
+    }
+
+    if (rowsToUpsert.length > 0) {
+      const pRes = await fetch(`${cfg.url}/rest/v1/portfolio_photos?on_conflict=id`, {
+        method: 'POST',
+        headers: {
+          'apikey': cfg.key,
+          'Authorization': `Bearer ${cfg.key}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify(rowsToUpsert)
+      });
+      if (!pRes.ok) {
+        const errTxt = await pRes.text().catch(() => '');
+        throw new Error(`No se pudieron sincronizar las fotos (${pRes.status}): ${errTxt}`);
+      }
+    }
+
+    // 2. Sincronizar portada Hero si fue personalizada localmente
+    const localHero = await getLocalHeroImage();
+    if (localHero && localHero !== DEFAULT_HERO) {
+      const heroCdnUrl = await uploadImageToCloudStorage(localHero, 'hero/portada', cfg);
+      await fetch(`${cfg.url}/rest/v1/site_settings?on_conflict=key`, {
+        method: 'POST',
+        headers: {
+          'apikey': cfg.key,
+          'Authorization': `Bearer ${cfg.key}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({
+          key: 'hero_image',
+          value: { url: heroCdnUrl },
+          updated_at: new Date().toISOString()
+        })
+      }).catch(() => {});
+    }
+
+    // 3. Sincronizar sesiones de clientes
+    const localSessions = await getLocalClientSessions();
+    if (Array.isArray(localSessions) && localSessions.length > 0) {
+      const sRows = localSessions.map(mapSessionToDbRow);
+      await fetch(`${cfg.url}/rest/v1/client_sessions?on_conflict=id`, {
+        method: 'POST',
+        headers: {
+          'apikey': cfg.key,
+          'Authorization': `Bearer ${cfg.key}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify(sRows)
+      }).catch(() => {});
+    }
+
+    return { syncedPhotos: rowsToUpsert.length };
+  }
+
   async function resetToDefaultData() {
+    const cfg = getSupabaseConfig();
+    if (cfg && cfg.url && cfg.key) {
+      try {
+        await fetch(`${cfg.url}/rest/v1/portfolio_photos?id=neq.__none__`, {
+          method: 'DELETE',
+          headers: { 'apikey': cfg.key, 'Authorization': `Bearer ${cfg.key}` }
+        });
+        const defaultRows = DEFAULT_PORTFOLIO.map(mapPhotoToDbRow);
+        await fetch(`${cfg.url}/rest/v1/portfolio_photos?on_conflict=id`, {
+          method: 'POST',
+          headers: {
+            'apikey': cfg.key,
+            'Authorization': `Bearer ${cfg.key}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify(defaultRows)
+        });
+        await fetch(`${cfg.url}/rest/v1/site_settings?key=eq.hero_image`, {
+          method: 'DELETE',
+          headers: { 'apikey': cfg.key, 'Authorization': `Bearer ${cfg.key}` }
+        });
+      } catch (err) {
+        console.warn('Error al restablecer datos en Supabase:', err);
+      }
+    }
+
     try {
       const db = await openDB();
-      const tx = db.transaction(['portfolio', 'sessions'], 'readwrite');
+      const tx = db.transaction(['portfolio', 'sessions', 'settings'], 'readwrite');
       tx.objectStore('portfolio').clear();
       tx.objectStore('sessions').clear();
+      tx.objectStore('settings').delete('hero_image');
       DEFAULT_PORTFOLIO.forEach((p) => tx.objectStore('portfolio').put(p));
       DEFAULT_SESSIONS.forEach((s) => tx.objectStore('sessions').put(s));
     } catch (e) {}
 
     setLS('portfolio', DEFAULT_PORTFOLIO);
     setLS('sessions', DEFAULT_SESSIONS);
+    setLS('hero_image', DEFAULT_HERO);
     return true;
   }
 
-  // Procesador y compresor de fotos
+  // Procesador y compresor de fotos optimizado en WebP (con fallback automático a JPEG)
   function processImageFile(file) {
     return new Promise((resolve, reject) => {
       if (!file.type.startsWith('image/')) {
@@ -554,7 +1030,7 @@
         img.onload = () => {
           try {
             const fullUrl = resizeImage(img, 2048, 0.85);
-            const thumbUrl = resizeImage(img, 700, 0.80);
+            const thumbUrl = resizeImage(img, 750, 0.82);
             resolve({ fullUrl, thumbUrl, originalName: file.name });
           } catch (err) {
             resolve({ fullUrl: e.target.result, thumbUrl: e.target.result, originalName: file.name });
@@ -586,6 +1062,12 @@
     canvas.height = height;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0, width, height);
+
+    // Preferir formato WebP por velocidad SEO (< 3s en móvil), con fallback a JPEG
+    const webpData = canvas.toDataURL('image/webp', quality);
+    if (webpData && webpData.startsWith('data:image/webp')) {
+      return webpData;
+    }
     return canvas.toDataURL('image/jpeg', quality);
   }
 
@@ -606,6 +1088,9 @@
     DEFAULT_PORTFOLIO,
     DEFAULT_SESSIONS,
     initStorage,
+    getSupabaseConfig,
+    isCloudEnabled,
+    syncLocalDataToSupabase,
     getAdminCredentials,
     saveAdminCredentials,
     verifyAdminLogin,
