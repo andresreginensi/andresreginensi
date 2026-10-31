@@ -54,6 +54,7 @@
       photoUrlInput: document.getElementById('photo-url-input'),
       photoCategory: document.getElementById('photo-category'),
       photoTitle: document.getElementById('photo-title'),
+      photoTag: document.getElementById('photo-tag'),
       photoAspect: document.getElementById('photo-aspect'),
 
       // Portada (Hero)
@@ -337,7 +338,7 @@
         const editId = dom.editPhotoId.value;
         const category = dom.photoCategory.value;
         const title = dom.photoTitle.value.trim();
-        const tag = dom.photoTag.value.trim() || 'Fotografía Editorial';
+        const tag = (dom.photoTag ? dom.photoTag.value.trim() : '') || 'Fotografía Editorial';
         const aspect = dom.photoAspect.value;
 
         const categoryLabels = {
@@ -637,7 +638,7 @@
       dom.photoModalTitle.textContent = 'Editar Fotografía';
       dom.editPhotoId.value = photoToEdit.id;
       dom.photoTitle.value = photoToEdit.title || '';
-      dom.photoTag.value = photoToEdit.tag || '';
+      if (dom.photoTag) dom.photoTag.value = photoToEdit.tag || '';
       dom.photoCategory.value = photoToEdit.category || 'realestate';
       dom.photoAspect.value = photoToEdit.aspect || 'landscape';
       dom.photoUrlInput.value = photoToEdit.fullUrl.startsWith('data:') ? '' : photoToEdit.fullUrl;
