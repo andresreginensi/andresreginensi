@@ -366,7 +366,7 @@
         if (saveBtn) {
           saveBtn.disabled = true;
           saveBtn.textContent = db.isCloudEnabled && db.isCloudEnabled()
-            ? 'Subiendo a la nube...'
+            ? 'Publicando en GitHub...'
             : 'Guardando...';
         }
 
@@ -374,8 +374,8 @@
           await db.savePortfolioPhoto(photoObj);
           closePhotoModal();
           await refreshPortfolio();
-          const cloudMsg = db.isCloudEnabled && db.isCloudEnabled() ? ' (sincronizada en la nube)' : '';
-          showToast(editId ? `Fotografía actualizada${cloudMsg}.` : `¡Nueva fotografía publicada${cloudMsg}!`);
+          const cloudMsg = db.isCloudEnabled && db.isCloudEnabled() ? ' · Publicada en GitHub / Cloudflare' : '';
+          showToast(editId ? `✓ Fotografía actualizada${cloudMsg}` : `✓ ¡Nueva fotografía añadida${cloudMsg}!`);
         } catch (err) {
           alert('Error al guardar la fotografía: ' + (err.message || err));
         } finally {
@@ -1146,25 +1146,26 @@ USING (bucket_id = 'portfolio');`;
     const btnBannerConnect = document.getElementById('btn-banner-connect');
     const modal = document.getElementById('modal-supabase-config');
     const btnCloseModal = document.getElementById('btn-close-supabase-modal');
-    const btnCopySql = document.getElementById('btn-copy-sql');
     const form = document.getElementById('supabase-config-form');
     const btnDisconnect = document.getElementById('btn-disconnect-supabase');
-    const inputUrl = document.getElementById('sb-project-url');
-    const inputKey = document.getElementById('sb-anon-key');
+    const inputOwner = document.getElementById('gh-owner');
+    const inputRepo = document.getElementById('gh-repo');
+    const inputBranch = document.getElementById('gh-branch');
+    const inputToken = document.getElementById('gh-token');
 
-    // Cargar credenciales guardadas si existen
-    const savedConfig = getSupabaseSavedConfig();
-    if (savedConfig) {
-      if (inputUrl) inputUrl.value = savedConfig.url || '';
-      if (inputKey) inputKey.value = savedConfig.key || '';
-    }
+    const populateInputs = () => {
+      const cfg = db && db.getGitHubConfig ? db.getGitHubConfig() : null;
+      if (cfg) {
+        if (inputOwner) inputOwner.value = cfg.owner || 'andresreginensi';
+        if (inputRepo) inputRepo.value = cfg.repo || 'andresreginensi';
+        if (inputBranch) inputBranch.value = cfg.branch || 'main';
+        if (inputToken) inputToken.value = cfg.token || '';
+      }
+    };
+    populateInputs();
 
     const openModal = () => {
-      const cfg = getSupabaseSavedConfig();
-      if (cfg) {
-        if (inputUrl && !inputUrl.value) inputUrl.value = cfg.url || '';
-        if (inputKey && !inputKey.value) inputKey.value = cfg.key || '';
-      }
+      populateInputs();
       if (modal) modal.classList.add('active');
     };
     const closeModal = () => {
@@ -1177,21 +1178,21 @@ USING (bucket_id = 'portfolio');`;
     if (btnBannerConnect) btnBannerConnect.addEventListener('click', openModal);
     if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
 
-    // Botón para sincronizar manualmente las fotos locales de este Mac hacia Supabase
+    // Botón para publicar manualmente todas las fotos locales de este Mac hacia GitHub
     if (btnSyncLocalToCloud) {
       btnSyncLocalToCloud.addEventListener('click', async () => {
-        if (!db || !db.syncLocalDataToSupabase) return;
+        if (!db || !db.syncLocalDataToGitHub) return;
         const origTxt = btnSyncLocalToCloud.textContent;
         btnSyncLocalToCloud.disabled = true;
-        btnSyncLocalToCloud.textContent = '⏳ Subiendo fotos a la nube...';
+        btnSyncLocalToCloud.textContent = '⏳ Publicando en GitHub...';
         try {
-          const result = await db.syncLocalDataToSupabase();
+          const result = await db.syncLocalDataToGitHub();
           await refreshPortfolio();
           await loadCurrentSettings();
           await refreshSessions();
-          showToast(`✓ ¡${result.syncedPhotos} fotografías sincronizadas en la nube!`);
+          showToast(`✓ ¡${result.syncedPhotos} fotos publicadas en GitHub! Se verán en móviles en ~20s.`);
         } catch (err) {
-          alert('No se pudo sincronizar con Supabase: ' + (err.message || err));
+          alert('No se pudo publicar en GitHub: ' + (err.message || err));
         } finally {
           btnSyncLocalToCloud.disabled = false;
           btnSyncLocalToCloud.textContent = origTxt;
@@ -1206,36 +1207,17 @@ USING (bucket_id = 'portfolio');`;
       });
     }
 
-    // Copiar código SQL
-    if (btnCopySql) {
-      btnCopySql.addEventListener('click', async () => {
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(SUPABASE_SQL_SCHEMA);
-          } else {
-            const ta = document.createElement('textarea');
-            ta.value = SUPABASE_SQL_SCHEMA;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-          }
-          showToast('✓ Código SQL completo copiado al portapapeles');
-        } catch (err) {
-          showToast('✓ Selecciona y copia el código SQL de la guía');
-        }
-      });
-    }
-
-    // Guardar y probar conexión
+    // Conectar y sincronizar con GitHub
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const url = (inputUrl ? inputUrl.value : '').trim().replace(/\/$/, '');
-        const key = (inputKey ? inputKey.value : '').trim();
+        const owner = (inputOwner ? inputOwner.value : 'andresreginensi').trim();
+        const repo = (inputRepo ? inputRepo.value : 'andresreginensi').trim();
+        const branch = (inputBranch ? inputBranch.value : 'main').trim();
+        const token = (inputToken ? inputToken.value : '').trim();
 
-        if (!url || !key) {
-          alert('Por favor, introduce la URL del proyecto y la clave anon public de Supabase.');
+        if (!token) {
+          alert('Por favor, pega tu Personal Access Token de GitHub (empieza por ghp_ o github_pat_).');
           return;
         }
 
@@ -1243,43 +1225,27 @@ USING (bucket_id = 'portfolio');`;
         const origText = submitBtn ? submitBtn.textContent : '';
         if (submitBtn) {
           submitBtn.disabled = true;
-          submitBtn.textContent = 'Probando conexión y tablas...';
+          submitBtn.textContent = 'Verificando repositorio en GitHub...';
         }
 
         try {
-          const testPortfolio = `${url}/rest/v1/portfolio_photos?select=id&limit=1`;
-          const res = await fetch(testPortfolio, {
-            headers: {
-              'apikey': key,
-              'Authorization': `Bearer ${key}`
-            }
-          });
+          const cfg = { owner, repo, branch, token };
+          await db.verifyGitHubToken(cfg);
+          db.setGitHubConfig(cfg);
 
-          if (res.ok) {
-            localStorage.setItem('andres_supabase_config', JSON.stringify({ url, key }));
-
-            // Si la tabla portfolio_photos está vacía, subimos automáticamente todas las fotos actuales de este Mac
-            const existingRows = await res.json().catch(() => []);
-            if (Array.isArray(existingRows) && existingRows.length === 0 && db && db.syncLocalDataToSupabase) {
-              if (submitBtn) submitBtn.textContent = 'Sincronizando tus fotos iniciales a la nube...';
-              await db.syncLocalDataToSupabase({ url, key });
-            }
-
-            showToast('✓ ¡Supabase conectado! Tus fotos ya están sincronizadas en la nube.');
-            closeModal();
-            checkSupabaseState();
-            await refreshPortfolio();
-            await loadCurrentSettings();
-            await refreshSessions();
-          } else if (res.status === 404) {
-            alert('Conexión con Supabase alcanzada, pero las tablas del portafolio aún no existen.\n\nPor favor:\n1. Pulsa el botón "📋 Copiar Código SQL Completo" en el Paso 2.\n2. Ve al "SQL Editor" de Supabase, pégalo y haz clic en "RUN".\n3. Vuelve aquí y pulsa "Probar y Guardar Conexión".');
-          } else if (res.status === 401 || res.status === 403) {
-            alert('Error de autenticación: verifica que hayas copiado la clave "anon public" en Supabase > Project Settings > API.');
-          } else {
-            alert(`Respuesta inesperada de Supabase (código ${res.status}). Verifica que ejecutaste el código SQL completo.`);
+          if (submitBtn) {
+            submitBtn.textContent = 'Publicando tus fotos actuales en GitHub...';
           }
+          await db.syncLocalDataToGitHub(cfg);
+
+          showToast('✓ ¡GitHub conectado! Tus fotos ya se están desplegando en Cloudflare Pages (~20s).');
+          closeModal();
+          checkSupabaseState();
+          await refreshPortfolio();
+          await loadCurrentSettings();
+          await refreshSessions();
         } catch (err) {
-          alert(`No se pudo conectar con ${url}.\nComprueba que la Project URL esté bien escrita y tengas conexión a internet.`);
+          alert('No se pudo conectar con GitHub:\n\n' + (err.message || err));
         } finally {
           if (submitBtn) {
             submitBtn.disabled = false;
@@ -1289,13 +1255,12 @@ USING (bucket_id = 'portfolio');`;
       });
     }
 
-    // Desconectar Supabase
+    // Desconectar GitHub
     if (btnDisconnect) {
       btnDisconnect.addEventListener('click', async () => {
-        localStorage.removeItem('andres_supabase_config');
-        if (inputUrl) inputUrl.value = '';
-        if (inputKey) inputKey.value = '';
-        showToast('Base de datos desconectada en este navegador.');
+        if (db && db.clearGitHubConfig) db.clearGitHubConfig();
+        if (inputToken) inputToken.value = '';
+        showToast('GitHub desconectado en este navegador.');
         closeModal();
         checkSupabaseState();
         await refreshPortfolio();
@@ -1308,15 +1273,12 @@ USING (bucket_id = 'portfolio');`;
     if (db && db.getSupabaseConfig) {
       return db.getSupabaseConfig();
     }
-    try {
-      return JSON.parse(localStorage.getItem('andres_supabase_config') || 'null');
-    } catch (e) {
-      return null;
-    }
+    return null;
   }
 
   function checkSupabaseState() {
-    const config = getSupabaseSavedConfig();
+    const ghCfg = db && db.getGitHubConfig ? db.getGitHubConfig() : null;
+    const sbCfg = getSupabaseSavedConfig();
     // Elementos Topbar
     const topbarDot = document.getElementById('topbar-db-dot');
     const topbarText = document.getElementById('topbar-db-text');
@@ -1329,49 +1291,27 @@ USING (bucket_id = 'portfolio');`;
     // Elementos Pestaña Analíticas
     const dot = document.getElementById('db-status-dot');
     const statusText = document.getElementById('db-status-text');
-    const banner = document.getElementById('analytics-mode-banner');
-    const badge = document.getElementById('banner-mode-badge');
-    const bannerText = document.getElementById('banner-mode-text');
-    const btnConnect = document.getElementById('btn-banner-connect');
 
-    if (config && config.url && config.key) {
-      // Estado Conectado a la Nube
+    if (ghCfg && ghCfg.token) {
       if (topbarDot) topbarDot.className = 'db-status-dot connected';
-      if (topbarText) topbarText.textContent = 'Nube Supabase: Conectada';
+      if (topbarText) topbarText.textContent = `GitHub: ${ghCfg.repo} (${ghCfg.branch})`;
 
       if (pBanner) pBanner.className = 'analytics-mode-banner connected';
       if (pBadge) {
         pBadge.className = 'banner-badge connected';
-        pBadge.textContent = 'Nube Activa (CDN)';
+        pBadge.textContent = 'GitHub + Cloudflare Activo';
       }
       if (pText) {
-        const hasGlobalFileConfig = Boolean(window.SUPABASE_PUBLIC_CONFIG && window.SUPABASE_PUBLIC_CONFIG.url && window.SUPABASE_PUBLIC_CONFIG.key);
-        pText.innerHTML = hasGlobalFileConfig
-          ? '<strong>✓ Sincronización global activa en todos los dispositivos.</strong> Cada foto o portada que subas o edites aquí se publica al instante en móviles, tablets y ordenadores.'
-          : '<strong>✓ Conectado a Supabase desde este panel.</strong> Envía tu <em>Project URL</em> y clave <em>anon public</em> una sola vez en el chat (o guárdalas en <code>assets/js/supabase-config.js</code>) para que todos los móviles lean de esta misma nube.';
+        pText.innerHTML = `<strong>✓ Conectado directamente a GitHub (${ghCfg.owner}/${ghCfg.repo}).</strong> Cada foto o portada que edites aquí hace commit automático y se publica en todos los móviles y dispositivos en ~20 segundos.`;
       }
-      if (pBtnConnect) pBtnConnect.innerHTML = '⚙️ Gestionar Nube';
+      if (pBtnConnect) pBtnConnect.innerHTML = '⚙️ Gestionar GitHub';
       if (pBtnSync) pBtnSync.style.display = 'inline-flex';
 
       if (dot) dot.className = 'db-status-dot connected';
-      if (statusText) statusText.textContent = 'Base de Datos: Nube Conectada';
-      if (banner) banner.className = 'analytics-mode-banner connected';
-      if (badge) {
-        badge.className = 'banner-badge connected';
-        badge.textContent = 'Modo Nube (Supabase)';
-      }
-      if (bannerText) {
-        bannerText.innerHTML = '<strong>✓ Base de datos en la nube conectada.</strong> Registrando visitas y eventos reales de todo el mundo con privacidad total (RGPD).';
-      }
-      if (btnConnect) {
-        btnConnect.innerHTML = '⚙️ Gestionar Conexión';
-      }
-
-      fetchSupabaseAnalytics(config);
+      if (statusText) statusText.textContent = 'GitHub: Conectado';
     } else {
-      // Estado Desconectado / Local
       if (topbarDot) topbarDot.className = 'db-status-dot';
-      if (topbarText) topbarText.textContent = 'Nube: Desconectada';
+      if (topbarText) topbarText.textContent = 'GitHub: Desconectado';
 
       if (pBanner) pBanner.className = 'analytics-mode-banner';
       if (pBadge) {
@@ -1379,28 +1319,20 @@ USING (bucket_id = 'portfolio');`;
         pBadge.textContent = 'Modo Local';
       }
       if (pText) {
-        pText.innerHTML = 'Actualmente tus cambios se guardan solo en este navegador. Conecta <strong>Supabase (Gratis)</strong> para publicar tus fotos y portada en vivo en todos los móviles y dispositivos.';
+        pText.innerHTML = 'Actualmente tus cambios se guardan solo en este navegador. Conecta tu repositorio de <strong>GitHub</strong> para publicar tus fotos directamente en Cloudflare Pages y que se actualicen en todos los móviles y dispositivos.';
       }
       if (pBtnConnect) {
-        pBtnConnect.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg> Conectar Nube (Supabase)`;
+        pBtnConnect.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg> Conectar con GitHub`;
       }
       if (pBtnSync) pBtnSync.style.display = 'none';
 
       if (dot) dot.className = 'db-status-dot';
-      if (statusText) statusText.textContent = 'Base de Datos: Nube Desconectada';
-      if (banner) banner.className = 'analytics-mode-banner';
-      if (badge) {
-        badge.className = 'banner-badge';
-        badge.textContent = 'Modo Muestra & Local';
-      }
-      if (bannerText) {
-        bannerText.innerHTML = 'Mostrando eventos locales y métricas de muestra. Conecta tu base de datos Supabase gratuita para recibir visitas y clics reales de todo el mundo.';
-      }
-      if (btnConnect) {
-        btnConnect.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg> Conectar Base de Datos (Gratis)`;
-      }
+      if (statusText) statusText.textContent = 'GitHub: Desconectado';
+    }
 
-      // Procesar eventos locales si existen
+    if (sbCfg && sbCfg.url && sbCfg.key) {
+      fetchSupabaseAnalytics(sbCfg);
+    } else {
       processLocalAnalyticsEvents();
     }
   }

@@ -79,9 +79,9 @@
         </div>
 
         <div class="topbar-actions">
-          <button type="button" class="btn-db-config" id="btn-topbar-supabase" title="Configurar base de datos en la nube (Supabase)">
+          <button type="button" class="btn-db-config" id="btn-topbar-supabase" title="Conectar directamente con tu repositorio de GitHub">
             <span class="db-status-dot" id="topbar-db-dot"></span>
-            <span id="topbar-db-text">Nube: Desconectada</span>
+            <span id="topbar-db-text">GitHub: Desconectado</span>
           </button>
 
           <a href="index.html" target="_blank" class="btn-secondary" title="Abrir página web en nueva pestaña">
@@ -175,23 +175,23 @@
           </button>
         </div>
 
-        <!-- Banner Estado Nube en Portafolio -->
+        <!-- Banner Estado GitHub en Portafolio -->
         <div class="analytics-mode-banner" id="portfolio-cloud-banner" style="margin-bottom: 1.5rem;">
           <div class="banner-left">
             <span class="banner-badge" id="portfolio-cloud-badge">Modo Local</span>
             <span class="banner-text" id="portfolio-cloud-text">
-              Actualmente tus cambios se guardan solo en este navegador. Conecta <strong>Supabase (Gratis)</strong> para publicar tus fotos y portada en vivo en todos los móviles y dispositivos.
+              Actualmente tus cambios se guardan solo en este navegador. Conecta tu repositorio de <strong>GitHub</strong> para publicar tus fotos directamente en Cloudflare Pages y que se actualicen en todos los móviles y dispositivos.
             </span>
           </div>
           <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
             <button type="button" class="btn-secondary" id="btn-sync-local-to-cloud" style="display: none; font-size: 0.78rem; padding: 0.45rem 0.85rem;">
-              🔄 Sincronizar Fotos de este Mac
+              🔄 Publicar Fotos de este Mac en GitHub
             </button>
             <button type="button" class="btn-connect-cloud" id="btn-portfolio-connect-cloud">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
               </svg>
-              Conectar Nube (Supabase)
+              Conectar con GitHub
             </button>
           </div>
         </div>
@@ -988,71 +988,82 @@
   </div>
 
   <!-- ==========================================
-       MODAL 3: CONECTAR BASE DE DATOS SUPABASE
+       MODAL 3: CONECTAR REPOSITORIO GITHUB DIRECTO
        ========================================== -->
   <div class="modal-overlay" id="modal-supabase-config">
     <div class="modal-box" style="max-width: 580px;">
       <button class="modal-close-btn" id="btn-close-supabase-modal" aria-label="Cerrar">&times;</button>
       <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-        <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(62, 207, 142, 0.15); display: flex; align-items: center; justify-content: center; color: #3ecf8e;">
+        <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(197, 160, 89, 0.16); display: flex; align-items: center; justify-content: center; color: #c5a059;">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
           </svg>
         </div>
         <div>
-          <h2 class="modal-title" style="margin: 0; font-size: 1.25rem;">Base de Datos en la Nube (Supabase)</h2>
-          <span style="font-size: 0.75rem; color: #10b981; font-weight: 500;">100% Gratuita, Privada y Conforme con el RGPD</span>
+          <h2 class="modal-title" style="margin: 0; font-size: 1.25rem;">Sincronización Directa con GitHub</h2>
+          <span style="font-size: 0.75rem; color: #10b981; font-weight: 500;">Sin bases de datos externas · Despliegue automático en Cloudflare Pages</span>
         </div>
       </div>
       
       <p class="modal-desc" style="margin-bottom: 1.2rem;">
-        Conecta tu proyecto gratuito de Supabase para que tus <strong>fotografías de portafolio, foto de portada, galerías privadas y analíticas</strong> se sincronicen automáticamente en todos los móviles y ordenadores del mundo.
+        Conecta tu panel directamente con tu repositorio <strong>andresreginensi/andresreginensi</strong>. Cada foto que subas o edites aquí se optimizará en WebP y se publicará automáticamente en todos los móviles y dispositivos.
       </p>
 
       <div class="supabase-steps-card">
         <div class="supabase-step">
           <span class="step-num">1</span>
           <div>
-            <strong>Crea tu proyecto gratis en <a href="https://supabase.com" target="_blank" rel="noopener" style="color: #c5a059; text-decoration: underline;">supabase.com</a></strong>
-            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0 0;">Haz clic en "Start your project" e inicia sesión con tu email o GitHub.</p>
+            <strong>Abre el generador directo de Token en GitHub:</strong>
+            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0.45rem 0;">Ya lleva el nombre y el permiso <code>repo</code> marcados por ti:</p>
+            <a href="https://github.com/settings/tokens/new?description=Panel+Admin+Andres+Reginensi&scopes=repo" target="_blank" rel="noopener" class="btn-copy-sql" style="display: inline-block; text-decoration: none;">
+              🔑 Crear Token en GitHub (1 clic) ↗
+            </a>
           </div>
         </div>
 
         <div class="supabase-step">
           <span class="step-num">2</span>
           <div>
-            <strong>Ejecuta el esquema completo en "SQL Editor"</strong>
-            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0.4rem 0;">Copia el código SQL completo (crea tablas de Fotos, Portada, Sesiones, Analíticas y CDN), pégalo en Supabase y pulsa <strong>RUN</strong>:</p>
-            <button type="button" class="btn-copy-sql" id="btn-copy-sql">📋 Copiar Código SQL Completo</button>
+            <strong>Pulsa el botón verde "Generate token"</strong>
+            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0 0;">En GitHub, elige <em>"No expiration"</em> (opcional), baja hasta abajo, haz clic en <strong>Generate token</strong> y copia el código <code>ghp_...</code>.</p>
           </div>
         </div>
 
         <div class="supabase-step">
           <span class="step-num">3</span>
           <div>
-            <strong>Pega tus 2 credenciales de Supabase:</strong>
-            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0 0;">Las encuentras en <em>Project Settings &gt; API</em> (Project URL y clave <code>anon public</code>).</p>
+            <strong>Pégalo aquí abajo y conecta:</strong>
+            <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0.15rem 0 0 0;">Tu token se guarda únicamente en este navegador (nunca es público).</p>
           </div>
         </div>
       </div>
 
       <form id="supabase-config-form" style="margin-top: 1.2rem;">
-        <div class="form-group">
-          <label class="form-label" for="sb-project-url">Project URL de Supabase</label>
-          <input type="url" id="sb-project-url" class="form-input" placeholder="https://tu-proyecto.supabase.co" required>
-          <span style="font-size: 0.72rem; color: var(--text-muted);">Ejemplo: https://abcdefghijklm.supabase.co</span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 90px; gap: 0.65rem;">
+          <div class="form-group">
+            <label class="form-label" for="gh-owner">Usuario GitHub</label>
+            <input type="text" id="gh-owner" class="form-input" value="andresreginensi" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="gh-repo">Repositorio</label>
+            <input type="text" id="gh-repo" class="form-input" value="andresreginensi" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="gh-branch">Rama</label>
+            <input type="text" id="gh-branch" class="form-input" value="main" required>
+          </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="sb-anon-key">Anon / Public API Key</label>
-          <input type="password" id="sb-anon-key" class="form-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required>
-          <span style="font-size: 0.72rem; color: var(--text-muted);">Tu clave pública (anon public). Es 100% segura para uso en navegador.</span>
+          <label class="form-label" for="gh-token">GitHub Personal Access Token</label>
+          <input type="password" id="gh-token" class="form-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" required>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Empieza por <code>ghp_...</code> o <code>github_pat_...</code> con permiso de escritura en el repositorio.</span>
         </div>
 
         <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem;">
           <button type="button" class="btn-secondary" id="btn-disconnect-supabase" style="flex: 1;">Desconectar</button>
           <button type="submit" class="btn-gold" id="btn-save-supabase" style="flex: 2; justify-content: center;">
-            Probar y Guardar Conexión
+            Conectar y Publicar en GitHub
           </button>
         </div>
       </form>
@@ -1070,8 +1081,7 @@
 
   <!-- Lógica JavaScript del Panel & Librería de Gráficos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="assets/js/supabase-config.js?v=4"></script>
-  <script src="assets/js/db.js?v=4"></script>
-  <script src="assets/js/admin.js?v=4"></script>
+  <script src="assets/js/db.js?v=5"></script>
+  <script src="assets/js/admin.js?v=5"></script>
 </body>
 </html>

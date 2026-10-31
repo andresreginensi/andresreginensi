@@ -1,8 +1,8 @@
 /**
- * Andrés Reginensi Photography — Gestor de Base de Datos Local
- * Compatible al 100% tanto abriendo el archivo directamente con doble clic (file://)
- * como alojado en un servidor web (http:// / https://).
- * Utiliza IndexedDB con fallback automático a localStorage.
+ * Andrés Reginensi Photography — Gestor de Datos Híbrido (GitHub Direct CMS + Local)
+ * Publica directamente desde admin.html hacia el repositorio GitHub (andresreginensi/andresreginensi)
+ * mediante commits atómicos (imágenes optimizadas en WebP + assets/data/site-data.json),
+ * desplegando automáticamente en Cloudflare Pages para todos los móviles y dispositivos del mundo.
  */
 
 (function (window) {
@@ -202,9 +202,12 @@
     password: 'admin2026'
   };
 
+  const DEFAULT_HERO = 'assets/images/portada.jpg';
+  const BASE_INITIAL_TIMESTAMP = 1700000000099;
+
   let useLocalStorageFallback = false;
 
-  // Apertura de base de datos
+  // Apertura de base de datos local (IndexedDB)
   function openDB() {
     return new Promise((resolve, reject) => {
       if (useLocalStorageFallback || !window.indexedDB) {
@@ -237,7 +240,6 @@
     });
   }
 
-  // Fallback helpers para localStorage
   function getLS(key, fallbackValue) {
     try {
       const data = localStorage.getItem('andres_' + key);
@@ -255,7 +257,6 @@
     }
   }
 
-  // Inicialización con migración automática de imágenes antiguas (Unsplash -> Fotos de Andrés)
   async function initStorage() {
     try {
       const db = await openDB();
@@ -268,8 +269,7 @@
         r.onerror = () => res([]);
       });
 
-      // Si no hay fotos o contienen URLs antiguas de Unsplash, actualizamos al portafolio de Andrés
-      const hasOldPlaceholders = existingPhotos.some(p => p.thumbUrl && p.thumbUrl.includes('unsplash.com'));
+      const hasOldPlaceholders = existingPhotos.some((p) => p.thumbUrl && p.thumbUrl.includes('unsplash.com'));
 
       if (existingPhotos.length === 0 || hasOldPlaceholders) {
         const tx = db.transaction(['portfolio', 'sessions', 'settings'], 'readwrite');
@@ -289,13 +289,13 @@
     } catch (err) {
       useLocalStorageFallback = true;
       const lsPort = getLS('portfolio', null);
-      const hasLsPlaceholders = Array.isArray(lsPort) && lsPort.some(p => p.thumbUrl && p.thumbUrl.includes('unsplash.com'));
+      const hasLsPlaceholders = Array.isArray(lsPort) && lsPort.some((p) => p.thumbUrl && p.thumbUrl.includes('unsplash.com'));
 
       if (!lsPort || hasLsPlaceholders) {
         setLS('portfolio', DEFAULT_PORTFOLIO);
       }
       const lsSessions = getLS('sessions', null);
-      const hasLsSessionPlaceholders = Array.isArray(lsSessions) && lsSessions.some(s => s.photos && s.photos.some(p => p.thumbUrl && p.thumbUrl.includes('unsplash.com')));
+      const hasLsSessionPlaceholders = Array.isArray(lsSessions) && lsSessions.some((s) => s.photos && s.photos.some((p) => p.thumbUrl && p.thumbUrl.includes('unsplash.com')));
       if (!lsSessions || hasLsSessionPlaceholders) {
         setLS('sessions', DEFAULT_SESSIONS);
       }
@@ -347,9 +347,77 @@
   }
 
   // =======================================================
-  // CONECTOR NUBE SUPABASE (REST + STORAGE CDN)
+  // CONECTOR DIRECTO GITHUB CMS + CLOUDFLARE PAGES CDN
   // =======================================================
+  const GITHUB_LS_KEY = 'andres_github_config';
   const SUPABASE_LS_KEY = 'andres_supabase_config';
+  const SITE_DATA_REPO_PATH = 'assets/data/site-data.json';
+
+  // Caché temporal de vistas previas (para que durante los ~20s que Cloudflare construye,
+  // las imágenes recién subidas se vean al instante sin esperar al despliegue)
+  const memoryPreviewMap = {};
+  let cachedGitHubSiteData = null;
+  let cachedGitHubSiteDataTime = 0;
+  let publicSiteDataPromise = null;
+  let publicSiteDataTime = 0;
+
+  function saveInstantPreview(repoPath, dataUrl) {
+    if (!repoPath || !dataUrl) return;
+    memoryPreviewMap[repoPath] = { dataUrl, ts: Date.now() };
+  }
+
+  function resolvePreviewUrl(url) {
+    if (!url || typeof url !== 'string') return url;
+    const entry = memoryPreviewMap[url];
+    if (entry && Date.now() - entry.ts < 180000) {
+      return entry.dataUrl;
+    }
+    return url;
+  }
+
+  function applyPreviewUrlsToPhoto(p) {
+    if (!p) return p;
+    return Object.assign({}, p, {
+      thumbUrl: resolvePreviewUrl(p.thumbUrl || p.fullUrl),
+      fullUrl: resolvePreviewUrl(p.fullUrl)
+    });
+  }
+
+  function getGitHubConfig() {
+    try {
+      const cfg = JSON.parse(localStorage.getItem(GITHUB_LS_KEY) || 'null');
+      if (cfg && cfg.token) {
+        return {
+          owner: (cfg.owner || 'andresreginensi').trim(),
+          repo: (cfg.repo || 'andresreginensi').trim(),
+          branch: (cfg.branch || 'main').trim(),
+          token: cfg.token.trim()
+        };
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function setGitHubConfig(cfg) {
+    const clean = {
+      owner: (cfg.owner || 'andresreginensi').trim(),
+      repo: (cfg.repo || 'andresreginensi').trim(),
+      branch: (cfg.branch || 'main').trim(),
+      token: (cfg.token || '').trim()
+    };
+    localStorage.setItem(GITHUB_LS_KEY, JSON.stringify(clean));
+    cachedGitHubSiteData = null;
+    return clean;
+  }
+
+  function clearGitHubConfig() {
+    localStorage.removeItem(GITHUB_LS_KEY);
+    cachedGitHubSiteData = null;
+  }
+
+  function isGitHubEnabled() {
+    return Boolean(getGitHubConfig());
+  }
 
   function getSupabaseConfig() {
     try {
@@ -358,138 +426,295 @@
         return { url: localCfg.url.trim().replace(/\/$/, ''), key: localCfg.key.trim() };
       }
     } catch (e) {}
-
-    if (window.SUPABASE_PUBLIC_CONFIG && window.SUPABASE_PUBLIC_CONFIG.url && window.SUPABASE_PUBLIC_CONFIG.key) {
-      return {
-        url: window.SUPABASE_PUBLIC_CONFIG.url.trim().replace(/\/$/, ''),
-        key: window.SUPABASE_PUBLIC_CONFIG.key.trim()
-      };
-    }
     return null;
   }
 
   function isCloudEnabled() {
-    const cfg = getSupabaseConfig();
-    return Boolean(cfg && cfg.url && cfg.key);
+    return isGitHubEnabled();
   }
 
-  function dataUrlToBlob(dataUrl) {
-    const parts = dataUrl.split(',');
-    const mimeMatch = parts[0].match(/:(.*?);/);
-    const contentType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-    const ext = contentType.includes('webp') ? 'webp' : contentType.includes('png') ? 'png' : 'jpg';
-    const raw = window.atob(parts[1]);
-    const rawLength = raw.length;
-    const uInt8Array = new Uint8Array(rawLength);
-    for (let i = 0; i < rawLength; i++) {
-      uInt8Array[i] = raw.charCodeAt(i);
+  function decodeBase64Utf8(b64) {
+    const clean = b64.replace(/\s/g, '');
+    const binStr = window.atob(clean);
+    const bytes = new Uint8Array(binStr.length);
+    for (let i = 0; i < binStr.length; i++) {
+      bytes[i] = binStr.charCodeAt(i);
+    }
+    if (typeof TextDecoder !== 'undefined') {
+      return new TextDecoder('utf-8').decode(bytes);
+    }
+    return decodeURIComponent(escape(binStr));
+  }
+
+  async function githubApi(cfg, endpointPath, options = {}) {
+    const url = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}${endpointPath}`;
+    const headers = Object.assign({
+      'Accept': 'application/vnd.github+json',
+      'Authorization': `Bearer ${cfg.token}`
+    }, options.headers || {});
+
+    if (options.body && !headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    const res = await fetch(url, Object.assign({}, options, {
+      headers,
+      cache: 'no-store'
+    }));
+
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      const msg = errJson.message || `HTTP ${res.status}`;
+      const err = new Error(`GitHub (${res.status}): ${msg}`);
+      err.status = res.status;
+      throw err;
+    }
+    return res.json();
+  }
+
+  async function verifyGitHubToken(customCfg) {
+    const cfg = customCfg || getGitHubConfig();
+    if (!cfg || !cfg.token) {
+      throw new Error('Introduce un Personal Access Token de GitHub.');
+    }
+    const repoInfo = await githubApi(cfg, '');
+    if (repoInfo.permissions && repoInfo.permissions.push === false) {
+      throw new Error('El token tiene acceso de solo lectura. Marca el permiso "repo" (o "Contents: Read and write") al generarlo en GitHub.');
     }
     return {
-      blob: new Blob([uInt8Array], { type: contentType }),
-      ext,
-      contentType
+      ok: true,
+      fullName: repoInfo.full_name,
+      isPrivate: Boolean(repoInfo.private),
+      defaultBranch: repoInfo.default_branch || 'main'
     };
   }
 
-  // Sube una imagen base64 al CDN público de Supabase Storage ("portfolio")
-  // Si el bucket no existe aún, hace fallback transparente al dataUrl comprimido
-  async function uploadImageToCloudStorage(urlOrData, folderPrefix, customCfg) {
+  // Convierte una imagen data:image/... en un archivo real dentro del repositorio (assets/images/uploads/...)
+  function prepareImageForGitHubCommit(urlOrData, folderPrefix, filesToUpload) {
     if (!urlOrData || typeof urlOrData !== 'string' || !urlOrData.startsWith('data:')) {
       return urlOrData;
     }
-    const cfg = customCfg || getSupabaseConfig();
-    if (!cfg || !cfg.url || !cfg.key) return urlOrData;
+    const commaIdx = urlOrData.indexOf(',');
+    if (commaIdx === -1) return urlOrData;
+
+    const header = urlOrData.substring(0, commaIdx);
+    const base64Data = urlOrData.substring(commaIdx + 1);
+    const ext = header.includes('webp') ? 'webp' : header.includes('png') ? 'png' : 'jpg';
+    const safePrefix = (folderPrefix || 'foto').replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-');
+    const rand = Math.random().toString(36).substring(2, 6);
+    const repoPath = `assets/images/uploads/${safePrefix}-${Date.now()}-${rand}.${ext}`;
+
+    filesToUpload.push({
+      path: repoPath,
+      base64: base64Data
+    });
+
+    saveInstantPreview(repoPath, urlOrData);
+    return repoPath;
+  }
+
+  // Lee site-data.json en tiempo real desde la API de GitHub (usado en el Admin autenticado)
+  async function fetchGitHubSiteData(customCfg, bypassCache = false) {
+    const cfg = customCfg || getGitHubConfig();
+    if (!cfg || !cfg.token) return null;
+
+    if (!bypassCache && cachedGitHubSiteData && Date.now() - cachedGitHubSiteDataTime < 4000) {
+      return JSON.parse(JSON.stringify(cachedGitHubSiteData));
+    }
 
     try {
-      const { blob, ext, contentType } = dataUrlToBlob(urlOrData);
-      const rand = Math.random().toString(36).substring(2, 7);
-      const safePrefix = (folderPrefix || 'img').replace(/[^a-zA-Z0-9/_-]/g, '-');
-      const filePath = `${safePrefix}-${Date.now()}-${rand}.${ext}`;
-      const uploadEndpoint = `${cfg.url}/storage/v1/object/portfolio/${filePath}`;
-
-      const res = await fetch(uploadEndpoint, {
-        method: 'POST',
-        headers: {
-          'apikey': cfg.key,
-          'Authorization': `Bearer ${cfg.key}`,
-          'Content-Type': contentType,
-          'x-upsert': 'true'
-        },
-        body: blob
-      });
-
-      if (res.ok) {
-        return `${cfg.url}/storage/v1/object/public/portfolio/${filePath}`;
+      const fileObj = await githubApi(
+        cfg,
+        `/contents/${SITE_DATA_REPO_PATH}?ref=${encodeURIComponent(cfg.branch)}`
+      );
+      if (fileObj && fileObj.content) {
+        const jsonStr = decodeBase64Utf8(fileObj.content);
+        const parsed = JSON.parse(jsonStr);
+        cachedGitHubSiteData = parsed;
+        cachedGitHubSiteDataTime = Date.now();
+        return JSON.parse(JSON.stringify(parsed));
       }
-      console.warn('Supabase Storage fallback a tabla directa (código ' + res.status + ')');
-      return urlOrData;
     } catch (err) {
-      console.warn('No se pudo subir a Supabase Storage, usando respaldo directo:', err);
-      return urlOrData;
+      if (err.status === 404) {
+        return {
+          version: 1,
+          updatedAt: 0,
+          heroImage: DEFAULT_HERO,
+          portfolio: [...DEFAULT_PORTFOLIO],
+          sessions: [...DEFAULT_SESSIONS]
+        };
+      }
+      throw err;
     }
+    return null;
   }
 
-  function mapDbRowToPhoto(row) {
+  // Lee assets/data/site-data.json directamente del sitio público desplegado en Cloudflare Pages
+  // Funciona en TODOS los móviles y ordenadores del mundo sin necesidad de tokens ni cuentas externas
+  async function fetchPublicDeployedSiteData() {
+    if (publicSiteDataPromise && Date.now() - publicSiteDataTime < 2500) {
+      return publicSiteDataPromise;
+    }
+    publicSiteDataTime = Date.now();
+    publicSiteDataPromise = fetch(`${SITE_DATA_REPO_PATH}?t=${Date.now()}`, { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null);
+    return publicSiteDataPromise;
+  }
+
+  // Crea 1 único commit atómico en GitHub con las imágenes nuevas + site-data.json actualizado
+  async function commitToGitHub(filesToUpload, newSiteData, commitMessage, customCfg) {
+    const cfg = customCfg || getGitHubConfig();
+    if (!cfg || !cfg.token) {
+      throw new Error('GitHub no está conectado en este navegador.');
+    }
+
+    newSiteData.version = 1;
+    newSiteData.updatedAt = Date.now();
+
+    // 1. Obtener SHA del último commit en la rama (main)
+    const refData = await githubApi(cfg, `/git/ref/heads/${encodeURIComponent(cfg.branch)}`);
+    const latestCommitSha = refData.object.sha;
+
+    // 2. Obtener SHA del árbol base
+    const commitData = await githubApi(cfg, `/git/commits/${latestCommitSha}`);
+    const baseTreeSha = commitData.tree.sha;
+
+    // 3. Crear blobs para cada imagen subida + el archivo JSON maestro
+    const treeEntries = [];
+
+    for (let i = 0; i < filesToUpload.length; i++) {
+      const f = filesToUpload[i];
+      const blobRes = await githubApi(cfg, '/git/blobs', {
+        method: 'POST',
+        body: JSON.stringify({
+          content: f.base64,
+          encoding: 'base64'
+        })
+      });
+      treeEntries.push({
+        path: f.path,
+        mode: '100644',
+        type: 'blob',
+        sha: blobRes.sha
+      });
+    }
+
+    const jsonBlobRes = await githubApi(cfg, '/git/blobs', {
+      method: 'POST',
+      body: JSON.stringify({
+        content: JSON.stringify(newSiteData, null, 2),
+        encoding: 'utf-8'
+      })
+    });
+
+    treeEntries.push({
+      path: SITE_DATA_REPO_PATH,
+      mode: '100644',
+      type: 'blob',
+      sha: jsonBlobRes.sha
+    });
+
+    // 4. Crear el nuevo árbol Git
+    const newTree = await githubApi(cfg, '/git/trees', {
+      method: 'POST',
+      body: JSON.stringify({
+        base_tree: baseTreeSha,
+        tree: treeEntries
+      })
+    });
+
+    // 5. Crear el commit
+    const newCommit = await githubApi(cfg, '/git/commits', {
+      method: 'POST',
+      body: JSON.stringify({
+        message: commitMessage || '📸 Admin: Actualizar portafolio web',
+        tree: newTree.sha,
+        parents: [latestCommitSha]
+      })
+    });
+
+    // 6. Actualizar la rama (main) para disparar el despliegue automático en Cloudflare Pages
+    await githubApi(cfg, `/git/refs/heads/${encodeURIComponent(cfg.branch)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        sha: newCommit.sha,
+        force: false
+      })
+    });
+
+    cachedGitHubSiteData = JSON.parse(JSON.stringify(newSiteData));
+    cachedGitHubSiteDataTime = Date.now();
+    setLS('last_cloud_sync_ts', newSiteData.updatedAt);
+
+    return { commitSha: newCommit.sha, updatedAt: newSiteData.updatedAt };
+  }
+
+  // Sincroniza todas las fotos locales de este Mac (incluidos cambios ya hechos en el Admin) hacia GitHub
+  async function syncLocalDataToGitHub(customCfg) {
+    const cfg = customCfg || getGitHubConfig();
+    if (!cfg || !cfg.token) {
+      throw new Error('Configura primero tu token de GitHub.');
+    }
+
+    const filesToUpload = [];
+    const localPhotos = await getLocalPortfolioPhotos();
+    const cleanPhotos = localPhotos.map((p) => {
+      const copy = Object.assign({}, p);
+      const safeSlug = slugify(copy.title || copy.id || 'foto');
+      copy.fullUrl = prepareImageForGitHubCommit(copy.fullUrl, `${copy.category || 'port'}-${safeSlug}-full`, filesToUpload);
+      copy.thumbUrl = prepareImageForGitHubCommit(copy.thumbUrl || copy.fullUrl, `${copy.category || 'port'}-${safeSlug}-thumb`, filesToUpload);
+      return copy;
+    });
+
+    let localHero = await getLocalHeroImage();
+    if (localHero && localHero.startsWith('data:')) {
+      localHero = prepareImageForGitHubCommit(localHero, 'hero-portada', filesToUpload);
+    }
+
+    const localSessions = await getLocalClientSessions();
+    const cleanSessions = localSessions.map((s) => {
+      const sCopy = Object.assign({}, s);
+      if (Array.isArray(sCopy.photos)) {
+        sCopy.photos = sCopy.photos.map((ph, idx) => {
+          const pCopy = Object.assign({}, ph);
+          pCopy.fullUrl = prepareImageForGitHubCommit(pCopy.fullUrl, `sesion-${sCopy.id}-${idx + 1}-full`, filesToUpload);
+          pCopy.thumbUrl = prepareImageForGitHubCommit(pCopy.thumbUrl || pCopy.fullUrl, `sesion-${sCopy.id}-${idx + 1}-thumb`, filesToUpload);
+          return pCopy;
+        });
+      }
+      return sCopy;
+    });
+
+    const newSiteData = {
+      version: 1,
+      updatedAt: Date.now(),
+      heroImage: localHero || DEFAULT_HERO,
+      portfolio: cleanPhotos,
+      sessions: cleanSessions
+    };
+
+    const res = await commitToGitHub(
+      filesToUpload,
+      newSiteData,
+      '📸 Admin: Sincronización completa de portafolio y portada',
+      cfg
+    );
+
+    // Actualizar también copia local con las nuevas rutas limpias
+    await saveLocalHeroImage(newSiteData.heroImage);
+    await replaceAllLocalPortfolioPhotos(cleanPhotos);
+
     return {
-      id: row.id,
-      category: row.category,
-      categoryLabel: row.category_label || '',
-      title: row.title,
-      tag: row.tag || '',
-      caption: row.caption || `${row.title} — ${row.tag || ''}`,
-      aspect: row.aspect || 'landscape',
-      thumbUrl: row.thumb_url || row.full_url,
-      fullUrl: row.full_url,
-      createdAt: Number(row.created_at) || Date.now()
+      syncedPhotos: cleanPhotos.length,
+      uploadedFiles: filesToUpload.length,
+      commitSha: res.commitSha
     };
   }
 
-  function mapPhotoToDbRow(photo) {
-    return {
-      id: photo.id,
-      category: photo.category,
-      category_label: photo.categoryLabel || '',
-      title: photo.title,
-      tag: photo.tag || '',
-      caption: photo.caption || `${photo.title} — ${photo.tag || ''}`,
-      aspect: photo.aspect || 'landscape',
-      thumb_url: photo.thumbUrl || photo.fullUrl,
-      full_url: photo.fullUrl,
-      created_at: Number(photo.createdAt) || Date.now()
-    };
-  }
-
-  function mapDbRowToSession(row) {
-    return {
-      id: row.id,
-      pin: row.pin,
-      title: row.title,
-      clientName: row.client_name || '',
-      date: row.session_date || '',
-      location: row.location || '',
-      maxSelectable: Number(row.max_selectable) || 40,
-      photos: Array.isArray(row.photos) ? row.photos : [],
-      createdAt: Number(row.created_at) || Date.now()
-    };
-  }
-
-  function mapSessionToDbRow(session) {
-    return {
-      id: session.id,
-      pin: String(session.pin || ''),
-      title: session.title,
-      client_name: session.clientName || '',
-      session_date: session.date || '',
-      location: session.location || '',
-      max_selectable: Number(session.maxSelectable) || 40,
-      photos: Array.isArray(session.photos) ? session.photos : [],
-      created_at: Number(session.createdAt) || Date.now()
-    };
-  }
-
-  // Gestión de Foto de Portada (Hero)
-  const DEFAULT_HERO = 'assets/images/portada.jpg';
-
+  // =======================================================
+  // OPERACIONES DE PORTADA, PORTAFOLIO Y SESIONES
+  // =======================================================
   async function getLocalHeroImage() {
     try {
       const db = await openDB();
@@ -522,59 +747,47 @@
   }
 
   async function getHeroImage() {
-    const cfg = getSupabaseConfig();
-    if (cfg && cfg.url && cfg.key) {
+    // 1. Si GitHub está conectado en este navegador, leer estado en tiempo real
+    if (isGitHubEnabled()) {
       try {
-        const res = await fetch(`${cfg.url}/rest/v1/site_settings?key=eq.hero_image&select=value&limit=1`, {
-          headers: {
-            'apikey': cfg.key,
-            'Authorization': `Bearer ${cfg.key}`
-          }
-        });
-        if (res.ok) {
-          const rows = await res.json();
-          if (Array.isArray(rows) && rows.length > 0 && rows[0].value) {
-            const val = rows[0].value;
-            const cloudUrl = typeof val === 'string' ? val : val.url;
-            if (cloudUrl) return cloudUrl;
-          }
+        const ghData = await fetchGitHubSiteData();
+        if (ghData && ghData.heroImage) {
+          return resolvePreviewUrl(ghData.heroImage);
         }
-      } catch (err) {
-        console.warn('Fallback local para Hero image:', err);
+      } catch (e) {
+        console.warn('Fallback Hero local:', e);
       }
     }
+
+    // 2. Para cualquier visitante en móvil u ordenador, leer site-data.json desplegado en Cloudflare Pages
+    const pubData = await fetchPublicDeployedSiteData();
+    if (pubData && pubData.updatedAt > BASE_INITIAL_TIMESTAMP && pubData.heroImage) {
+      return resolvePreviewUrl(pubData.heroImage);
+    }
+
+    // 3. Respaldo local (IndexedDB)
     return getLocalHeroImage();
   }
 
   async function saveHeroImage(url) {
     let finalUrl = url;
-    const cfg = getSupabaseConfig();
-    if (cfg && cfg.url && cfg.key) {
-      finalUrl = await uploadImageToCloudStorage(url, 'hero/portada', cfg);
-      const res = await fetch(`${cfg.url}/rest/v1/site_settings?on_conflict=key`, {
-        method: 'POST',
-        headers: {
-          'apikey': cfg.key,
-          'Authorization': `Bearer ${cfg.key}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates,return=representation'
-        },
-        body: JSON.stringify({
-          key: 'hero_image',
-          value: { url: finalUrl },
-          updated_at: new Date().toISOString()
-        })
-      });
-      if (!res.ok) {
-        const errTxt = await res.text().catch(() => '');
-        throw new Error(`Error al guardar portada en Supabase (${res.status}): ${errTxt}`);
-      }
+    if (isGitHubEnabled()) {
+      const ghData = (await fetchGitHubSiteData(null, true)) || {
+        version: 1,
+        heroImage: DEFAULT_HERO,
+        portfolio: await getLocalPortfolioPhotos(),
+        sessions: await getLocalClientSessions()
+      };
+      const filesToUpload = [];
+      finalUrl = prepareImageForGitHubCommit(url, 'hero-portada', filesToUpload);
+      ghData.heroImage = finalUrl;
+      await commitToGitHub(filesToUpload, ghData, '📸 Admin: Actualizar fotografía de portada (Hero)');
     }
+
     await saveLocalHeroImage(finalUrl);
-    return finalUrl;
+    return resolvePreviewUrl(finalUrl);
   }
 
-  // Portafolio Local + Nube
   async function getLocalPortfolioPhotos() {
     try {
       const db = await openDB();
@@ -594,10 +807,90 @@
     }
   }
 
-  async function saveLocalPortfolioPhoto(photo) {
+  async function replaceAllLocalPortfolioPhotos(photos) {
     try {
       const db = await openDB();
-      return new Promise((resolve, reject) => {
+      await new Promise((resolve) => {
+        const tx = db.transaction('portfolio', 'readwrite');
+        const st = tx.objectStore('portfolio');
+        st.clear();
+        photos.forEach((p) => st.put(p));
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      });
+    } catch (e) {
+      setLS('portfolio', photos);
+    }
+  }
+
+  async function getAllPortfolioPhotos() {
+    // 1. Si GitHub está conectado en este navegador, consultar estado real de GitHub
+    if (isGitHubEnabled()) {
+      try {
+        const ghData = await fetchGitHubSiteData();
+        if (ghData && Array.isArray(ghData.portfolio) && ghData.portfolio.length > 0) {
+          const sorted = [...ghData.portfolio].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          return sorted.map(applyPreviewUrlsToPhoto);
+        }
+      } catch (err) {
+        console.warn('Error leyendo portafolio desde GitHub API, usando respaldo:', err);
+      }
+    }
+
+    // 2. Para todos los visitantes (móviles, tablets, clientes), leer assets/data/site-data.json de Cloudflare Pages
+    const pubData = await fetchPublicDeployedSiteData();
+    if (pubData && pubData.updatedAt > BASE_INITIAL_TIMESTAMP && Array.isArray(pubData.portfolio) && pubData.portfolio.length > 0) {
+      const sorted = [...pubData.portfolio].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      return sorted.map(applyPreviewUrlsToPhoto);
+    }
+
+    // 3. Respaldo local (IndexedDB)
+    return getLocalPortfolioPhotos();
+  }
+
+  async function savePortfolioPhoto(photo) {
+    const currentList = await getAllPortfolioPhotos().catch(() => []);
+    const existingItem = photo.id ? currentList.find((p) => p.id === photo.id) : null;
+
+    if (!photo.id) {
+      photo.id = 'photo-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    }
+    if (!photo.createdAt) {
+      photo.createdAt = existingItem && existingItem.createdAt ? existingItem.createdAt : Date.now();
+    }
+
+    if (isGitHubEnabled()) {
+      const ghData = (await fetchGitHubSiteData(null, true)) || {
+        version: 1,
+        heroImage: await getLocalHeroImage(),
+        portfolio: await getLocalPortfolioPhotos(),
+        sessions: await getLocalClientSessions()
+      };
+
+      // Si el JSON remoto aún era la plantilla inicial sin sincronizar cambios locales, partimos de la lista actual
+      if (!Array.isArray(ghData.portfolio) || ghData.portfolio.length === 0) {
+        ghData.portfolio = await getLocalPortfolioPhotos();
+      }
+
+      const filesToUpload = [];
+      const safeSlug = slugify(photo.title || photo.category || 'foto');
+      photo.fullUrl = prepareImageForGitHubCommit(photo.fullUrl, `${photo.category || 'port'}-${safeSlug}-full`, filesToUpload);
+      photo.thumbUrl = prepareImageForGitHubCommit(photo.thumbUrl || photo.fullUrl, `${photo.category || 'port'}-${safeSlug}-thumb`, filesToUpload);
+
+      const idx = ghData.portfolio.findIndex((p) => p.id === photo.id);
+      if (idx >= 0) {
+        ghData.portfolio[idx] = Object.assign({}, photo);
+      } else {
+        ghData.portfolio.unshift(Object.assign({}, photo));
+      }
+
+      const actionLabel = existingItem ? `Editar foto "${photo.title}"` : `Publicar foto "${photo.title}"`;
+      await commitToGitHub(filesToUpload, ghData, `📸 Admin: ${actionLabel}`);
+    }
+
+    try {
+      const db = await openDB();
+      await new Promise((resolve, reject) => {
         const tx = db.transaction('portfolio', 'readwrite');
         const st = tx.objectStore('portfolio');
         const req = st.put(photo);
@@ -610,109 +903,18 @@
       if (idx >= 0) list[idx] = photo;
       else list.unshift(photo);
       setLS('portfolio', list);
-      return photo;
-    }
-  }
-
-  // Garantiza que la tabla portfolio_photos de Supabase tenga las fotos base antes de editar/borrar 1 sola
-  async function ensureCloudPortfolioSeeded(cfg) {
-    if (!cfg || !cfg.url || !cfg.key) return;
-    try {
-      const checkRes = await fetch(`${cfg.url}/rest/v1/portfolio_photos?select=id&limit=1`, {
-        headers: {
-          'apikey': cfg.key,
-          'Authorization': `Bearer ${cfg.key}`
-        }
-      });
-      if (checkRes.ok) {
-        const existing = await checkRes.json();
-        if (Array.isArray(existing) && existing.length === 0) {
-          await syncLocalDataToSupabase(cfg);
-        }
-      }
-    } catch (e) {
-      console.warn('No se pudo verificar estado inicial de portfolio_photos:', e);
-    }
-  }
-
-  async function getAllPortfolioPhotos() {
-    const cfg = getSupabaseConfig();
-    if (cfg && cfg.url && cfg.key) {
-      try {
-        const res = await fetch(`${cfg.url}/rest/v1/portfolio_photos?select=*&order=created_at.desc`, {
-          headers: {
-            'apikey': cfg.key,
-            'Authorization': `Bearer ${cfg.key}`
-          }
-        });
-        if (res.ok) {
-          const rows = await res.json();
-          if (Array.isArray(rows) && rows.length > 0) {
-            return rows.map(mapDbRowToPhoto);
-          }
-        }
-      } catch (err) {
-        console.warn('Fallback local para portafolio:', err);
-      }
-    }
-    return getLocalPortfolioPhotos();
-  }
-
-  async function savePortfolioPhoto(photo) {
-    const existingList = await getAllPortfolioPhotos().catch(() => []);
-    const existingItem = photo.id ? existingList.find((p) => p.id === photo.id) : null;
-
-    if (!photo.id) {
-      photo.id = 'photo-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
-    }
-    if (!photo.createdAt) {
-      photo.createdAt = existingItem && existingItem.createdAt ? existingItem.createdAt : Date.now();
     }
 
-    const cfg = getSupabaseConfig();
-    if (cfg && cfg.url && cfg.key) {
-      await ensureCloudPortfolioSeeded(cfg);
-
-      const safeTitleSlug = slugify(photo.title || photo.category || 'foto');
-      photo.fullUrl = await uploadImageToCloudStorage(photo.fullUrl, `${photo.category || 'general'}/${safeTitleSlug}-full`, cfg);
-      photo.thumbUrl = await uploadImageToCloudStorage(photo.thumbUrl || photo.fullUrl, `${photo.category || 'general'}/${safeTitleSlug}-thumb`, cfg);
-
-      const dbRow = mapPhotoToDbRow(photo);
-      const res = await fetch(`${cfg.url}/rest/v1/portfolio_photos?on_conflict=id`, {
-        method: 'POST',
-        headers: {
-          'apikey': cfg.key,
-          'Authorization': `Bearer ${cfg.key}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates,return=representation'
-        },
-        body: JSON.stringify(dbRow)
-      });
-
-      if (!res.ok) {
-        const errTxt = await res.text().catch(() => '');
-        throw new Error(`Error al guardar foto en Supabase (${res.status}): ${errTxt}`);
-      }
-    }
-
-    await saveLocalPortfolioPhoto(photo);
-    return photo;
+    return applyPreviewUrlsToPhoto(photo);
   }
 
   async function deletePortfolioPhoto(id) {
-    const cfg = getSupabaseConfig();
-    if (cfg && cfg.url && cfg.key) {
-      await ensureCloudPortfolioSeeded(cfg);
-      const res = await fetch(`${cfg.url}/rest/v1/portfolio_photos?id=eq.${encodeURIComponent(id)}`, {
-        method: 'DELETE',
-        headers: {
-          'apikey': cfg.key,
-          'Authorization': `Bearer ${cfg.key}`
-        }
-      });
-      if (!res.ok) {
-        const errTxt = await res.text().catch(() => '');
-        throw new Error(`Error al eliminar foto en Supabase (${res.status}): ${errTxt}`);
+    if (isGitHubEnabled()) {
+      const ghData = await fetchGitHubSiteData(null, true);
+      if (ghData && Array.isArray(ghData.portfolio)) {
+        const target = ghData.portfolio.find((p) => p.id === id);
+        ghData.portfolio = ghData.portfolio.filter((p) => p.id !== id);
+        await commitToGitHub([], ghData, `🗑️ Admin: Eliminar foto "${target ? target.title : id}"`);
       }
     }
 
@@ -733,7 +935,7 @@
     return true;
   }
 
-  // Sesiones de Clientes (Proofing Local + Nube)
+  // Sesiones de Clientes (Proofing Local + GitHub)
   async function getLocalClientSessions() {
     try {
       const db = await openDB();
@@ -754,60 +956,26 @@
   }
 
   async function getAllClientSessions() {
-    const cfg = getSupabaseConfig();
-    if (cfg && cfg.url && cfg.key) {
+    if (isGitHubEnabled()) {
       try {
-        const res = await fetch(`${cfg.url}/rest/v1/client_sessions?select=*&order=created_at.desc`, {
-          headers: {
-            'apikey': cfg.key,
-            'Authorization': `Bearer ${cfg.key}`
-          }
-        });
-        if (res.ok) {
-          const rows = await res.json();
-          if (Array.isArray(rows) && rows.length > 0) {
-            return rows.map(mapDbRowToSession);
-          }
-        }
-      } catch (err) {
-        console.warn('Fallback local para sesiones de clientes:', err);
-      }
-    }
-    return getLocalClientSessions();
-  }
-
-  async function getClientSessionById(id) {
-    const cfg = getSupabaseConfig();
-    if (cfg && cfg.url && cfg.key) {
-      try {
-        const res = await fetch(`${cfg.url}/rest/v1/client_sessions?id=eq.${encodeURIComponent(id)}&select=*&limit=1`, {
-          headers: {
-            'apikey': cfg.key,
-            'Authorization': `Bearer ${cfg.key}`
-          }
-        });
-        if (res.ok) {
-          const rows = await res.json();
-          if (Array.isArray(rows) && rows.length > 0) {
-            return mapDbRowToSession(rows[0]);
-          }
+        const ghData = await fetchGitHubSiteData();
+        if (ghData && Array.isArray(ghData.sessions) && ghData.sessions.length > 0) {
+          return [...ghData.sessions].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
         }
       } catch (err) {}
     }
 
-    try {
-      const db = await openDB();
-      return new Promise((resolve) => {
-        const tx = db.transaction('sessions', 'readonly');
-        const st = tx.objectStore('sessions');
-        const req = st.get(id);
-        req.onsuccess = () => resolve(req.result || null);
-        req.onerror = () => resolve(null);
-      });
-    } catch (e) {
-      const list = getLS('sessions', DEFAULT_SESSIONS);
-      return list.find((s) => s.id === id) || null;
+    const pubData = await fetchPublicDeployedSiteData();
+    if (pubData && pubData.updatedAt > BASE_INITIAL_TIMESTAMP && Array.isArray(pubData.sessions) && pubData.sessions.length > 0) {
+      return [...pubData.sessions].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     }
+
+    return getLocalClientSessions();
+  }
+
+  async function getClientSessionById(id) {
+    const all = await getAllClientSessions();
+    return all.find((s) => s.id === id) || null;
   }
 
   async function saveClientSession(session) {
@@ -818,35 +986,30 @@
       session.createdAt = Date.now();
     }
 
-    const cfg = getSupabaseConfig();
-    if (cfg && cfg.url && cfg.key) {
+    if (isGitHubEnabled()) {
+      const ghData = (await fetchGitHubSiteData(null, true)) || {
+        version: 1,
+        heroImage: await getLocalHeroImage(),
+        portfolio: await getLocalPortfolioPhotos(),
+        sessions: await getLocalClientSessions()
+      };
+      if (!Array.isArray(ghData.sessions)) ghData.sessions = [];
+
+      const filesToUpload = [];
       if (Array.isArray(session.photos)) {
-        const uploadedPhotos = [];
-        for (let i = 0; i < session.photos.length; i++) {
-          const p = { ...session.photos[i] };
-          p.fullUrl = await uploadImageToCloudStorage(p.fullUrl, `sessions/${session.id}/foto-${i + 1}-full`, cfg);
-          p.thumbUrl = await uploadImageToCloudStorage(p.thumbUrl || p.fullUrl, `sessions/${session.id}/foto-${i + 1}-thumb`, cfg);
-          uploadedPhotos.push(p);
-        }
-        session.photos = uploadedPhotos;
+        session.photos = session.photos.map((ph, idx) => {
+          const pCopy = Object.assign({}, ph);
+          pCopy.fullUrl = prepareImageForGitHubCommit(pCopy.fullUrl, `sesion-${session.id}-${idx + 1}-full`, filesToUpload);
+          pCopy.thumbUrl = prepareImageForGitHubCommit(pCopy.thumbUrl || pCopy.fullUrl, `sesion-${session.id}-${idx + 1}-thumb`, filesToUpload);
+          return pCopy;
+        });
       }
 
-      const dbRow = mapSessionToDbRow(session);
-      const res = await fetch(`${cfg.url}/rest/v1/client_sessions?on_conflict=id`, {
-        method: 'POST',
-        headers: {
-          'apikey': cfg.key,
-          'Authorization': `Bearer ${cfg.key}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates,return=representation'
-        },
-        body: JSON.stringify(dbRow)
-      });
+      const idx = ghData.sessions.findIndex((s) => s.id === session.id);
+      if (idx >= 0) ghData.sessions[idx] = Object.assign({}, session);
+      else ghData.sessions.unshift(Object.assign({}, session));
 
-      if (!res.ok) {
-        const errTxt = await res.text().catch(() => '');
-        console.warn(`Aviso al guardar sesión en Supabase (${res.status}): ${errTxt}`);
-      }
+      await commitToGitHub(filesToUpload, ghData, `🔒 Admin: Guardar galería privada "${session.title}"`);
     }
 
     try {
@@ -869,17 +1032,12 @@
   }
 
   async function deleteClientSession(id) {
-    const cfg = getSupabaseConfig();
-    if (cfg && cfg.url && cfg.key) {
-      try {
-        await fetch(`${cfg.url}/rest/v1/client_sessions?id=eq.${encodeURIComponent(id)}`, {
-          method: 'DELETE',
-          headers: {
-            'apikey': cfg.key,
-            'Authorization': `Bearer ${cfg.key}`
-          }
-        });
-      } catch (err) {}
+    if (isGitHubEnabled()) {
+      const ghData = await fetchGitHubSiteData(null, true);
+      if (ghData && Array.isArray(ghData.sessions)) {
+        ghData.sessions = ghData.sessions.filter((s) => s.id !== id);
+        await commitToGitHub([], ghData, `🗑️ Admin: Eliminar galería privada "${id}"`);
+      }
     }
 
     try {
@@ -899,106 +1057,16 @@
     }
   }
 
-  // Sincroniza todas las fotos locales (incluyendo cambios que Andrés ya hizo en su Mac) hacia Supabase
-  async function syncLocalDataToSupabase(customCfg) {
-    const cfg = customCfg || getSupabaseConfig();
-    if (!cfg || !cfg.url || !cfg.key) {
-      throw new Error('No hay credenciales de Supabase configuradas.');
-    }
-
-    // 1. Sincronizar fotos del portafolio local
-    const localPhotos = await getLocalPortfolioPhotos();
-    const rowsToUpsert = [];
-    for (const p of localPhotos) {
-      const copy = { ...p };
-      const safeSlug = slugify(copy.title || copy.id || 'foto');
-      copy.fullUrl = await uploadImageToCloudStorage(copy.fullUrl, `${copy.category || 'general'}/${safeSlug}-full`, cfg);
-      copy.thumbUrl = await uploadImageToCloudStorage(copy.thumbUrl || copy.fullUrl, `${copy.category || 'general'}/${safeSlug}-thumb`, cfg);
-      rowsToUpsert.push(mapPhotoToDbRow(copy));
-    }
-
-    if (rowsToUpsert.length > 0) {
-      const pRes = await fetch(`${cfg.url}/rest/v1/portfolio_photos?on_conflict=id`, {
-        method: 'POST',
-        headers: {
-          'apikey': cfg.key,
-          'Authorization': `Bearer ${cfg.key}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates'
-        },
-        body: JSON.stringify(rowsToUpsert)
-      });
-      if (!pRes.ok) {
-        const errTxt = await pRes.text().catch(() => '');
-        throw new Error(`No se pudieron sincronizar las fotos (${pRes.status}): ${errTxt}`);
-      }
-    }
-
-    // 2. Sincronizar portada Hero si fue personalizada localmente
-    const localHero = await getLocalHeroImage();
-    if (localHero && localHero !== DEFAULT_HERO) {
-      const heroCdnUrl = await uploadImageToCloudStorage(localHero, 'hero/portada', cfg);
-      await fetch(`${cfg.url}/rest/v1/site_settings?on_conflict=key`, {
-        method: 'POST',
-        headers: {
-          'apikey': cfg.key,
-          'Authorization': `Bearer ${cfg.key}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates'
-        },
-        body: JSON.stringify({
-          key: 'hero_image',
-          value: { url: heroCdnUrl },
-          updated_at: new Date().toISOString()
-        })
-      }).catch(() => {});
-    }
-
-    // 3. Sincronizar sesiones de clientes
-    const localSessions = await getLocalClientSessions();
-    if (Array.isArray(localSessions) && localSessions.length > 0) {
-      const sRows = localSessions.map(mapSessionToDbRow);
-      await fetch(`${cfg.url}/rest/v1/client_sessions?on_conflict=id`, {
-        method: 'POST',
-        headers: {
-          'apikey': cfg.key,
-          'Authorization': `Bearer ${cfg.key}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates'
-        },
-        body: JSON.stringify(sRows)
-      }).catch(() => {});
-    }
-
-    return { syncedPhotos: rowsToUpsert.length };
-  }
-
   async function resetToDefaultData() {
-    const cfg = getSupabaseConfig();
-    if (cfg && cfg.url && cfg.key) {
-      try {
-        await fetch(`${cfg.url}/rest/v1/portfolio_photos?id=neq.__none__`, {
-          method: 'DELETE',
-          headers: { 'apikey': cfg.key, 'Authorization': `Bearer ${cfg.key}` }
-        });
-        const defaultRows = DEFAULT_PORTFOLIO.map(mapPhotoToDbRow);
-        await fetch(`${cfg.url}/rest/v1/portfolio_photos?on_conflict=id`, {
-          method: 'POST',
-          headers: {
-            'apikey': cfg.key,
-            'Authorization': `Bearer ${cfg.key}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'resolution=merge-duplicates'
-          },
-          body: JSON.stringify(defaultRows)
-        });
-        await fetch(`${cfg.url}/rest/v1/site_settings?key=eq.hero_image`, {
-          method: 'DELETE',
-          headers: { 'apikey': cfg.key, 'Authorization': `Bearer ${cfg.key}` }
-        });
-      } catch (err) {
-        console.warn('Error al restablecer datos en Supabase:', err);
-      }
+    if (isGitHubEnabled()) {
+      const resetSiteData = {
+        version: 1,
+        updatedAt: Date.now(),
+        heroImage: DEFAULT_HERO,
+        portfolio: [...DEFAULT_PORTFOLIO],
+        sessions: [...DEFAULT_SESSIONS]
+      };
+      await commitToGitHub([], resetSiteData, '🔄 Admin: Restablecer portafolio a valores iniciales');
     }
 
     try {
@@ -1063,7 +1131,6 @@
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0, width, height);
 
-    // Preferir formato WebP por velocidad SEO (< 3s en móvil), con fallback a JPEG
     const webpData = canvas.toDataURL('image/webp', quality);
     if (webpData && webpData.startsWith('data:image/webp')) {
       return webpData;
@@ -1083,14 +1150,19 @@
       .replace(/--+/g, '-');
   }
 
-  // Exportar al objeto global window para que funcione siempre sin módulos
   window.AndresDB = {
     DEFAULT_PORTFOLIO,
     DEFAULT_SESSIONS,
     initStorage,
-    getSupabaseConfig,
+    getGitHubConfig,
+    setGitHubConfig,
+    clearGitHubConfig,
+    isGitHubEnabled,
     isCloudEnabled,
-    syncLocalDataToSupabase,
+    verifyGitHubToken,
+    syncLocalDataToGitHub,
+    syncLocalDataToSupabase: syncLocalDataToGitHub,
+    getSupabaseConfig,
     getAdminCredentials,
     saveAdminCredentials,
     verifyAdminLogin,
