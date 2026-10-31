@@ -1,67 +1,19 @@
 {
   "version": 1,
-  "updatedAt": 1700000000012,
+  "updatedAt": 1793484078426,
   "heroImage": "assets/images/portada.jpg",
   "portfolio": [
-    {
-      "id": "port-real-1",
-      "category": "realestate",
-      "categoryLabel": "Inmobiliaria & Real Estate",
-      "title": "Villa Galileu",
-      "tag": "Arquitectura Exterior & Piscina",
-      "caption": "Villa Galileu — Arquitectura Contemporánea & Piscina",
-      "aspect": "landscape",
-      "thumbUrl": "assets/images/realestate/galileu-piscina-thumb.jpg",
-      "fullUrl": "assets/images/realestate/galileu-piscina.jpg",
-      "createdAt": 1700000000001
-    },
-    {
-      "id": "port-real-2",
-      "category": "realestate",
-      "categoryLabel": "Inmobiliaria & Real Estate",
-      "title": "Villa Galileu — Foyer",
-      "tag": "Interiorismo de Lujo",
-      "caption": "Villa Galileu — Foyer de Entrada & Diseño Interior",
-      "aspect": "landscape",
-      "thumbUrl": "assets/images/realestate/galileu-salon-thumb.jpg",
-      "fullUrl": "assets/images/realestate/galileu-salon.jpg",
-      "createdAt": 1700000000002
-    },
-    {
-      "id": "port-real-3",
-      "category": "realestate",
-      "categoryLabel": "Inmobiliaria & Real Estate",
-      "title": "Villa Galileu — Cocina",
-      "tag": "Espacios Residenciales",
-      "caption": "Villa Galileu — Cocina de Autor & Isla de Mármol",
-      "aspect": "landscape",
-      "thumbUrl": "assets/images/realestate/galileu-cocina-thumb.jpg",
-      "fullUrl": "assets/images/realestate/galileu-cocina.jpg",
-      "createdAt": 1700000000003
-    },
     {
       "id": "port-boda-1",
       "category": "bodas",
       "categoryLabel": "Bodas & Eventos",
       "title": "La Salida",
       "tag": "Ceremonia B&N",
-      "caption": "Celebración & Alegría — Salida de Ceremonia en Confeti",
+      "caption": "La Salida — Ceremonia B&N",
       "aspect": "landscape",
-      "thumbUrl": "assets/images/bodas/boda-salida-arroz-thumb.jpg",
-      "fullUrl": "assets/images/bodas/boda-salida-arroz.jpg",
-      "createdAt": 1700000000004
-    },
-    {
-      "id": "port-boda-2",
-      "category": "bodas",
-      "categoryLabel": "Bodas & Eventos",
-      "title": "Paseo Urbano",
-      "tag": "Documental Editorial",
-      "caption": "Paseo Urbano — Retrato Editorial de Novios",
-      "aspect": "landscape",
-      "thumbUrl": "assets/images/bodas/boda-editorial-calle-thumb.jpg",
-      "fullUrl": "assets/images/bodas/boda-editorial-calle.jpg",
-      "createdAt": 1700000000005
+      "thumbUrl": "assets/images/uploads/bodas-la-salida-thumb-1793484078424-w7qb.jpg",
+      "fullUrl": "assets/images/uploads/bodas-la-salida-full-1793484078424-114u.jpg",
+      "createdAt": 1793406876568
     },
     {
       "id": "port-boda-3",
@@ -69,59 +21,23 @@
       "categoryLabel": "Bodas & Eventos",
       "title": "Orilla Dorada",
       "tag": "Atardecer & Pareja",
-      "caption": "Orilla del Mar — Atardecer Mediterráneo",
+      "caption": "Orilla Dorada — Atardecer & Pareja",
       "aspect": "landscape",
-      "thumbUrl": "assets/images/bodas/boda-playa-orilla-thumb.jpg",
-      "fullUrl": "assets/images/bodas/boda-playa-orilla.jpg",
-      "createdAt": 1700000000006
+      "thumbUrl": "assets/images/uploads/bodas-orilla-dorada-thumb-1793484078424-kg3p.jpg",
+      "fullUrl": "assets/images/uploads/bodas-orilla-dorada-full-1793484078424-j38e.jpg",
+      "createdAt": 1793406675069
     },
     {
-      "id": "port-ret-1",
-      "category": "retratos",
-      "categoryLabel": "Retratos & Editorial",
-      "title": "Steffa",
-      "tag": "Editorial Nocturno",
-      "caption": "Steffa — Noche Urbana, Rascacielos & Bokeh",
-      "aspect": "portrait",
-      "thumbUrl": "assets/images/retratos/retrato-steffa-noche-thumb.jpg",
-      "fullUrl": "assets/images/retratos/retrato-steffa-noche.jpg",
-      "createdAt": 1700000000007
-    },
-    {
-      "id": "port-ret-2",
-      "category": "retratos",
-      "categoryLabel": "Retratos & Editorial",
-      "title": "Luz Dorada",
-      "tag": "Luz Natural en Exterior",
-      "caption": "Luz Dorada — Atardecer & Flare Natural",
-      "aspect": "portrait",
-      "thumbUrl": "assets/images/retratos/retrato-golden-hour-thumb.jpg",
-      "fullUrl": "assets/images/retratos/retrato-golden-hour.jpg",
-      "createdAt": 1700000000008
-    },
-    {
-      "id": "port-ret-3",
-      "category": "retratos",
-      "categoryLabel": "Retratos & Editorial",
-      "title": "Brisa Marina",
-      "tag": "Luz Suave & Atmósfera",
-      "caption": "Serenidad Marina — Retrato en la Playa",
-      "aspect": "portrait",
-      "thumbUrl": "assets/images/retratos/retrato-playa-sombrero-thumb.jpg",
-      "fullUrl": "assets/images/retratos/retrato-playa-sombrero.jpg",
-      "createdAt": 1700000000009
-    },
-    {
-      "id": "port-corp-1",
+      "id": "port-corp-3",
       "category": "empresarial",
       "categoryLabel": "Empresarial & Corporativo",
-      "title": "Presencia de Marca",
-      "tag": "Headshot Profesional",
-      "caption": "Identidad Corporativa — Retrato Profesional en Estudio",
+      "title": "Edificio Burgueras",
+      "tag": "Sede & Arquitectura Comercial",
+      "caption": "Edificio Burgueras — Geometría, Cristales & Fachada Moderna",
       "aspect": "landscape",
-      "thumbUrl": "assets/images/retratos/retrato-corporativo-estudio-thumb.jpg",
-      "fullUrl": "assets/images/retratos/retrato-corporativo-estudio.jpg",
-      "createdAt": 1700000000010
+      "thumbUrl": "assets/images/realestate/burgueras-fachada-thumb.jpg",
+      "fullUrl": "assets/images/realestate/burgueras-fachada.jpg",
+      "createdAt": 1700000000012
     },
     {
       "id": "port-corp-2",
@@ -136,35 +52,103 @@
       "createdAt": 1700000000011
     },
     {
-      "id": "port-corp-3",
+      "id": "port-corp-1",
       "category": "empresarial",
       "categoryLabel": "Empresarial & Corporativo",
-      "title": "Edificio Burgueras",
-      "tag": "Sede & Arquitectura Comercial",
-      "caption": "Edificio Burgueras — Geometría, Cristales & Fachada Moderna",
+      "title": "Presencia de Marca",
+      "tag": "Headshot Profesional",
+      "caption": "Identidad Corporativa — Retrato Profesional en Estudio",
       "aspect": "landscape",
-      "thumbUrl": "assets/images/realestate/burgueras-fachada-thumb.jpg",
-      "fullUrl": "assets/images/realestate/burgueras-fachada.jpg",
-      "createdAt": 1700000000012
+      "thumbUrl": "assets/images/retratos/retrato-corporativo-estudio-thumb.jpg",
+      "fullUrl": "assets/images/retratos/retrato-corporativo-estudio.jpg",
+      "createdAt": 1700000000010
+    },
+    {
+      "id": "port-ret-3",
+      "category": "retratos",
+      "categoryLabel": "Retratos & Editorial",
+      "title": "Brisa Marina",
+      "tag": "Luz Suave & Atmósfera",
+      "caption": "Serenidad Marina — Retrato en la Playa",
+      "aspect": "portrait",
+      "thumbUrl": "assets/images/retratos/retrato-playa-sombrero-thumb.jpg",
+      "fullUrl": "assets/images/retratos/retrato-playa-sombrero.jpg",
+      "createdAt": 1700000000009
+    },
+    {
+      "id": "port-ret-2",
+      "category": "retratos",
+      "categoryLabel": "Retratos & Editorial",
+      "title": "Luz Dorada",
+      "tag": "Luz Natural en Exterior",
+      "caption": "Luz Dorada — Atardecer & Flare Natural",
+      "aspect": "portrait",
+      "thumbUrl": "assets/images/retratos/retrato-golden-hour-thumb.jpg",
+      "fullUrl": "assets/images/retratos/retrato-golden-hour.jpg",
+      "createdAt": 1700000000008
+    },
+    {
+      "id": "port-ret-1",
+      "category": "retratos",
+      "categoryLabel": "Retratos & Editorial",
+      "title": "Steffa",
+      "tag": "Editorial Nocturno",
+      "caption": "Steffa — Noche Urbana, Rascacielos & Bokeh",
+      "aspect": "portrait",
+      "thumbUrl": "assets/images/retratos/retrato-steffa-noche-thumb.jpg",
+      "fullUrl": "assets/images/retratos/retrato-steffa-noche.jpg",
+      "createdAt": 1700000000007
+    },
+    {
+      "id": "port-boda-2",
+      "category": "bodas",
+      "categoryLabel": "Bodas & Eventos",
+      "title": "Paseo Urbano",
+      "tag": "Documental Editorial",
+      "caption": "Paseo Urbano — Retrato Editorial de Novios",
+      "aspect": "landscape",
+      "thumbUrl": "assets/images/bodas/boda-editorial-calle-thumb.jpg",
+      "fullUrl": "assets/images/bodas/boda-editorial-calle.jpg",
+      "createdAt": 1700000000005
+    },
+    {
+      "id": "port-real-3",
+      "category": "realestate",
+      "categoryLabel": "Inmobiliaria & Real Estate",
+      "title": "Villa Galileu — Cocina",
+      "tag": "Espacios Residenciales",
+      "caption": "Villa Galileu — Cocina de Autor & Isla de Mármol",
+      "aspect": "landscape",
+      "thumbUrl": "assets/images/realestate/galileu-cocina-thumb.jpg",
+      "fullUrl": "assets/images/realestate/galileu-cocina.jpg",
+      "createdAt": 1700000000003
+    },
+    {
+      "id": "port-real-2",
+      "category": "realestate",
+      "categoryLabel": "Inmobiliaria & Real Estate",
+      "title": "Villa Galileu — Foyer",
+      "tag": "Interiorismo de Lujo",
+      "caption": "Villa Galileu — Foyer de Entrada & Diseño Interior",
+      "aspect": "landscape",
+      "thumbUrl": "assets/images/realestate/galileu-salon-thumb.jpg",
+      "fullUrl": "assets/images/realestate/galileu-salon.jpg",
+      "createdAt": 1700000000002
+    },
+    {
+      "id": "port-real-1",
+      "category": "realestate",
+      "categoryLabel": "Inmobiliaria & Real Estate",
+      "title": "Villa Galileu",
+      "tag": "Arquitectura Exterior & Piscina",
+      "caption": "Villa Galileu — Arquitectura Contemporánea & Piscina",
+      "aspect": "landscape",
+      "thumbUrl": "assets/images/realestate/galileu-piscina-thumb.jpg",
+      "fullUrl": "assets/images/realestate/galileu-piscina.jpg",
+      "createdAt": 1700000000001
     }
   ],
   "sessions": [
-    {
-      "id": "boda-laura-carlos",
-      "pin": "2026",
-      "title": "Boda Laura & Carlos — Reportaje Documental",
-      "date": "18 de Octubre, 2026",
-      "location": "Finca Bellver, Mallorca",
-      "clientName": "Laura Gómez & Carlos Martínez",
-      "maxSelectable": 50,
-      "photos": [
-        { "id": "AR_LC_001", "thumbUrl": "assets/images/bodas/boda-salida-arroz-thumb.jpg", "fullUrl": "assets/images/bodas/boda-salida-arroz.jpg" },
-        { "id": "AR_LC_002", "thumbUrl": "assets/images/bodas/boda-editorial-calle-thumb.jpg", "fullUrl": "assets/images/bodas/boda-editorial-calle.jpg" },
-        { "id": "AR_LC_003", "thumbUrl": "assets/images/bodas/boda-playa-orilla-thumb.jpg", "fullUrl": "assets/images/bodas/boda-playa-orilla.jpg" },
-        { "id": "AR_LC_004", "thumbUrl": "assets/images/bodas/boda-alianzas-manos-thumb.jpg", "fullUrl": "assets/images/bodas/boda-alianzas-manos.jpg" }
-      ],
-      "createdAt": 1700000000001
-    },
     {
       "id": "inmobiliaria-villa-mediterranea",
       "pin": "1234",
@@ -174,14 +158,70 @@
       "clientName": "Habitat Luxury Real Estate",
       "maxSelectable": 25,
       "photos": [
-        { "id": "AR_VM_001", "thumbUrl": "assets/images/realestate/galileu-piscina-thumb.jpg", "fullUrl": "assets/images/realestate/galileu-piscina.jpg" },
-        { "id": "AR_VM_002", "thumbUrl": "assets/images/realestate/galileu-salon-thumb.jpg", "fullUrl": "assets/images/realestate/galileu-salon.jpg" },
-        { "id": "AR_VM_003", "thumbUrl": "assets/images/realestate/galileu-cocina-thumb.jpg", "fullUrl": "assets/images/realestate/galileu-cocina.jpg" },
-        { "id": "AR_VM_004", "thumbUrl": "assets/images/realestate/galileu-escalera-thumb.jpg", "fullUrl": "assets/images/realestate/galileu-escalera.jpg" },
-        { "id": "AR_VM_005", "thumbUrl": "assets/images/realestate/galileu-exterior-noche-thumb.jpg", "fullUrl": "assets/images/realestate/galileu-exterior-noche.jpg" },
-        { "id": "AR_VM_006", "thumbUrl": "assets/images/realestate/burgueras-fachada-thumb.jpg", "fullUrl": "assets/images/realestate/burgueras-fachada.jpg" }
+        {
+          "id": "AR_VM_001",
+          "thumbUrl": "assets/images/realestate/galileu-piscina-thumb.jpg",
+          "fullUrl": "assets/images/realestate/galileu-piscina.jpg"
+        },
+        {
+          "id": "AR_VM_002",
+          "thumbUrl": "assets/images/realestate/galileu-salon-thumb.jpg",
+          "fullUrl": "assets/images/realestate/galileu-salon.jpg"
+        },
+        {
+          "id": "AR_VM_003",
+          "thumbUrl": "assets/images/realestate/galileu-cocina-thumb.jpg",
+          "fullUrl": "assets/images/realestate/galileu-cocina.jpg"
+        },
+        {
+          "id": "AR_VM_004",
+          "thumbUrl": "assets/images/realestate/galileu-escalera-thumb.jpg",
+          "fullUrl": "assets/images/realestate/galileu-escalera.jpg"
+        },
+        {
+          "id": "AR_VM_005",
+          "thumbUrl": "assets/images/realestate/galileu-exterior-noche-thumb.jpg",
+          "fullUrl": "assets/images/realestate/galileu-exterior-noche.jpg"
+        },
+        {
+          "id": "AR_VM_006",
+          "thumbUrl": "assets/images/realestate/burgueras-fachada-thumb.jpg",
+          "fullUrl": "assets/images/realestate/burgueras-fachada.jpg"
+        }
       ],
       "createdAt": 1700000000002
+    },
+    {
+      "id": "boda-laura-carlos",
+      "pin": "2026",
+      "title": "Boda Laura & Carlos — Reportaje Documental",
+      "date": "18 de Octubre, 2026",
+      "location": "Finca Bellver, Mallorca",
+      "clientName": "Laura Gómez & Carlos Martínez",
+      "maxSelectable": 50,
+      "photos": [
+        {
+          "id": "AR_LC_001",
+          "thumbUrl": "assets/images/bodas/boda-salida-arroz-thumb.jpg",
+          "fullUrl": "assets/images/bodas/boda-salida-arroz.jpg"
+        },
+        {
+          "id": "AR_LC_002",
+          "thumbUrl": "assets/images/bodas/boda-editorial-calle-thumb.jpg",
+          "fullUrl": "assets/images/bodas/boda-editorial-calle.jpg"
+        },
+        {
+          "id": "AR_LC_003",
+          "thumbUrl": "assets/images/bodas/boda-playa-orilla-thumb.jpg",
+          "fullUrl": "assets/images/bodas/boda-playa-orilla.jpg"
+        },
+        {
+          "id": "AR_LC_004",
+          "thumbUrl": "assets/images/bodas/boda-alianzas-manos-thumb.jpg",
+          "fullUrl": "assets/images/bodas/boda-alianzas-manos.jpg"
+        }
+      ],
+      "createdAt": 1700000000001
     }
   ]
 }
