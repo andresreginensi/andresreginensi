@@ -2291,3 +2291,120 @@ img {
     font-size: 0.72rem;
   }
 }
+
+/* =======================================================
+   16. SECCIÓN DE INTRODUCCIÓN SEO & PROPUESTA DE VALOR
+   ======================================================= */
+.seo-intro-section {
+  border-bottom: 1px solid var(--border-hairline);
+  padding: 5rem 2rem 6rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.seo-intro-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.seo-intro-header {
+  margin-bottom: 2rem;
+}
+
+.seo-intro-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-pure);
+  margin-top: 0.5rem;
+  line-height: 1.2;
+}
+
+.seo-intro-body {
+  font-size: 1.02rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+
+.seo-intro-body p {
+  margin-bottom: 1.5rem;
+}
+
+.seo-intro-body strong {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.seo-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 2.5rem 0 3rem;
+}
+
+.seo-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  border-radius: 12px;
+  padding: 2rem 1.75rem;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.seo-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(197, 160, 89, 0.4);
+}
+
+.seo-card-num {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent-gold);
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 0.85rem;
+}
+
+.seo-card-h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-pure);
+  margin-bottom: 0.75rem;
+  line-height: 1.35;
+}
+
+.seo-card p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 0;
+}
+
+.seo-intro-cta {
+  background: rgba(197, 160, 89, 0.05);
+  border: 1px solid rgba(197, 160, 89, 0.2);
+  border-radius: 12px;
+  padding: 1.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.seo-cta-text {
+  font-size: 0.98rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  margin-bottom: 0 !important;
+}
+
+.seo-cta-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
