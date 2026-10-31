@@ -10,11 +10,14 @@
 
   // Configuración del rastreador
   const CONFIG = {
+    consentKey: 'andres_cookie_consent_v1',
     storageKey: 'andres_analytics_events',
     sessionKey: 'andres_analytics_session',
     supabaseKey: 'andres_supabase_config',
     maxLocalEvents: 500
   };
+
+  let initialPageViewTracked = false;
 
   // Obtener configuración de Supabase si existe (localStorage o supabase-config.js global)
   function getSupabaseConfig() {
@@ -23,7 +26,7 @@
       if (localCfg && localCfg.url && localCfg.key) {
         return { url: localCfg.url.trim().replace(/\/$/, ''), key: localCfg.key.trim() };
       }
-    } catch (e) {}
+    } catch (e) { }
 
     if (window.SUPABASE_PUBLIC_CONFIG && window.SUPABASE_PUBLIC_CONFIG.url && window.SUPABASE_PUBLIC_CONFIG.key) {
       return {
@@ -73,15 +76,24 @@
     return 'Otro';
   }
 
-  // Comprobar si el usuario consintió analítica en el banner RGPD
+  // Comprobar si el usuario consintió explícitamente analítica en el banner RGPD (opt-in estricto)
   function isAnalyticsAllowed() {
     try {
-      const consent = JSON.parse(localStorage.getItem('andres_cookie_consent') || 'null');
-      if (consent && consent.analytics === false) return false;
-      return true; // Permitido en modo anónimo sin cookies según RGPD
+      const consent = JSON.parse(localStorage.getItem(CONFIG.consentKey) || 'null');
+      return Boolean(consent && consent.analytics === true);
     } catch (e) {
-      return true;
+      return false;
     }
+  }
+
+  // Purgar almacenamiento analítico si se rechaza o revoca el consentimiento
+  function purgeAnalyticsStorage() {
+    try {
+      localStorage.removeItem(CONFIG.storageKey);
+    } catch (e) { }
+    try {
+      sessionStorage.removeItem(CONFIG.sessionKey);
+    } catch (e) { }
   }
 
   // Enviar evento a Supabase en la nube
@@ -115,7 +127,7 @@
         },
         body: JSON.stringify(record),
         keepalive: true
-      }).catch(() => {});
+      }).catch(() => { });
     } catch (err) {
       // Ignorar fallos de red
     }
@@ -161,10 +173,26 @@
     }
   }
 
-  // Rastrear eventos automáticos en la página
+  // Rastrear eventos automáticos en la página (solo tras consentimiento explícito)
   function initAutoTracking() {
-    // 1. Vista de página inicial
-    trackEvent('navigation', 'page_view', document.title || 'Inicio');
+    // 1. Vista de página inicial únicamente si ya existe consentimiento previo
+    if (isAnalyticsAllowed() && !initialPageViewTracked) {
+      initialPageViewTracked = true;
+      trackEvent('navigation', 'page_view', document.title || 'Inicio');
+    }
+
+    // Escuchar cambios de consentimiento en tiempo real desde cookies.js
+    window.addEventListener('cookieConsentUpdated', (e) => {
+      const detail = e && e.detail ? e.detail : null;
+      if (detail && detail.analytics === true) {
+        if (!initialPageViewTracked) {
+          initialPageViewTracked = true;
+          trackEvent('navigation', 'page_view', document.title || 'Inicio');
+        }
+      } else {
+        purgeAnalyticsStorage();
+      }
+    });
 
     // 2. Rastrear cambios de hash (secciones #realestate, #bodas, #retratos, etc.)
     window.addEventListener('hashchange', () => {

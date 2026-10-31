@@ -180,23 +180,60 @@
     }, 3500);
   }
 
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  const LOGIN_LOCK_KEY = 'andres_admin_lockout';
+  const MAX_LOGIN_ATTEMPTS = 5;
+  const LOCKOUT_MS = 60 * 1000;
+
   async function handleLoginAttempt() {
-    const username = (dom.loginUsername.value || '').trim();
-    const password = (dom.loginPassword.value || '').trim();
+    try {
+      const lockState = JSON.parse(sessionStorage.getItem(LOGIN_LOCK_KEY) || '{"count":0,"until":0}');
+      const now = Date.now();
+      if (lockState.until && now < lockState.until) {
+        const waitSec = Math.ceil((lockState.until - now) / 1000);
+        if (dom.loginError) {
+          dom.loginError.textContent = `Demasiados intentos fallidos. Espera ${waitSec} segundos antes de volver a intentarlo.`;
+          dom.loginError.style.display = 'block';
+        }
+        return;
+      }
 
-    let isValid = false;
-    if (db && db.verifyAdminLogin) {
-      isValid = await db.verifyAdminLogin(username, password);
-    } else {
-      isValid = username.toLowerCase() === 'admin' && password === 'admin2026';
-    }
+      const username = (dom.loginUsername.value || '').trim();
+      const password = (dom.loginPassword.value || '').trim();
 
-    if (isValid) {
-      sessionStorage.setItem('andres_admin_auth', 'true');
-      showDashboard();
-      showToast('¡Bienvenido al Panel de Gestión, Andrés!');
-    } else {
+      let isValid = false;
+      if (db && db.verifyAdminLogin) {
+        isValid = await db.verifyAdminLogin(username, password);
+      }
+
+      if (isValid) {
+        sessionStorage.removeItem(LOGIN_LOCK_KEY);
+        sessionStorage.setItem('andres_admin_auth', 'true');
+        showDashboard();
+        showToast('¡Bienvenido al Panel de Gestión, Andrés!');
+      } else {
+        const nextCount = (lockState.count || 0) + 1;
+        const nextUntil = nextCount >= MAX_LOGIN_ATTEMPTS ? now + LOCKOUT_MS : 0;
+        sessionStorage.setItem(LOGIN_LOCK_KEY, JSON.stringify({ count: nextCount, until: nextUntil }));
+
+        if (dom.loginError) {
+          dom.loginError.textContent = nextUntil
+            ? 'Acceso bloqueado temporalmente durante 60 segundos por seguridad.'
+            : 'Usuario o contraseña incorrectos. Por favor, verifica tus datos.';
+          dom.loginError.style.display = 'block';
+        }
+      }
+    } catch (err) {
       if (dom.loginError) {
+        dom.loginError.textContent = 'Error verificando credenciales.';
         dom.loginError.style.display = 'block';
       }
     }
@@ -467,8 +504,8 @@
         const newPass = dom.settingNewPassword.value;
         const confirmPass = dom.settingConfirmPassword.value;
 
-        if (newPass.length < 4) {
-          alert('La contraseña debe tener al menos 4 caracteres.');
+        if (newPass.length < 8) {
+          alert('Por seguridad, la nueva contraseña debe tener al menos 8 caracteres.');
           return;
         }
 
@@ -585,20 +622,26 @@
         empresarial: 'Empresarial'
       };
 
+      const safeThumb = escapeHtml(photo.thumbUrl || photo.fullUrl);
+      const safeTitle = escapeHtml(photo.title);
+      const safeTag = escapeHtml(photo.tag || '');
+      const safeId = escapeHtml(photo.id);
+      const safeCategory = escapeHtml(categoryLabels[photo.category] || photo.category);
+
       card.innerHTML = `
         <div class="card-preview">
-          <img src="${photo.thumbUrl || photo.fullUrl}" alt="${photo.title}" loading="lazy">
-          <span class="badge-category">${categoryLabels[photo.category] || photo.category}</span>
+          <img src="${safeThumb}" alt="${safeTitle}" loading="lazy">
+          <span class="badge-category">${safeCategory}</span>
         </div>
         <div class="card-details">
-          <h3 class="card-item-title">${photo.title}</h3>
-          <span class="card-item-tag">${photo.tag || ''}</span>
+          <h3 class="card-item-title">${safeTitle}</h3>
+          <span class="card-item-tag">${safeTag}</span>
 
           <div class="card-actions">
-            <button class="btn-secondary btn-edit-photo" data-id="${photo.id}" style="padding: 0.4rem 0.8rem; font-size: 0.78rem;">
+            <button class="btn-secondary btn-edit-photo" data-id="${safeId}" style="padding: 0.4rem 0.8rem; font-size: 0.78rem;">
               ✏️ Editar
             </button>
-            <button class="btn-danger btn-delete-photo" data-id="${photo.id}" style="padding: 0.4rem 0.8rem; font-size: 0.78rem;">
+            <button class="btn-danger btn-delete-photo" data-id="${safeId}" style="padding: 0.4rem 0.8rem; font-size: 0.78rem;">
               🗑️ Eliminar
             </button>
           </div>
@@ -713,26 +756,34 @@
 
       const photosCount = session.photos ? session.photos.length : 0;
       const previewThumbs = (session.photos || []).slice(0, 5).map((p) => `
-        <img src="${p.thumbUrl || p.fullUrl}" class="session-preview-thumb" alt="Foto">
+        <img src="${escapeHtml(p.thumbUrl || p.fullUrl)}" class="session-preview-thumb" alt="Foto">
       `).join('');
+
+      const safeTitle = escapeHtml(session.title);
+      const safeClient = escapeHtml(session.clientName || 'Cliente');
+      const safePin = escapeHtml(session.pin || (session.pinHash ? 'SHA-256' : '—'));
+      const safeDate = escapeHtml(session.date || 'Sin fecha');
+      const safeLocation = escapeHtml(session.location || 'Local');
+      const safeSlug = escapeHtml(slug);
+      const safeSessionId = escapeHtml(session.id);
 
       card.innerHTML = `
         <div class="session-card-header">
           <div>
-            <h3 class="session-card-title">${session.title}</h3>
-            <span class="session-card-client">${session.clientName || 'Cliente'}</span>
+            <h3 class="session-card-title">${safeTitle}</h3>
+            <span class="session-card-client">${safeClient}</span>
           </div>
           <div class="pin-chip" title="PIN de acceso privado">
             <span>PIN:</span>
-            <span>${session.pin}</span>
+            <span>${safePin}</span>
           </div>
         </div>
 
         <div class="session-meta-row">
-          <span>📅 ${session.date || 'Sin fecha'}</span>
-          <span>📍 ${session.location || 'Local'}</span>
+          <span>📅 ${safeDate}</span>
+          <span>📍 ${safeLocation}</span>
           <span>🖼️ ${photosCount} fotos</span>
-          <span style="color: var(--accent-gold); font-weight: 500;">🔗 /galeria/${slug}</span>
+          <span style="color: var(--accent-gold); font-weight: 500;">🔗 /galeria/${safeSlug}</span>
         </div>
 
         <div class="session-preview-strip">
@@ -740,15 +791,15 @@
         </div>
 
         <div class="session-actions-bar">
-          <button class="btn-copy-link" data-slug="${slug}" data-pin="${session.pin}">
-            📋 Copiar Enlace Directo (/galeria/${slug})
+          <button class="btn-copy-link" data-slug="${safeSlug}" data-pin="${safePin}">
+            📋 Copiar Enlace Directo (/galeria/${safeSlug})
           </button>
 
           <div class="session-btn-row">
-            <a href="galeria/${slug}/" target="_blank" class="btn-secondary" style="flex: 1; justify-content: center; font-size: 0.78rem; padding: 0.5rem; text-decoration: none;">
+            <a href="galeria/${encodeURIComponent(slug)}/" target="_blank" rel="noopener" class="btn-secondary" style="flex: 1; justify-content: center; font-size: 0.78rem; padding: 0.5rem; text-decoration: none;">
               👁️ Probar Galería
             </a>
-            <button class="btn-danger btn-delete-session" data-id="${session.id}" style="padding: 0.5rem 0.8rem; font-size: 0.78rem;" title="Eliminar">
+            <button class="btn-danger btn-delete-session" data-id="${safeSessionId}" style="padding: 0.5rem 0.8rem; font-size: 0.78rem;" title="Eliminar">
               🗑️
             </button>
           </div>
@@ -758,10 +809,11 @@
       card.querySelector('.btn-copy-link').addEventListener('click', () => {
         const baseUrl = window.location.href.split('admin.html')[0].split('admin')[0];
         const clientUrl = `${baseUrl}galeria/${slug}/`;
+        const pinNotice = session.pin ? ` (PIN: ${session.pin})` : '';
         navigator.clipboard.writeText(clientUrl).then(() => {
-          showToast(`¡Enlace copiado! ${clientUrl} (PIN: ${session.pin})`);
+          showToast(`¡Enlace copiado! ${clientUrl}${pinNotice}`);
         }).catch(() => {
-          prompt(`Copia este enlace para tu cliente (PIN: ${session.pin}):`, clientUrl);
+          prompt(`Copia este enlace para tu cliente${pinNotice}:`, clientUrl);
         });
       });
 

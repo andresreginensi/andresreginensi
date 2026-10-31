@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Portada principal y portafolio general -->
+  <url>
+    <loc>https://andresreginensi.es/</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/portada.jpg</image:loc>
+      <image:title>Andrés Reginensi Photography — Fotógrafo Profesional en Tarragona</image:title>
+      <image:caption>Fotografía editorial, inmobiliaria, arquitectura, bodas y retratos corporativos en la provincia de Tarragona y Costa Daurada.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/sobre-mi.jpg</image:loc>
+      <image:title>Andrés Reginensi — Fotógrafo Profesional en Tarragona</image:title>
+      <image:caption>Retrato profesional de Andrés Reginensi, fotógrafo especializado en inmobiliaria, bodas y empresa en Tarragona.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/paisajes/paisaje-atardecer.jpg</image:loc>
+      <image:title>Luz mediterránea al atardecer — Andrés Reginensi Photography</image:title>
+      <image:caption>Fotografía de paisaje y atmósfera mediterránea al atardecer.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Servicio 1 y 2: Fotografía Inmobiliaria, Arquitectura e Interiores -->
+  <url>
+    <loc>https://andresreginensi.es/fotografia-inmobiliaria-tarragona.html</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/realestate/galileu-piscina.jpg</image:loc>
+      <image:title>Fotografía inmobiliaria de villa con piscina — Andrés Reginensi</image:title>
+      <image:caption>Reportaje fotográfico de vivienda unifamiliar con piscina y arquitectura contemporánea para comercialización inmobiliaria.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/realestate/galileu-salon.jpg</image:loc>
+      <image:title>Fotografía de interiores de salón luminoso — Andrés Reginensi</image:title>
+      <image:caption>Fotografía de interiorismo con líneas verticales corregidas e iluminación equilibrada interior-exterior.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/realestate/galileu-cocina.jpg</image:loc>
+      <image:title>Fotografía de cocina de diseño e interiorismo — Andrés Reginensi</image:title>
+      <image:caption>Fotografía profesional de cocina moderna y acabados arquitectónicos para inmobiliarias e interioristas.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/realestate/galileu-exterior-noche.jpg</image:loc>
+      <image:title>Fotografía crepuscular de arquitectura residencial — Andrés Reginensi</image:title>
+      <image:caption>Toma nocturna en hora azul de vivienda contemporánea iluminada para marketing inmobiliario.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/realestate/galileu-escalera.jpg</image:loc>
+      <image:title>Detalle arquitectónico de escalera interior — Andrés Reginensi</image:title>
+      <image:caption>Composición geométrica de escalera e iluminación natural para estudios de arquitectura.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/realestate/galileu-estancia.jpg</image:loc>
+      <image:title>Estancia residencial e interiorismo mediterráneo — Andrés Reginensi</image:title>
+      <image:caption>Fotografía de habitación y espacio habitable con fidelidad cromática y amplitud natural.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/realestate/galileu-patio.jpg</image:loc>
+      <image:title>Terraza y patio exterior de vivienda — Andrés Reginensi</image:title>
+      <image:caption>Fotografía de zona exterior y terraza residencial para portales inmobiliarios y alquiler vacacional.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/realestate/burgueras-fachada.jpg</image:loc>
+      <image:title>Arquitectura comercial y fachada acristalada — Andrés Reginensi</image:title>
+      <image:caption>Fotografía de edificio corporativo y fachada contemporánea.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/realestate/burgueras-geometria.jpg</image:loc>
+      <image:title>Geometría arquitectónica contemporánea — Andrés Reginensi</image:title>
+      <image:caption>Perspectiva arquitectónica de líneas y volúmenes en edificación moderna.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Servicio 3: Fotografía de Bodas y Eventos -->
+  <url>
+    <loc>https://andresreginensi.es/fotografo-bodas-tarragona.html</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/uploads/bodas-la-salida-full-1793484078424-114u.jpg</image:loc>
+      <image:title>La Salida — Reportaje documental de boda por Andrés Reginensi</image:title>
+      <image:caption>Fotografía documental de ceremonia de boda en blanco y negro.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/uploads/bodas-orilla-dorada-full-1793484078424-j38e.jpg</image:loc>
+      <image:title>Orilla Dorada — Fotografía de pareja en boda por Andrés Reginensi</image:title>
+      <image:caption>Fotografía de boda al atardecer con luz natural.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/bodas/boda-editorial-calle.jpg</image:loc>
+      <image:title>Paseo Urbano — Fotografía editorial de pareja en boda por Andrés Reginensi</image:title>
+      <image:caption>Retrato editorial de novios con estética atemporal en blanco y negro.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Servicios 4, 5 y 6: Fotografía Corporativa, Retratos Profesionales y Acción -->
+  <url>
+    <loc>https://andresreginensi.es/fotografia-corporativa-retratos-tarragona.html</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/retratos/retrato-corporativo-estudio.jpg</image:loc>
+      <image:title>Retrato corporativo en estudio profesional — Andrés Reginensi</image:title>
+      <image:caption>Headshot de marca personal e identidad ejecutiva con iluminación de estudio.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/retratos/retrato-ejecutivo-profesional.jpg</image:loc>
+      <image:title>Retrato ejecutivo para dirección y LinkedIn — Andrés Reginensi</image:title>
+      <image:caption>Fotografía profesional para directivos, despachos y comunicación empresarial en Tarragona.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/retratos/retrato-steffa-noche.jpg</image:loc>
+      <image:title>Retrato editorial nocturno — Andrés Reginensi</image:title>
+      <image:caption>Sesión de retrato editorial nocturno en localización urbana.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/retratos/retrato-golden-hour.jpg</image:loc>
+      <image:title>Retrato con luz natural en hora dorada — Andrés Reginensi</image:title>
+      <image:caption>Fotografía de retrato exterior al atardecer con iluminación natural cálida.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/retratos/retrato-exterior-color.jpg</image:loc>
+      <image:title>Retrato editorial en exterior — Andrés Reginensi</image:title>
+      <image:caption>Sesión creativa de retrato profesional para marca personal y porfolio artístico.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://andresreginensi.es/assets/images/retratos/retrato-natural-luz.jpg</image:loc>
+      <image:title>Retrato cercano con luz suave — Andrés Reginensi</image:title>
+      <image:caption>Retrato expresivo con iluminación natural controlada.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Política de Cookies y Privacidad -->
+  <url>
+    <loc>https://andresreginensi.es/cookies.html</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>
+

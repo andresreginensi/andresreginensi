@@ -1,27 +1,31 @@
 /**
  * ==========================================================================
  * ANDRÉS REGINENSI PHOTOGRAPHY — SCRIPT DE GALERÍA PRIVADA DE CLIENTE
- * Validación de PIN en frontend, visualización fluida y descarga directa
+ * Validación de PIN con soporte SHA-256, límite de intentos, sanitización XSS
+ * y descarga directa.
  * ==========================================================================
  */
 
 (function () {
   'use strict';
 
-  // Configuración por defecto si no estuviera definida en la página
   const config = window.GALLERY_CONFIG || {
     title: 'Galería Privada',
     client: 'Cliente',
     date: '',
     location: '',
-    pin: '1234',
+    pin: '',
+    pinHash: '',
     zipDownloadUrl: '',
     photos: []
   };
 
-  const storageKey = 'auth_galeria_' + (window.location.pathname.replace(/\/+$/, '') || 'root');
+  const cleanPath = window.location.pathname.replace(/\/+$/, '') || 'root';
+  const storageKey = 'auth_galeria_' + cleanPath;
+  const lockKey = 'lock_galeria_' + cleanPath;
+  const MAX_ATTEMPTS = 5;
+  const LOCKOUT_MS = 60 * 1000;
 
-  // Elementos del DOM
   const pinScreen = document.getElementById('pin-screen');
   const pinForm = document.getElementById('pin-form');
   const pinInput = document.getElementById('pin-input');
@@ -38,7 +42,6 @@
   const btnDownloadAll = document.getElementById('btn-download-all');
   const btnLock = document.getElementById('btn-lock');
 
-  // Lightbox
   const lightbox = document.getElementById('gallery-lightbox');
   const lightboxImg = document.getElementById('lightbox-img');
   const lightboxCaption = document.getElementById('lightbox-caption');
@@ -49,19 +52,40 @@
 
   let currentPhotoIndex = 0;
 
-  // 1. Inicialización
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  async function sha256Hex(value) {
+    const str = String(value || '');
+    if (window.crypto && window.crypto.subtle && window.TextEncoder) {
+      const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+    return '';
+  }
+
   function init() {
-    // Si ya fue desbloqueada en esta sesión de navegador, mostrar directamente
-    if (sessionStorage.getItem(storageKey) === 'true') {
-      unlockGallery(false);
-    } else {
+    try {
+      if (sessionStorage.getItem(storageKey) === 'true') {
+        unlockGallery();
+      } else if (pinInput) {
+        pinInput.focus();
+      }
+    } catch (e) {
       if (pinInput) pinInput.focus();
     }
 
     setupEventListeners();
   }
 
-  // 2. Control de eventos
   function setupEventListeners() {
     if (pinForm) {
       pinForm.addEventListener('submit', (e) => {
@@ -83,7 +107,6 @@
       });
     }
 
-    // Lightbox controles
     if (lightboxBtnClose) {
       lightboxBtnClose.addEventListener('click', closeLightbox);
     }
@@ -107,18 +130,51 @@
     });
   }
 
-  // 3. Validación de PIN
-  function validatePin() {
-    const entered = (pinInput ? pinInput.value : '').trim();
-    const expected = String(config.pin || '').trim();
+  async function validatePin() {
+    try {
+      const lockState = JSON.parse(sessionStorage.getItem(lockKey) || '{"count":0,"until":0}');
+      const now = Date.now();
+      if (lockState.until && now < lockState.until) {
+        const waitSec = Math.ceil((lockState.until - now) / 1000);
+        if (pinError) {
+          pinError.textContent = `Demasiados intentos. Espera ${waitSec} segundos para volver a intentarlo.`;
+          pinError.classList.add('visible');
+        }
+        return;
+      }
+    } catch (e) {}
 
-    if (entered === expected) {
+    const entered = (pinInput ? pinInput.value : '').trim();
+    let matched = false;
+
+    if (config.pinHash) {
+      const enteredHash = await sha256Hex(entered);
+      matched = Boolean(enteredHash && enteredHash === String(config.pinHash).trim());
+    } else if (config.pin) {
+      matched = entered === String(config.pin).trim();
+    }
+
+    if (matched) {
       if (pinError) pinError.classList.remove('visible');
-      sessionStorage.setItem(storageKey, 'true');
-      unlockGallery(true);
+      try {
+        sessionStorage.removeItem(lockKey);
+        sessionStorage.setItem(storageKey, 'true');
+      } catch (e) {}
+      unlockGallery();
     } else {
+      let blocked = false;
+      try {
+        const lockState = JSON.parse(sessionStorage.getItem(lockKey) || '{"count":0,"until":0}');
+        const nextCount = (lockState.count || 0) + 1;
+        const nextUntil = nextCount >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_MS : 0;
+        blocked = Boolean(nextUntil);
+        sessionStorage.setItem(lockKey, JSON.stringify({ count: nextCount, until: nextUntil }));
+      } catch (e) {}
+
       if (pinError) {
-        pinError.textContent = 'Código PIN incorrecto. Por favor, verifícalo con Andrés.';
+        pinError.textContent = blocked
+          ? 'Acceso bloqueado durante 60 segundos tras varios intentos fallidos.'
+          : 'Código PIN incorrecto. Por favor, verifícalo con Andrés.';
         pinError.classList.add('visible');
       }
       if (pinInput) {
@@ -130,20 +186,16 @@
     }
   }
 
-  // 4. Desbloqueo y render de galería
-  function unlockGallery(withAnimation) {
-    if (pinScreen) {
-      pinScreen.classList.add('unlocked');
-    }
-    if (galleryLayout) {
-      galleryLayout.classList.add('active');
-    }
-
+  function unlockGallery() {
+    if (pinScreen) pinScreen.classList.add('unlocked');
+    if (galleryLayout) galleryLayout.classList.add('active');
     renderGalleryData();
   }
 
   function lockGallery() {
-    sessionStorage.removeItem(storageKey);
+    try {
+      sessionStorage.removeItem(storageKey);
+    } catch (e) {}
     if (galleryLayout) galleryLayout.classList.remove('active');
     if (pinScreen) pinScreen.classList.remove('unlocked');
     if (pinInput) {
@@ -152,7 +204,6 @@
     }
   }
 
-  // 5. Poblar datos y fotos en el DOM
   function renderGalleryData() {
     if (elTitle) elTitle.textContent = config.title;
     if (elClient) elClient.textContent = config.client || 'Cliente';
@@ -168,18 +219,23 @@
       card.className = 'photo-card';
 
       const filename = photo.full ? photo.full.split('/').pop() : `foto-${idx + 1}.jpg`;
+      const safeThumb = escapeHtml(photo.thumb || photo.full);
+      const safeCaption = escapeHtml(photo.caption || photo.title || `Foto ${idx + 1}`);
+      const safeId = escapeHtml(photo.id || `AR-${idx + 1}`);
+      const safeFull = escapeHtml(photo.full);
+      const safeName = escapeHtml(filename);
 
       card.innerHTML = `
-        <div class="photo-img-wrap" data-index="${idx}">
-          <img src="${photo.thumb || photo.full}" alt="${photo.caption || photo.title || 'Fotografía'}" loading="lazy">
+        <div class="photo-img-wrap" data-index="${idx}" tabindex="0" role="button" aria-label="Ampliar ${safeCaption}">
+          <img src="${safeThumb}" alt="${safeCaption}" loading="lazy" decoding="async">
         </div>
         <div class="photo-card-footer">
           <div class="photo-info">
-            <h3 class="photo-caption">${photo.caption || photo.title || `Foto ${idx + 1}`}</h3>
-            <span class="photo-id-tag">${photo.id || `AR-${idx + 1}`}</span>
+            <h3 class="photo-caption">${safeCaption}</h3>
+            <span class="photo-id-tag">${safeId}</span>
           </div>
-          <button class="btn-photo-download" data-url="${photo.full}" data-name="${filename}" title="Descargar en alta resolución">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <button type="button" class="btn-photo-download" data-url="${safeFull}" data-name="${safeName}" title="Descargar en alta resolución">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -189,12 +245,15 @@
         </div>
       `;
 
-      // Clic en la foto para abrir Lightbox
-      card.querySelector('.photo-img-wrap').addEventListener('click', () => {
-        openLightbox(idx);
+      const imgWrap = card.querySelector('.photo-img-wrap');
+      imgWrap.addEventListener('click', () => openLightbox(idx));
+      imgWrap.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openLightbox(idx);
+        }
       });
 
-      // Botón individual de descarga
       card.querySelector('.btn-photo-download').addEventListener('click', (e) => {
         e.stopPropagation();
         triggerDownload(photo.full, filename);
@@ -204,11 +263,12 @@
     });
   }
 
-  // 6. Funcionalidad de Descarga
   function triggerDownload(url, filename) {
+    if (!url) return;
     const link = document.createElement('a');
     link.href = url;
     link.download = filename || 'fotografia.jpg';
+    link.rel = 'noopener';
     link.target = '_blank';
     document.body.appendChild(link);
     link.click();
@@ -217,7 +277,7 @@
 
   function handleDownloadAll() {
     if (config.zipDownloadUrl) {
-      window.open(config.zipDownloadUrl, '_blank');
+      window.open(config.zipDownloadUrl, '_blank', 'noopener');
       return;
     }
 
@@ -231,12 +291,12 @@
     }
   }
 
-  // 7. Lightbox Fullscreen
   function openLightbox(index) {
     currentPhotoIndex = index;
     updateLightboxContent();
     if (lightbox) {
       lightbox.classList.add('active');
+      lightbox.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
     }
   }
@@ -244,6 +304,7 @@
   function closeLightbox() {
     if (lightbox) {
       lightbox.classList.remove('active');
+      lightbox.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
     }
   }
@@ -266,20 +327,20 @@
   }
 
   function showPrevPhoto() {
+    if (!config.photos.length) return;
     currentPhotoIndex = (currentPhotoIndex - 1 + config.photos.length) % config.photos.length;
     updateLightboxContent();
   }
 
   function showNextPhoto() {
+    if (!config.photos.length) return;
     currentPhotoIndex = (currentPhotoIndex + 1) % config.photos.length;
     updateLightboxContent();
   }
 
-  // Ejecutar al cargar el DOM
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
 })();
-

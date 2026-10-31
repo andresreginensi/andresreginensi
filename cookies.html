@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Política de Cookies de Andrés Reginensi Photography en cumplimiento con el RGPD y la LSSI-CE.">
-  <title>Política de Cookies | Andrés Reginensi Photography</title>
+  <meta name="description" content="Política de Cookies y Almacenamiento Local de Andrés Reginensi Photography conforme al RGPD y la LSSI-CE.">
+  <title>Política de Cookies y Privacidad Técnica | Andrés Reginensi Photography</title>
+  <link rel="canonical" href="https://andresreginensi.es/cookies.html">
 
-  <!-- Google Fonts: Plus Jakarta Sans & Inter (Minimalismo Contemporáneo) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/cookies.css">
+  <link rel="stylesheet" href="assets/css/main.css?v=3">
+  <link rel="stylesheet" href="assets/css/cookies.css?v=3">
 
   <style>
     .legal-page {
-      max-width: 840px;
+      max-width: 860px;
       margin: 0 auto;
       padding: 9rem 2rem 6rem;
       font-family: var(--font-sans);
     }
     .legal-header {
-      margin-bottom: 3.5rem;
+      margin-bottom: 3rem;
       border-bottom: 1px solid var(--border-hairline);
       padding-bottom: 2rem;
     }
@@ -36,24 +36,24 @@
     }
     .legal-title {
       font-family: var(--font-serif);
-      font-size: 2.4rem;
+      font-size: clamp(1.9rem, 4vw, 2.5rem);
       font-weight: 400;
       color: var(--text-pure);
       margin-bottom: 0.8rem;
     }
     .legal-updated {
-      font-size: 0.82rem;
-      color: var(--text-dim);
+      font-size: 0.84rem;
+      color: var(--text-muted);
     }
     .legal-content h2 {
       font-family: var(--font-serif);
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       color: var(--text-pure);
       margin: 2.2rem 0 0.8rem;
     }
     .legal-content p, .legal-content li {
-      font-size: 0.92rem;
-      line-height: 1.7;
+      font-size: 0.94rem;
+      line-height: 1.75;
       color: var(--text-muted);
       margin-bottom: 1rem;
     }
@@ -61,16 +61,21 @@
       padding-left: 1.4rem;
       margin-bottom: 1.5rem;
     }
+    .legal-table-wrap {
+      overflow-x: auto;
+      margin: 1.5rem 0 2rem;
+    }
     .legal-table {
       width: 100%;
       border-collapse: collapse;
-      margin: 1.5rem 0 2rem;
-      font-size: 0.82rem;
+      font-size: 0.84rem;
+      min-width: 600px;
     }
     .legal-table th, .legal-table td {
       border: 1px solid var(--border-hairline);
-      padding: 0.8rem 1rem;
+      padding: 0.85rem 1rem;
       text-align: left;
+      vertical-align: top;
     }
     .legal-table th {
       background: var(--bg-surface);
@@ -81,27 +86,40 @@
       color: var(--text-muted);
       background: var(--bg-card);
     }
+    .legal-table code {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--accent-warm);
+    }
     .btn-manage-cookies {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
       background: var(--accent-gold);
-      color: #000;
-      padding: 0.8rem 1.6rem;
+      color: #09090b;
+      padding: 0.85rem 1.6rem;
       border-radius: 8px;
-      font-weight: 500;
+      font-weight: 600;
       font-size: 0.88rem;
       cursor: pointer;
       border: none;
-      margin: 1.5rem 0;
+      margin: 1.25rem 0 1.5rem;
       transition: background var(--duration-fast);
     }
     .btn-manage-cookies:hover {
       background: #deb66c;
     }
+    .legal-notice-box {
+      background: rgba(197, 160, 89, 0.06);
+      border: 1px solid rgba(197, 160, 89, 0.22);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+    }
   </style>
 </head>
 <body>
+  <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
 
   <!-- Cabecera -->
   <header class="site-header">
@@ -111,11 +129,11 @@
         <span class="brand-subtitle">Fotografía</span>
       </a>
 
-      <nav class="main-nav" aria-label="Navegación secundaria">
-        <a href="index.html#realestate" class="nav-link">Inmobiliaria</a>
-        <a href="index.html#bodas" class="nav-link">Bodas</a>
-        <a href="index.html#retratos" class="nav-link">Retratos</a>
-        <a href="index.html#empresarial" class="nav-link">Empresarial</a>
+      <nav class="main-nav desktop-nav" aria-label="Navegación secundaria">
+        <a href="fotografia-inmobiliaria-tarragona.html" class="nav-link">Inmobiliaria</a>
+        <a href="fotografo-bodas-tarragona.html" class="nav-link">Bodas</a>
+        <a href="fotografia-corporativa-retratos-tarragona.html" class="nav-link">Corporativo &amp; Retratos</a>
+        <a href="index.html#contacto" class="nav-link">Contacto</a>
       </nav>
 
       <a href="index.html" class="btn-client-access">
@@ -124,77 +142,102 @@
     </div>
   </header>
 
-  <main class="legal-page">
+  <main id="contenido-principal" class="legal-page">
     <div class="legal-header">
-      <span class="legal-tag">Privacidad & Legalidad</span>
-      <h1 class="legal-title">Política de Cookies</h1>
-      <p class="legal-updated">Última actualización: 25 de Octubre de 2026 · Conforme al RGPD (UE 2016/679) y LSSI-CE</p>
+      <span class="legal-tag">Transparencia, Privacidad &amp; RGPD</span>
+      <h1 class="legal-title">Política de Cookies y Almacenamiento Local</h1>
+      <p class="legal-updated">Última revisión técnica: Octubre de 2026 · RGPD (UE 2016/679) y Art. 22.2 LSSI-CE</p>
     </div>
 
     <div class="legal-content">
       <p>
-        En <strong>Andrés Reginensi Photography</strong> (en adelante, "el Sitio Web"), respetamos tu privacidad y nos comprometemos a ser transparentes sobre las tecnologías que utilizamos. Esta Política de Cookies explica qué son las cookies, cuáles empleamos y cómo puedes gestionarlas en cualquier momento.
+        En <strong>Andrés Reginensi Photography</strong> (<code>https://andresreginensi.es/</code>) aplicamos el principio de minimización de datos. Este documento detalla con precisión técnica qué almacenamiento local (<code>localStorage</code> / <code>sessionStorage</code>) y recursos externos utiliza realmente este sitio web, sin incluir rastreadores publicitarios de terceros.
       </p>
 
       <button type="button" class="btn-manage-cookies" data-open-cookie-settings>
-        ⚙️ Modificar mis preferencias de cookies
+        ⚙️ Modificar o revocar mis preferencias de cookies
       </button>
 
-      <h2>1. ¿Qué es una cookie?</h2>
+      <h2>1. ¿Qué tecnologías de almacenamiento utilizamos?</h2>
       <p>
-        Una cookie es un pequeño archivo de texto que los sitios web almacenan en tu dispositivo (ordenador, tablet o teléfono móvil) cuando los visitas. Permiten recordar tus preferencias (como el consentimiento otorgado o la visualización de fotos), mejorar el rendimiento de carga y, en su caso, analizar hábitos de navegación.
+        A diferencia de los portales con seguimiento publicitario masivo, este sitio web <strong>no instala cookies publicitarias ni píxeles de redes sociales de terceros</strong>. Únicamente empleamos almacenamiento web del navegador (<code>localStorage</code> y <code>sessionStorage</code>, sujetos a las mismas garantías legales del Art. 22.2 de la LSSI-CE que las cookies tradicionales) para dos finalidades claramente diferenciadas:
       </p>
 
-      <h2>2. ¿Qué tipos de cookies utilizamos?</h2>
-      <p>
-        De acuerdo con las directrices de la Agencia Española de Protección de Datos (AEPD), clasificamos las cookies en las siguientes categorías:
-      </p>
+      <div class="legal-table-wrap">
+        <table class="legal-table">
+          <thead>
+            <tr>
+              <th>Identificador</th>
+              <th>Tipo / Titular</th>
+              <th>Finalidad técnica real</th>
+              <th>Duración</th>
+              <th>Consentimiento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>andres_cookie_consent_v1</code></td>
+              <td>Propia (<code>localStorage</code>)</td>
+              <td>Guarda tu decisión sobre el panel de privacidad (aceptación o rechazo granular, versión y fecha) para no mostrar el aviso en cada visita.</td>
+              <td>Persistente (hasta borrado o cambio de versión)</td>
+              <td>Exenta (Técnica necesaria)</td>
+            </tr>
+            <tr>
+              <td><code>auth_galeria_*</code></td>
+              <td>Propia (<code>sessionStorage</code>)</td>
+              <td>Mantiene desbloqueada temporalmente una galería privada de cliente durante la pestaña actual tras validar el código PIN.</td>
+              <td>Sesión (se elimina al cerrar la pestaña)</td>
+              <td>Exenta (Técnica solicitada por el usuario)</td>
+            </tr>
+            <tr>
+              <td><code>andres_portfolio</code> / <code>IndexedDB</code></td>
+              <td>Propia (<code>IndexedDB</code> / caché local)</td>
+              <td>Permite la carga ágil del catálogo fotográfico público del estudio. No contiene identificadores personales del visitante.</td>
+              <td>Persistente técnica</td>
+              <td>Exenta (Técnica necesaria)</td>
+            </tr>
+            <tr>
+              <td><code>andres_analytics_session</code><br><code>andres_analytics_events</code></td>
+              <td>Propia (<code>sessionStorage</code> / <code>localStorage</code>)</td>
+              <td>Estadística interna de primera parte (secciones visitadas, tipo de dispositivo y clics de contacto) sin compartir datos con redes publicitarias. <strong>Permanece bloqueada hasta que otorgas consentimiento explícito</strong> y se elimina automáticamente si lo rechazas o revocas.</td>
+              <td>Sesión (30 min) / Máx. 500 eventos locales</td>
+              <td><strong>Requerido</strong> (Desactivada por defecto)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      <table class="legal-table">
-        <thead>
-          <tr>
-            <th>Categoría</th>
-            <th>Finalidad</th>
-            <th>Consentimiento</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Técnicas / Necesarias</strong></td>
-            <td>Garantizan la navegación, seguridad, carga fluida del portafolio y el funcionamiento de la selección privada de clientes.</td>
-            <td>No requerido (Exentas por el Art. 22.2 LSSI)</td>
-          </tr>
-          <tr>
-            <td><strong>Analíticas</strong></td>
-            <td>Permiten cuantificar el número de visitantes y analizar estadísticamente cómo interactúan con las obras fotográficas para mejorar el sitio.</td>
-            <td><strong>Requerido</strong> (Desactivadas por defecto)</td>
-          </tr>
-          <tr>
-            <td><strong>Marketing / Publicidad</strong></td>
-            <td>Permiten gestionar espacios publicitarios y medir campañas o enlaces en redes sociales (ej. Instagram, LinkedIn).</td>
-            <td><strong>Requerido</strong> (Desactivadas por defecto)</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h2>3. ¿Cómo revocar o cambiar mi consentimiento?</h2>
+      <h2>2. Solicitudes técnicas a recursos de terceros</h2>
       <p>
-        Puedes modificar tu decisión en cualquier instante pulsando el botón <a href="#" data-open-cookie-settings>Configurar cookies</a> que se encuentra disponible en el pie de página de todo el sitio web o utilizando el botón superior de esta página.
-      </p>
-      <p>
-        Asimismo, puedes deshabilitar o eliminar las cookies instaladas en tu equipo configurando las opciones de tu navegador web habitual:
+        Para la correcta representación tipográfica y el funcionamiento de herramientas específicas en áreas concretas, el navegador puede realizar solicitudes técnicas a:
       </p>
       <ul>
-        <li><strong>Safari:</strong> Preferencias > Privacidad > Bloquear todas las cookies.</li>
-        <li><strong>Google Chrome:</strong> Configuración > Privacidad y seguridad > Cookies y otros datos de sitios.</li>
-        <li><strong>Mozilla Firefox:</strong> Ajustes > Privacidad & Seguridad > Cookies y datos del sitio.</li>
-        <li><strong>Microsoft Edge:</strong> Configuración > Cookies y permisos del sitio.</li>
+        <li><strong>Google Fonts (<code>fonts.googleapis.com</code> y <code>fonts.gstatic.com</code>):</strong> Descarga de las fuentes tipográficas <em>Plus Jakarta Sans</em> e <em>Inter</em> necesarias para el diseño editorial. Google no instala cookies en el navegador mediante este servicio, aunque recibe técnicamente la dirección IP para servir los archivos de fuente.</li>
+        <li><strong>jsDelivr CDN (únicamente en el área privada de selección <code>proofing.html</code>):</strong> Carga de la librería técnica de envío de formularios cuando el cliente remite su selección de fotografías.</li>
       </ul>
 
-      <h2>4. Contacto</h2>
+      <h2>3. Cómo modificar o retirar tu consentimiento en cualquier momento</h2>
       <p>
-        Para cualquier duda relativa a nuestra política de cookies o el tratamiento de tus datos personales, puedes contactar directamente en: <a href="mailto:andresreginensi@gmail.com" style="color: var(--accent-warm);">andresreginensi@gmail.com</a>.
+        Puedes cambiar tu elección o retirar el consentimiento con la misma facilidad con la que lo otorgaste pulsando el botón <strong>Modificar o revocar mis preferencias de cookies</strong> situado al inicio de esta página o el enlace <strong>Preferencias</strong> presente en el pie de página de todo el sitio web. Al desactivar la analítica, los registros locales (<code>andres_analytics_events</code> y <code>andres_analytics_session</code>) se borran de inmediato de tu navegador.
       </p>
+      <p>
+        Adicionalmente, puedes restringir o borrar el almacenamiento de cualquier sitio web desde los ajustes de tu navegador:
+      </p>
+      <ul>
+        <li><strong>Safari (macOS / iOS):</strong> Ajustes &gt; Privacidad &gt; Gestionar datos de sitios web.</li>
+        <li><strong>Google Chrome:</strong> Configuración &gt; Privacidad y seguridad &gt; Eliminar datos de navegación.</li>
+        <li><strong>Mozilla Firefox:</strong> Ajustes &gt; Privacidad y seguridad &gt; Cookies y datos del sitio.</li>
+        <li><strong>Microsoft Edge:</strong> Configuración &gt; Privacidad, búsqueda y servicios &gt; Borrar datos de exploración.</li>
+      </ul>
+
+      <h2>4. Responsable y contacto de privacidad</h2>
+      <div class="legal-notice-box">
+        <p style="margin-bottom: 0.5rem;">
+          <strong>Titular comercial:</strong> Andrés Reginensi Photography (Provincia de Tarragona, España)<br>
+          <strong>Correo electrónico de contacto y ejercicio de derechos:</strong> <a href="mailto:andresreginensi@gmail.com" style="color: var(--accent-warm);">andresreginensi@gmail.com</a><br>
+          <strong>Teléfono profesional:</strong> <a href="tel:+34664848096" style="color: var(--accent-warm);">+34 664 848 096</a>
+        </p>
+      </div>
     </div>
   </main>
 
@@ -203,12 +246,94 @@
     <div>Andrés Reginensi &copy; 2026. Todos los derechos reservados.</div>
     <div class="footer-nav">
       <a href="index.html">Portafolio</a>
-      <a href="cookies.html">Política de Cookies</a>
+      <a href="fotografia-inmobiliaria-tarragona.html">Inmobiliaria</a>
+      <a href="fotografo-bodas-tarragona.html">Bodas</a>
+      <a href="fotografia-corporativa-retratos-tarragona.html">Corporativo</a>
+      <a href="cookies.html" aria-current="page">Política de Cookies</a>
       <button type="button" class="btn-cookie-reopen" data-open-cookie-settings>Preferencias de Cookies</button>
     </div>
   </footer>
 
-  <!-- Scripts del sistema de cookies -->
-  <script src="assets/js/cookies.js"></script>
+  <!-- BANNER DE COOKIES (RGPD / GDPR) -->
+  <aside class="cookie-banner" id="cookie-banner" role="dialog" aria-modal="false" aria-label="Aviso de cookies y privacidad" aria-hidden="true">
+    <div class="cookie-banner-inner">
+      <div class="cookie-banner-text">
+        <h2 class="cookie-banner-title">Privacidad y preferencias de almacenamiento</h2>
+        <p class="cookie-banner-desc">
+          Utilizamos almacenamiento técnico esencial para el funcionamiento del portafolio y, solo si lo autorizas, analítica propia de primera parte para conocer qué reportajes generan mayor interés. No utilizamos cookies publicitarias de terceros. Más detalles en nuestra <a href="cookies.html">Política de Cookies</a>.
+        </p>
+      </div>
+
+      <div class="cookie-banner-actions">
+        <button type="button" class="cookie-btn cookie-btn-accept" id="cookie-btn-accept-all">
+          Aceptar analítica
+        </button>
+        <button type="button" class="cookie-btn cookie-btn-reject" id="cookie-btn-reject-all">
+          Rechazar no esenciales
+        </button>
+        <button type="button" class="cookie-btn cookie-btn-config" id="cookie-btn-open-config">
+          Configurar
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MODAL DE CONFIGURACIÓN DE COOKIES -->
+  <div class="cookie-modal-overlay" id="cookie-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cookie-modal-heading" aria-hidden="true">
+    <div class="cookie-modal" id="cookie-modal">
+      <div class="cookie-modal-header">
+        <div>
+          <h2 class="cookie-modal-title" id="cookie-modal-heading">Panel de Preferencias de Privacidad</h2>
+          <p class="cookie-modal-subtitle">
+            Gestiona tu consentimiento en cualquier momento. Al desactivar la analítica se eliminan automáticamente los datos locales registrados en tu navegador.
+          </p>
+        </div>
+        <button type="button" class="cookie-modal-close" id="cookie-btn-close-modal" aria-label="Cerrar panel de privacidad">&times;</button>
+      </div>
+
+      <div class="cookie-modal-body">
+        <article class="cookie-category-item">
+          <div class="cookie-category-header">
+            <span class="cookie-category-name">
+              Técnicas y Esenciales
+              <span class="cookie-badge-required">Siempre activas</span>
+            </span>
+            <label class="cookie-switch" aria-label="Almacenamiento técnico obligatorio">
+              <input type="checkbox" checked disabled>
+              <span class="cookie-slider"></span>
+            </label>
+          </div>
+          <p class="cookie-category-desc">
+            Imprescindibles para recordar tu elección en este panel, visualizar galerías a pantalla completa y mantener la sesión en el área privada de clientes.
+          </p>
+        </article>
+
+        <article class="cookie-category-item">
+          <div class="cookie-category-header">
+            <span class="cookie-category-name">Analítica Propia de Primera Parte</span>
+            <label class="cookie-switch" aria-label="Permitir analítica propia anónima">
+              <input type="checkbox" id="cookie-toggle-analytics">
+              <span class="cookie-slider"></span>
+            </label>
+          </div>
+          <p class="cookie-category-desc">
+            Mide de forma agregada las secciones visitadas y clics de contacto sin compartir información con plataformas publicitarias externas. Desactivada por defecto.
+          </p>
+        </article>
+      </div>
+
+      <div class="cookie-modal-footer">
+        <button type="button" class="cookie-btn cookie-btn-reject" id="cookie-btn-modal-accept-all">
+          Aceptar analítica
+        </button>
+        <button type="button" class="cookie-btn cookie-btn-accept" id="cookie-btn-save-preferences">
+          Guardar mis preferencias
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/cookies.js?v=6" defer></script>
+  <script src="assets/js/analytics-tracker.js?v=6" defer></script>
 </body>
 </html>

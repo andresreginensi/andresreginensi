@@ -28,6 +28,7 @@
   let modalEl = null;
   let toggleAnalyticsEl = null;
   let toggleMarketingEl = null;
+  let lastTriggerEl = null;
 
   /**
    * 1. INICIALIZACIÓN
@@ -193,6 +194,7 @@
   }
 
   function openModal() {
+    lastTriggerEl = document.activeElement;
     const current = getConsent() || defaultConsent;
 
     // Sincronizar estado de los interruptores
@@ -212,6 +214,10 @@
     if (modalOverlayEl) {
       modalOverlayEl.classList.remove('is-visible');
       modalOverlayEl.setAttribute('aria-hidden', 'true');
+    }
+    if (lastTriggerEl && typeof lastTriggerEl.focus === 'function') {
+      lastTriggerEl.focus();
+      lastTriggerEl = null;
     }
   }
 
@@ -270,8 +276,13 @@
   }
 
   function disableAnalyticsCookies() {
-    // Si el usuario revoca su consentimiento, se evitan nuevas llamadas analíticas
-    console.info('[Cookies] Analítica deshabilitada.');
+    // Si el usuario rechaza o revoca su consentimiento, se purgan los eventos locales de inmediato
+    try {
+      localStorage.removeItem('andres_analytics_events');
+    } catch (e) {}
+    try {
+      sessionStorage.removeItem('andres_analytics_session');
+    } catch (e) {}
   }
 
   /**

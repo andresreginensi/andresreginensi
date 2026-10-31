@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
   <title>Galería Privada | Andrés Reginensi Photography</title>
 
   <!-- Google Fonts: Plus Jakarta Sans & Inter -->
@@ -124,19 +125,19 @@
     </div>
   </div>
 
-  <!-- ==========================================================================
-       INSTRUCCIONES PARA CREAR UN NUEVO CLIENTE:
-       1. Duplica esta carpeta 'plantilla' con el nombre del cliente (ej. 'galeria/cliente-2')
-       2. Cambia los datos de abajo (title, client, pin, photos)
-       3. ¡Listo! La URL será andresreginensi.es/galeria/cliente-2
-       ========================================================================== -->
+   <!-- ==========================================================================
+        INSTRUCCIONES PARA CREAR UN NUEVO CLIENTE:
+        1. Duplica esta carpeta 'plantilla' con un identificador no predecible (ej. 'galeria/boda-marta-8f3k')
+        2. Cambia los datos de abajo (title, client, pinHash o pin, photos)
+        3. ¡Listo! La URL privada será andresreginensi.es/galeria/boda-marta-8f3k
+        ========================================================================== -->
   <script>
     window.GALLERY_CONFIG = {
       title: "Título de la Sesión",
       client: "Nombre del Cliente",
       date: "Fecha del Reportaje",
       location: "Ubicación",
-      pin: "1234", // Elige el PIN que desees dar al cliente
+      pinHash: "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4", // Opcional: usa 'pin: "TU_PIN"' o genera su hash SHA-256
       zipDownloadUrl: "", // Opcional: enlace a archivo ZIP completo
       photos: [
         {
@@ -149,7 +150,7 @@
     };
   </script>
 
-  <script src="../../assets/js/client-gallery.js"></script>
+  <script src="../../assets/js/client-gallery.js?v=6" defer></script>
 </body>
 </html>
 

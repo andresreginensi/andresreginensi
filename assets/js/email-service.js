@@ -1,18 +1,21 @@
 /**
  * Servicio de Envío de Pedidos de Selección de Fotos
- * Compatible con ejecución local directa (file://) y servidores web.
+ * Soporta EmailJS, Formspree y canal directo garantizado (WhatsApp / Email / Portapapeles)
+ * cuando las claves de envío automático aún no están configuradas.
  */
 
 (function (window) {
   'use strict';
 
   const EMAIL_CONFIG = {
-    provider: 'emailjs', // 'emailjs' | 'formspree' | 'demo'
-    
+    provider: 'emailjs', // 'emailjs' | 'formspree' | 'direct'
+    studioEmail: 'andresreginensi@gmail.com',
+    studioWhatsapp: '34664848096',
+
     // Configuración EmailJS (https://www.emailjs.com)
     emailjs: {
       publicKey: 'TU_PUBLIC_KEY',       // Reemplazar con tu Public Key de EmailJS
-      serviceId: 'service_reginensi',    // Tu Service ID
+      serviceId: 'service_reginensi',   // Tu Service ID
       templateId: 'template_proofing'   // Tu Template ID
     },
 
@@ -22,22 +25,48 @@
     }
   };
 
-  /**
-   * Inicializa EmailJS si está configurado en el navegador
-   */
-  function initEmailService() {
-    if (
+  function isEmailJsConfigured() {
+    return Boolean(
       EMAIL_CONFIG.provider === 'emailjs' &&
       window.emailjs &&
+      EMAIL_CONFIG.emailjs.publicKey &&
       EMAIL_CONFIG.emailjs.publicKey !== 'TU_PUBLIC_KEY'
-    ) {
+    );
+  }
+
+  function isFormspreeConfigured() {
+    return Boolean(
+      EMAIL_CONFIG.provider === 'formspree' &&
+      EMAIL_CONFIG.formspree.endpoint &&
+      !EMAIL_CONFIG.formspree.endpoint.includes('TU_FORMSPREE_ID')
+    );
+  }
+
+  function initEmailService() {
+    if (isEmailJsConfigured()) {
       window.emailjs.init(EMAIL_CONFIG.emailjs.publicKey);
     }
   }
 
-  /**
-   * Envía el pedido de fotos seleccionadas al fotógrafo
-   */
+  function buildOrderChannels(templateParams) {
+    const summaryText = [
+      `SELECCIÓN DE FOTOS — ${templateParams.session_title}`,
+      `Cliente: ${templateParams.client_name} (${templateParams.client_email})`,
+      `Total seleccionadas: ${templateParams.total_selected}`,
+      `Fecha: ${templateParams.sent_at}`,
+      `Notas: ${templateParams.notes}`,
+      '',
+      'Fotografías elegidas:',
+      templateParams.photo_list
+    ].join('\n');
+
+    const subject = `Selección de Fotos (${templateParams.total_selected}) — ${templateParams.session_title}`;
+    const mailtoUrl = `mailto:${EMAIL_CONFIG.studioEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(summaryText)}`;
+    const whatsappUrl = `https://wa.me/${EMAIL_CONFIG.studioWhatsapp}?text=${encodeURIComponent('Hola Andrés, te envío mi selección final de fotografías:\n\n' + summaryText)}`;
+
+    return { summaryText, mailtoUrl, whatsappUrl };
+  }
+
   async function sendOrder(orderData) {
     const formattedPhotoList = orderData.selectedPhotos
       .map((id, index) => `${index + 1}. [${id}]`)
@@ -54,30 +83,36 @@
       sent_at: new Date().toLocaleString('es-ES')
     };
 
-    // 1. Envío con EmailJS
-    if (
-      EMAIL_CONFIG.provider === 'emailjs' &&
-      window.emailjs &&
-      EMAIL_CONFIG.emailjs.publicKey !== 'TU_PUBLIC_KEY'
-    ) {
+    const channels = buildOrderChannels(templateParams);
+
+    // 1. Envío automático con EmailJS (si hay claves reales configuradas)
+    if (isEmailJsConfigured()) {
       try {
         const response = await window.emailjs.send(
           EMAIL_CONFIG.emailjs.serviceId,
           EMAIL_CONFIG.emailjs.templateId,
           templateParams
         );
-        return { success: true, message: 'Pedido enviado correctamente', response };
+        return {
+          success: true,
+          mode: 'emailjs',
+          message: 'Tu selección se ha enviado automáticamente al correo del estudio.',
+          response,
+          ...channels
+        };
       } catch (err) {
         console.error('[EmailService] Error en EmailJS:', err);
-        throw new Error('No se pudo enviar el correo mediante EmailJS.');
+        return {
+          success: false,
+          mode: 'direct_channel',
+          message: 'El envío automático no estuvo disponible. Usa uno de los botones directos para remitir tu selección sin perder ningún dato.',
+          ...channels
+        };
       }
     }
 
-    // 2. Envío con Formspree
-    if (
-      EMAIL_CONFIG.provider === 'formspree' &&
-      EMAIL_CONFIG.formspree.endpoint !== 'https://formspree.io/f/TU_FORMSPREE_ID'
-    ) {
+    // 2. Envío automático con Formspree (si hay endpoint real configurado)
+    if (isFormspreeConfigured()) {
       try {
         const response = await fetch(EMAIL_CONFIG.formspree.endpoint, {
           method: 'POST',
@@ -85,34 +120,36 @@
           body: JSON.stringify(templateParams)
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return { success: true, message: 'Pedido enviado correctamente con Formspree' };
+        return {
+          success: true,
+          mode: 'formspree',
+          message: 'Tu selección se ha registrado correctamente.',
+          ...channels
+        };
       } catch (err) {
         console.error('[EmailService] Error en Formspree:', err);
-        throw new Error('No se pudo enviar el pedido mediante Formspree.');
+        return {
+          success: false,
+          mode: 'direct_channel',
+          message: 'El envío automático no estuvo disponible. Usa uno de los botones directos para remitir tu selección.',
+          ...channels
+        };
       }
     }
 
-    // 3. MODO DEMOSTRACIÓN (Cuando aún no has puesto tus claves de API)
-    console.info('%c[EmailService] Simulación de Pedido Enviado:', 'color: #22c55e; font-weight: bold;');
-    console.table({
-      Cliente: templateParams.client_name,
-      Email: templateParams.client_email,
-      Sesion: templateParams.session_title,
-      TotalFotos: templateParams.total_selected,
-      Fecha: templateParams.sent_at
-    });
-    console.log('Lista de fotos seleccionadas:\n' + templateParams.photo_list);
-
-    await new Promise((resolve) => setTimeout(resolve, 900));
+    // 3. Canal directo garantizado (evita perder pedidos cuando EmailJS/Formspree aún no tiene API key)
     return {
-      success: true,
-      message: 'Modo demo: pedido simulado con éxito.'
+      success: false,
+      mode: 'direct_channel',
+      message: 'Tu lista está lista. Pulsa WhatsApp o Correo directo para enviarla a Andrés Reginensi al instante.',
+      ...channels
     };
   }
 
   window.EmailService = {
     EMAIL_CONFIG,
     initEmailService,
+    isAutomatedConfigured: () => isEmailJsConfigured() || isFormspreeConfigured(),
     sendOrder
   };
 

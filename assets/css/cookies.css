@@ -357,11 +357,11 @@
   flex-wrap: wrap;
 }
 
-/* Enlace discreto para reabrir el panel desde el footer */
+/* Enlace discreto para reabrir el panel desde el footer (contraste WCAG AA) */
 .btn-cookie-reopen {
   background: none;
   border: none;
-  color: var(--text-dim, #52525b);
+  color: var(--text-muted, #a1a1aa);
   font-family: inherit;
   font-size: 0.8rem;
   cursor: pointer;
@@ -375,12 +375,19 @@
   color: var(--accent-warm, #e3d5b8);
 }
 
+.cookie-btn:focus-visible,
+.cookie-modal-close:focus-visible,
+.btn-cookie-reopen:focus-visible {
+  outline: 2px solid var(--accent-gold, #c5a059);
+  outline-offset: 2px;
+}
+
 /* ----------------------------------------------------
-   4. RESPONSIVE
+   4. RESPONSIVE & ACCESIBILIDAD DE MOVIMIENTO
    ---------------------------------------------------- */
 @media (max-width: 768px) {
   .cookie-banner {
-    bottom: 0.75rem;
+    bottom: 5.1rem; /* Se sitúa por encima de la barra flotante de contacto móvil sin taparla */
     width: calc(100% - 1.5rem);
     padding: 1.25rem 1.25rem;
   }
@@ -417,5 +424,16 @@
 
   .cookie-modal-footer .cookie-btn {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-banner,
+  .cookie-modal-overlay,
+  .cookie-modal,
+  .cookie-btn,
+  .cookie-slider,
+  .cookie-slider::before {
+    transition: none !important;
   }
 }

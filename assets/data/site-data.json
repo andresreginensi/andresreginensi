@@ -151,7 +151,6 @@
   "sessions": [
     {
       "id": "inmobiliaria-villa-mediterranea",
-      "pin": "1234",
       "title": "Villa Galileu - Reportaje Arquitectura & Lujo",
       "date": "20 de Octubre, 2026",
       "location": "Jávea, Alicante",
@@ -189,11 +188,11 @@
           "fullUrl": "assets/images/realestate/burgueras-fachada.jpg"
         }
       ],
-      "createdAt": 1700000000002
+      "createdAt": 1700000000002,
+      "pinHash": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
     },
     {
       "id": "boda-laura-carlos",
-      "pin": "2026",
       "title": "Boda Laura & Carlos — Reportaje Documental",
       "date": "18 de Octubre, 2026",
       "location": "Finca Bellver, Mallorca",
@@ -221,7 +220,8 @@
           "fullUrl": "assets/images/bodas/boda-alianzas-manos.jpg"
         }
       ],
-      "createdAt": 1700000000001
+      "createdAt": 1700000000001,
+      "pinHash": "158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab"
     }
   ]
 }

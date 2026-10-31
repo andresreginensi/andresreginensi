@@ -11,8 +11,8 @@
   --accent-gold-hover: #dfbc76;
   --text-pure: #ffffff;
   --text-primary: #f4f4f6;
-  --text-muted: #8e8e98;
-  --text-dim: #5c5c64;
+  --text-muted: #a1a1aa;
+  --text-dim: #8e8e98;
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-gold: rgba(197, 160, 89, 0.35);
   --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -627,5 +627,23 @@ html, body {
   }
   .lightbox-prev { left: 0.5rem; }
   .lightbox-next { right: 0.5rem; }
+}
+
+.photo-img-wrap:focus-visible,
+.btn-photo-download:focus-visible,
+.btn-download-all:focus-visible,
+.btn-lock:focus-visible,
+.btn-unlock:focus-visible,
+.lightbox-close:focus-visible,
+.lightbox-nav-btn:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 

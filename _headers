@@ -1,0 +1,60 @@
+# ==============================================================================
+# _headers — Configuración de Seguridad y Caché para Cloudflare Pages
+# Sitio: https://andresreginensi.es/
+# ==============================================================================
+
+# 1. Cabeceras globales de seguridad para todas las rutas
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://api.emailjs.com https://formspree.io https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://formspree.io mailto:; object-src 'none'; upgrade-insecure-requests
+
+# 2. Protección adicional y bloqueo de indexación en áreas privadas y panel admin
+/admin
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/admin.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/proofing
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Referrer-Policy: no-referrer
+  Cache-Control: no-cache, must-revalidate
+
+/proofing.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Referrer-Policy: no-referrer
+  Cache-Control: no-cache, must-revalidate
+
+/galeria/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Referrer-Policy: no-referrer
+  Cache-Control: no-cache, must-revalidate
+
+/data/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store, no-cache, must-revalidate
+
+# 3. Datos dinámicos del CMS GitHub (lectura fresca inmediata en móvil y escritorio)
+/assets/data/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# 4. Política de caché optimizada para recursos estáticos
+/assets/images/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/assets/css/*
+  Cache-Control: public, max-age=86400, must-revalidate
+
+/assets/js/*
+  Cache-Control: public, max-age=86400, must-revalidate
+

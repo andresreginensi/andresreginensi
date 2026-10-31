@@ -55,11 +55,23 @@
       categoryLabel: 'Bodas & Eventos',
       title: 'La Salida',
       tag: 'Ceremonia B&N',
-      caption: 'Celebración & Alegría — Salida de Ceremonia en Confeti',
+      caption: 'La Salida — Ceremonia B&N',
       aspect: 'landscape',
-      thumbUrl: 'assets/images/bodas/boda-salida-arroz-thumb.jpg',
-      fullUrl: 'assets/images/bodas/boda-salida-arroz.jpg',
-      createdAt: 1700000000004
+      thumbUrl: 'assets/images/uploads/bodas-la-salida-thumb-1793484078424-w7qb.jpg',
+      fullUrl: 'assets/images/uploads/bodas-la-salida-full-1793484078424-114u.jpg',
+      createdAt: 1793406876568
+    },
+    {
+      id: 'port-boda-3',
+      category: 'bodas',
+      categoryLabel: 'Bodas & Eventos',
+      title: 'Orilla Dorada',
+      tag: 'Atardecer & Pareja',
+      caption: 'Orilla Dorada — Atardecer & Pareja',
+      aspect: 'landscape',
+      thumbUrl: 'assets/images/uploads/bodas-orilla-dorada-thumb-1793484078424-kg3p.jpg',
+      fullUrl: 'assets/images/uploads/bodas-orilla-dorada-full-1793484078424-j38e.jpg',
+      createdAt: 1793406675069
     },
     {
       id: 'port-boda-2',
@@ -72,18 +84,6 @@
       thumbUrl: 'assets/images/bodas/boda-editorial-calle-thumb.jpg',
       fullUrl: 'assets/images/bodas/boda-editorial-calle.jpg',
       createdAt: 1700000000005
-    },
-    {
-      id: 'port-boda-3',
-      category: 'bodas',
-      categoryLabel: 'Bodas & Eventos',
-      title: 'Orilla Dorada',
-      tag: 'Atardecer & Pareja',
-      caption: 'Orilla del Mar — Atardecer Mediterráneo',
-      aspect: 'landscape',
-      thumbUrl: 'assets/images/bodas/boda-playa-orilla-thumb.jpg',
-      fullUrl: 'assets/images/bodas/boda-playa-orilla.jpg',
-      createdAt: 1700000000006
     },
     {
       id: 'port-ret-1',
@@ -159,11 +159,11 @@
     }
   ];
 
-  // Sesiones de clientes iniciales con fotos auténticas
+  // Sesiones de clientes iniciales con fotos auténticas (PIN almacenado como SHA-256)
   const DEFAULT_SESSIONS = [
     {
       id: 'boda-laura-carlos',
-      pin: '2026',
+      pinHash: '158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab',
       title: 'Boda Laura & Carlos — Reportaje Documental',
       date: '18 de Octubre, 2026',
       location: 'Finca Bellver, Mallorca',
@@ -179,7 +179,7 @@
     },
     {
       id: 'inmobiliaria-villa-mediterranea',
-      pin: '1234',
+      pinHash: '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',
       title: 'Villa Galileu - Reportaje Arquitectura & Lujo',
       date: '20 de Octubre, 2026',
       location: 'Jávea, Alicante',
@@ -199,8 +199,19 @@
 
   const DEFAULT_AUTH = {
     username: 'admin',
-    password: 'admin2026'
+    passwordHash: '6051fc84a7a0d74c225fb18a496b09952da5642e60723ecae543298edd7d82d6'
   };
+
+  async function sha256Hex(value) {
+    const str = String(value || '');
+    if (window.crypto && window.crypto.subtle && window.TextEncoder) {
+      const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+    return '';
+  }
 
   const DEFAULT_HERO = 'assets/images/portada.jpg';
   const BASE_INITIAL_TIMESTAMP = 1700000000099;
@@ -322,7 +333,8 @@
   }
 
   async function saveAdminCredentials(username, password) {
-    const creds = { username: username.trim(), password };
+    const passwordHash = await sha256Hex(password);
+    const creds = { username: username.trim(), passwordHash };
     try {
       const db = await openDB();
       return new Promise((resolve, reject) => {
@@ -342,8 +354,20 @@
     let auth = await getAdminCredentials();
     if (!auth) auth = DEFAULT_AUTH;
     const uMatch = (auth.username || 'admin').trim().toLowerCase() === (username || '').trim().toLowerCase();
-    const pMatch = String(auth.password) === String(password);
-    return uMatch && pMatch;
+    const inputHash = await sha256Hex(password);
+
+    if (auth.passwordHash && inputHash) {
+      return uMatch && auth.passwordHash === inputHash;
+    }
+    // Migración transparente si existía credencial local antigua sin hash
+    if (auth.password) {
+      const legacyMatch = uMatch && String(auth.password) === String(password);
+      if (legacyMatch && inputHash) {
+        await saveAdminCredentials(auth.username || 'admin', password);
+      }
+      return legacyMatch;
+    }
+    return false;
   }
 
   // =======================================================
@@ -571,6 +595,21 @@
 
     newSiteData.version = 1;
     newSiteData.updatedAt = Date.now();
+
+    // Garantizar que ningún PIN de galería se publique en texto plano en site-data.json
+    if (Array.isArray(newSiteData.sessions)) {
+      for (let i = 0; i < newSiteData.sessions.length; i++) {
+        const s = Object.assign({}, newSiteData.sessions[i]);
+        if (s.pin) {
+          const computedHash = await sha256Hex(s.pin);
+          if (computedHash) {
+            s.pinHash = computedHash;
+            delete s.pin;
+          }
+        }
+        newSiteData.sessions[i] = s;
+      }
+    }
 
     // 1. Obtener SHA del último commit en la rama (main)
     const refData = await githubApi(cfg, `/git/ref/heads/${encodeURIComponent(cfg.branch)}`);

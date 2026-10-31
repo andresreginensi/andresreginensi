@@ -1,0 +1,18 @@
+# robots.txt — Andrés Reginensi Photography (https://andresreginensi.es/)
+User-agent: *
+Allow: /
+Allow: /assets/css/
+Allow: /assets/js/
+Allow: /assets/images/
+
+# Áreas privadas de clientes, panel administrativo y datos internos
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /proofing
+Disallow: /proofing.html
+Disallow: /galeria/
+Disallow: /data/
+Disallow: /assets/data/
+
+Sitemap: https://andresreginensi.es/sitemap.xml
+
