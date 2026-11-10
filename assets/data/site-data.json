@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": 1793484078426,
+  "updatedAt": 1794269820352,
   "heroImage": "assets/images/portada.jpg",
   "portfolio": [
     {
@@ -31,12 +31,12 @@
       "id": "port-corp-3",
       "category": "empresarial",
       "categoryLabel": "Empresarial & Corporativo",
-      "title": "Edificio Burgueras",
-      "tag": "Sede & Arquitectura Comercial",
-      "caption": "Edificio Burgueras — Geometría, Cristales & Fachada Moderna",
+      "title": "25 años MEDIAMARKT",
+      "tag": "Empresariales",
+      "caption": "25 años MEDIAMARKT — Empresariales",
       "aspect": "landscape",
-      "thumbUrl": "assets/images/realestate/burgueras-fachada-thumb.jpg",
-      "fullUrl": "assets/images/realestate/burgueras-fachada.jpg",
+      "thumbUrl": "assets/images/uploads/empresarial-25-anos-mediamarkt-thumb-1794269820352-we5q.jpg",
+      "fullUrl": "assets/images/uploads/empresarial-25-anos-mediamarkt-full-1794269820352-s4ka.jpg",
       "createdAt": 1700000000012
     },
     {
