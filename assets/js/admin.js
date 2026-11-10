@@ -324,7 +324,17 @@
 
     // Modal Foto: Dropzone & Selección de archivo local
     if (dom.photoDropzone && dom.photoFileInput) {
-      dom.photoDropzone.addEventListener('click', () => dom.photoFileInput.click());
+      dom.photoDropzone.addEventListener('click', (e) => {
+        if (e.target === dom.photoFileInput) return;
+        dom.photoFileInput.value = '';
+        dom.photoFileInput.click();
+      });
+      if (dom.photoPreviewBox) {
+        dom.photoPreviewBox.addEventListener('click', () => {
+          dom.photoFileInput.value = '';
+          dom.photoFileInput.click();
+        });
+      }
       dom.photoDropzone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dom.photoDropzone.classList.add('dragover');
@@ -664,34 +674,42 @@
 
   async function handlePhotoFileSelect(file) {
     const titleEl = dom.photoDropzone.querySelector('.dropzone-title');
-    if (titleEl) titleEl.textContent = 'Procesando y optimizando imagen...';
+    if (titleEl) titleEl.textContent = '⏳ Procesando y optimizando imagen...';
     try {
       const processed = await db.processImageFile(file);
-      currentUploadData = processed;
-      dom.photoPreviewImg.src = processed.thumbUrl;
+      currentUploadData = {
+        fullUrl: processed.fullUrl,
+        thumbUrl: processed.thumbUrl || processed.fullUrl
+      };
+      dom.photoPreviewImg.src = currentUploadData.thumbUrl;
       dom.photoPreviewBox.style.display = 'block';
-      dom.photoUrlInput.value = '';
+      if (dom.photoUrlInput) dom.photoUrlInput.value = '';
 
       if (!dom.photoTitle.value) {
         const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
         dom.photoTitle.value = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
       }
 
-      if (titleEl) titleEl.textContent = `Foto seleccionada: ${file.name}`;
+      if (titleEl) {
+        titleEl.textContent = `✓ Nueva foto cargada: ${file.name} (Pulsa Guardar abajo)`;
+      }
+      showToast(`Imagen "${file.name}" lista. Pulsa Guardar para aplicar el cambio.`);
     } catch (err) {
-      alert('Error al procesar la foto: ' + err.message);
+      alert('Error al procesar la foto: ' + (err.message || err));
       if (titleEl) titleEl.textContent = 'Haz clic aquí para seleccionar tu foto';
     }
   }
 
   function openPhotoModal(photoToEdit = null) {
     dom.photoForm.reset();
+    if (dom.photoFileInput) dom.photoFileInput.value = '';
+    if (dom.photoUrlInput) dom.photoUrlInput.value = '';
     dom.photoPreviewBox.style.display = 'none';
     dom.photoPreviewImg.src = '';
     currentUploadData = { fullUrl: '', thumbUrl: '' };
 
     const titleEl = dom.photoDropzone.querySelector('.dropzone-title');
-    if (titleEl) titleEl.textContent = 'Haz clic aquí para seleccionar tu foto';
+    if (titleEl) titleEl.textContent = 'Haz clic aquí para seleccionar tu nueva foto';
 
     if (photoToEdit) {
       dom.photoModalTitle.textContent = 'Editar Fotografía';
@@ -700,7 +718,6 @@
       if (dom.photoTag) dom.photoTag.value = photoToEdit.tag || '';
       dom.photoCategory.value = photoToEdit.category || 'realestate';
       dom.photoAspect.value = photoToEdit.aspect || 'landscape';
-      dom.photoUrlInput.value = photoToEdit.fullUrl.startsWith('data:') ? '' : photoToEdit.fullUrl;
 
       currentUploadData.fullUrl = photoToEdit.fullUrl;
       currentUploadData.thumbUrl = photoToEdit.thumbUrl || photoToEdit.fullUrl;

@@ -463,23 +463,43 @@
   const SUPABASE_LS_KEY = 'andres_supabase_config';
   const SITE_DATA_REPO_PATH = 'assets/data/site-data.json';
 
-  // Caché temporal de vistas previas (para que durante los ~20s que Cloudflare construye,
-  // las imágenes recién subidas se vean al instante sin esperar al despliegue)
+  // Caché temporal de vistas previas (persistida en sessionStorage para que en todas las pestañas
+  // las imágenes recién subidas se vean al instante mientras Cloudflare construye el despliegue)
+  const PREVIEW_STORAGE_KEY = 'andres_instant_previews';
   const memoryPreviewMap = {};
   let cachedGitHubSiteData = null;
   let cachedGitHubSiteDataTime = 0;
   let publicSiteDataPromise = null;
   let publicSiteDataTime = 0;
 
+  function loadStoredPreviews() {
+    try {
+      const raw = sessionStorage.getItem(PREVIEW_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      const now = Date.now();
+      Object.keys(parsed).forEach((k) => {
+        if (parsed[k] && now - parsed[k].ts < 300000) {
+          memoryPreviewMap[k] = parsed[k];
+        }
+      });
+    } catch (e) {}
+  }
+  loadStoredPreviews();
+
   function saveInstantPreview(repoPath, dataUrl) {
     if (!repoPath || !dataUrl) return;
     memoryPreviewMap[repoPath] = { dataUrl, ts: Date.now() };
+    try {
+      sessionStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(memoryPreviewMap));
+    } catch (e) {}
   }
 
   function resolvePreviewUrl(url) {
     if (!url || typeof url !== 'string') return url;
+    if (!memoryPreviewMap[url]) loadStoredPreviews();
     const entry = memoryPreviewMap[url];
-    if (entry && Date.now() - entry.ts < 180000) {
+    if (entry && Date.now() - entry.ts < 300000) {
       return entry.dataUrl;
     }
     return url;
@@ -949,6 +969,8 @@
   }
 
   async function getAllPortfolioPhotos() {
+    const localUpdatedAt = Number(getLS('local_portfolio_updated_at', 0)) || 0;
+
     // 1. Si GitHub está conectado en este navegador, consultar estado real de GitHub
     if (isGitHubEnabled()) {
       try {
@@ -962,15 +984,26 @@
       }
     }
 
-    // 2. Para todos los visitantes (móviles, tablets, clientes), leer assets/data/site-data.json de Cloudflare Pages
+    // 2. Si el administrador ha editado fotos localmente en este navegador más recientemente que site-data.json
     const pubData = await fetchPublicDeployedSiteData();
-    if (pubData && pubData.updatedAt > BASE_INITIAL_TIMESTAMP && Array.isArray(pubData.portfolio) && pubData.portfolio.length > 0) {
+    const pubUpdatedAt = pubData && pubData.updatedAt ? Number(pubData.updatedAt) : 0;
+
+    if (localUpdatedAt > pubUpdatedAt) {
+      const localList = await getLocalPortfolioPhotos();
+      if (Array.isArray(localList) && localList.length > 0) {
+        return localList.map(applyPreviewUrlsToPhoto);
+      }
+    }
+
+    // 3. Para todos los visitantes (móviles, tablets, clientes), leer assets/data/site-data.json de Cloudflare Pages
+    if (pubData && pubUpdatedAt > BASE_INITIAL_TIMESTAMP && Array.isArray(pubData.portfolio) && pubData.portfolio.length > 0) {
       const sorted = [...pubData.portfolio].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       return sorted.map(applyPreviewUrlsToPhoto);
     }
 
-    // 3. Respaldo local (IndexedDB)
-    return getLocalPortfolioPhotos();
+    // 4. Respaldo local (IndexedDB)
+    const fallbackList = await getLocalPortfolioPhotos();
+    return fallbackList.map(applyPreviewUrlsToPhoto);
   }
 
   async function savePortfolioPhoto(photo) {
@@ -984,23 +1017,25 @@
       photo.createdAt = existingItem && existingItem.createdAt ? existingItem.createdAt : Date.now();
     }
 
+    const rawFullData = photo.fullUrl;
+    const rawThumbData = photo.thumbUrl || photo.fullUrl;
+
     if (isGitHubEnabled()) {
       const ghData = (await fetchGitHubSiteData(null, true)) || {
         version: 1,
         heroImage: await getLocalHeroImage(),
-        portfolio: await getLocalPortfolioPhotos(),
+        portfolio: currentList.length > 0 ? currentList : await getLocalPortfolioPhotos(),
         sessions: await getLocalClientSessions()
       };
 
-      // Si el JSON remoto aún era la plantilla inicial sin sincronizar cambios locales, partimos de la lista actual
       if (!Array.isArray(ghData.portfolio) || ghData.portfolio.length === 0) {
-        ghData.portfolio = await getLocalPortfolioPhotos();
+        ghData.portfolio = currentList.length > 0 ? [...currentList] : await getLocalPortfolioPhotos();
       }
 
       const filesToUpload = [];
       const safeSlug = slugify(photo.title || photo.category || 'foto');
-      photo.fullUrl = prepareImageForGitHubCommit(photo.fullUrl, `${photo.category || 'port'}-${safeSlug}-full`, filesToUpload);
-      photo.thumbUrl = prepareImageForGitHubCommit(photo.thumbUrl || photo.fullUrl, `${photo.category || 'port'}-${safeSlug}-thumb`, filesToUpload);
+      photo.fullUrl = prepareImageForGitHubCommit(rawFullData, `${photo.category || 'port'}-${safeSlug}-full`, filesToUpload);
+      photo.thumbUrl = prepareImageForGitHubCommit(rawThumbData, `${photo.category || 'port'}-${safeSlug}-thumb`, filesToUpload);
 
       const idx = ghData.portfolio.findIndex((p) => p.id === photo.id);
       if (idx >= 0) {
@@ -1013,27 +1048,30 @@
       await commitToGitHub(filesToUpload, ghData, `📸 Admin: ${actionLabel}`);
     }
 
-    try {
-      const db = await openDB();
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction('portfolio', 'readwrite');
-        const st = tx.objectStore('portfolio');
-        const req = st.put(photo);
-        req.onsuccess = () => resolve(photo);
-        req.onerror = () => reject(req.error);
-      });
-    } catch (e) {
-      const list = getLS('portfolio', [...DEFAULT_PORTFOLIO]);
-      const idx = list.findIndex((p) => p.id === photo.id);
-      if (idx >= 0) list[idx] = photo;
-      else list.unshift(photo);
-      setLS('portfolio', list);
+    // Actualizar la lista completa en almacenamiento local (con vistas previas inmediatas si aún no está en disco)
+    const localPhotoCopy = Object.assign({}, photo, {
+      fullUrl: rawFullData && rawFullData.startsWith('data:') ? rawFullData : photo.fullUrl,
+      thumbUrl: rawThumbData && rawThumbData.startsWith('data:') ? rawThumbData : photo.thumbUrl
+    });
+
+    const updatedList = currentList.length > 0 ? [...currentList] : [...DEFAULT_PORTFOLIO];
+    const localIdx = updatedList.findIndex((p) => p.id === photo.id);
+    if (localIdx >= 0) {
+      updatedList[localIdx] = localPhotoCopy;
+    } else {
+      updatedList.unshift(localPhotoCopy);
     }
 
-    return applyPreviewUrlsToPhoto(photo);
+    setLS('local_portfolio_updated_at', Date.now());
+    await replaceAllLocalPortfolioPhotos(updatedList);
+    setLS('portfolio', updatedList);
+
+    return applyPreviewUrlsToPhoto(localPhotoCopy);
   }
 
   async function deletePortfolioPhoto(id) {
+    const currentList = await getAllPortfolioPhotos().catch(() => []);
+
     if (isGitHubEnabled()) {
       const ghData = await fetchGitHubSiteData(null, true);
       if (ghData && Array.isArray(ghData.portfolio)) {
@@ -1043,20 +1081,10 @@
       }
     }
 
-    try {
-      const db = await openDB();
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction('portfolio', 'readwrite');
-        const st = tx.objectStore('portfolio');
-        const req = st.delete(id);
-        req.onsuccess = () => resolve(true);
-        req.onerror = () => reject(req.error);
-      });
-    } catch (e) {
-      let list = getLS('portfolio', [...DEFAULT_PORTFOLIO]);
-      list = list.filter((p) => p.id !== id);
-      setLS('portfolio', list);
-    }
+    const updatedList = (currentList.length > 0 ? currentList : [...DEFAULT_PORTFOLIO]).filter((p) => p.id !== id);
+    setLS('local_portfolio_updated_at', Date.now());
+    await replaceAllLocalPortfolioPhotos(updatedList);
+    setLS('portfolio', updatedList);
     return true;
   }
 
@@ -1210,35 +1238,55 @@
     return true;
   }
 
-  // Procesador y compresor de fotos optimizado en WebP (con fallback automático a JPEG)
+  // Procesador y compresor de fotos optimizado en JPEG/WebP de alta compatibilidad
   function processImageFile(file) {
     return new Promise((resolve, reject) => {
-      if (!file.type.startsWith('image/')) {
-        return reject(new Error('El archivo no es una imagen.'));
+      if (file.type && !file.type.startsWith('image/')) {
+        return reject(new Error('El archivo seleccionado no es una imagen válida.'));
       }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const fullUrl = resizeImage(img, 2048, 0.85);
-            const thumbUrl = resizeImage(img, 750, 0.82);
-            resolve({ fullUrl, thumbUrl, originalName: file.name });
-          } catch (err) {
-            resolve({ fullUrl: e.target.result, thumbUrl: e.target.result, originalName: file.name });
-          }
-        };
-        img.onerror = () => reject(new Error('No se pudo abrir la imagen.'));
-        img.src = e.target.result;
+      const handleLoadedImage = (img, cleanupUrl) => {
+        try {
+          const fullUrl = resizeImage(img, 1920, 0.85);
+          const thumbUrl = resizeImage(img, 750, 0.82);
+          if (cleanupUrl) URL.revokeObjectURL(cleanupUrl);
+          resolve({ fullUrl, thumbUrl, originalName: file.name });
+        } catch (err) {
+          if (cleanupUrl) URL.revokeObjectURL(cleanupUrl);
+          reject(new Error('No se pudo procesar la imagen seleccionada.'));
+        }
       };
-      reader.onerror = () => reject(new Error('Error de lectura.'));
-      reader.readAsDataURL(file);
+
+      if (window.URL && window.URL.createObjectURL) {
+        const objUrl = window.URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => handleLoadedImage(img, objUrl);
+        img.onerror = () => {
+          window.URL.revokeObjectURL(objUrl);
+          fallbackFileReader(file, handleLoadedImage, reject);
+        };
+        img.src = objUrl;
+      } else {
+        fallbackFileReader(file, handleLoadedImage, reject);
+      }
     });
   }
 
+  function fallbackFileReader(file, handleLoadedImage, reject) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => handleLoadedImage(img, null);
+      img.onerror = () => reject(new Error('No se pudo abrir la imagen. Usa formato JPG, PNG o WebP.'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Error de lectura del archivo.'));
+    reader.readAsDataURL(file);
+  }
+
   function resizeImage(img, maxDim, quality) {
-    let { width, height } = img;
+    let width = img.naturalWidth || img.width;
+    let height = img.naturalHeight || img.height;
     if (width > height) {
       if (width > maxDim) {
         height = Math.round((height * maxDim) / width);
@@ -1256,10 +1304,6 @@
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0, width, height);
 
-    const webpData = canvas.toDataURL('image/webp', quality);
-    if (webpData && webpData.startsWith('data:image/webp')) {
-      return webpData;
-    }
     return canvas.toDataURL('image/jpeg', quality);
   }
 

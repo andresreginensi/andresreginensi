@@ -862,13 +862,16 @@
           <input type="file" id="photo-file-input" accept="image/*" style="display: none;">
         </div>
 
-        <div class="upload-preview-box" id="photo-preview-box">
+        <div class="upload-preview-box" id="photo-preview-box" style="cursor: pointer;" title="Haz clic aquí para cambiar la fotografía">
           <img id="photo-preview-img" src="" alt="Vista previa">
+          <div style="text-align: center; font-size: 0.78rem; color: var(--accent-gold); padding: 0.45rem; background: rgba(0,0,0,0.65);">
+            🔄 Haz clic aquí o en el recuadro superior para cambiar la imagen desde tu ordenador
+          </div>
         </div>
 
         <div class="form-group" style="margin-top: 1.2rem;">
-          <label class="form-label" for="photo-url-input">O también puedes pegar un enlace (URL) de foto:</label>
-          <input type="url" id="photo-url-input" class="form-input" placeholder="https://ejemplo.com/mifoto.jpg">
+          <label class="form-label" for="photo-url-input">O también puedes pegar un enlace (URL) externo:</label>
+          <input type="text" id="photo-url-input" class="form-input" placeholder="https://ejemplo.com/mifoto.jpg">
         </div>
 
         <div class="form-group">
@@ -1082,7 +1085,7 @@
 
   <!-- Lógica JavaScript del Panel & Librería de Gráficos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
-  <script src="assets/js/db.js?v=9" defer></script>
-  <script src="assets/js/admin.js?v=9" defer></script>
+  <script src="assets/js/db.js?v=10" defer></script>
+  <script src="assets/js/admin.js?v=10" defer></script>
 </body>
 </html>
