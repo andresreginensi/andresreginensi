@@ -105,19 +105,46 @@ body {
 }
 
 .back-link {
-  color: var(--text-muted);
+  color: var(--text-primary);
   text-decoration: none;
-  font-size: 0.75rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  transition: color var(--duration-fast);
+  gap: 0.55rem;
+  padding: 0.5rem 1.05rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              background 220ms ease-out,
+              border-color 220ms ease-out,
+              color 200ms ease-out,
+              box-shadow 220ms ease-out;
+}
+
+.back-link svg {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .back-link:hover {
-  color: var(--accent-warm);
+  color: var(--text-pure);
+  background: rgba(227, 213, 184, 0.12);
+  border-color: rgba(227, 213, 184, 0.38);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.5);
+}
+
+.back-link:hover svg {
+  transform: translateX(-3px);
+}
+
+.back-link:active {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 90ms;
 }
 
 .session-badge {
@@ -396,45 +423,81 @@ body {
 }
 
 .btn-bar-clear {
-  background: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border-hairline);
-  padding: 0.5rem 1.1rem;
-  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.58rem 1.25rem;
+  border-radius: 9999px;
   font-size: 0.8rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
   cursor: pointer;
-  transition: all var(--duration-fast);
+  box-shadow: 0 4px 12px -3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
+              background 220ms ease-out,
+              border-color 220ms ease-out,
+              color 200ms ease-out;
 }
 
 .btn-bar-clear:hover {
   color: #fff;
-  border-color: var(--border-hover);
+  background: rgba(227, 213, 184, 0.12);
+  border-color: rgba(227, 213, 184, 0.38);
+  transform: translateY(-2px) scale(1.015);
+  box-shadow: 0 10px 22px -4px rgba(0, 0, 0, 0.6), 0 0 16px -3px rgba(227, 213, 184, 0.15);
+}
+
+.btn-bar-clear:active {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 90ms;
 }
 
 .btn-bar-submit {
-  background: var(--accent-warm);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #dfbe78 0%, #c5a059 52%, #b0893e 100%);
   color: var(--bg-deep);
-  border: none;
-  padding: 0.5rem 1.3rem;
-  border-radius: 999px;
+  border: 1px solid rgba(245, 224, 181, 0.45);
+  padding: 0.58rem 1.4rem;
+  border-radius: 9999px;
   font-size: 0.8rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  letter-spacing: 0.03em;
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
   cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-out-expo);
+  box-shadow: 0 4px 14px -2px rgba(197, 160, 89, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
+              background 220ms ease-out,
+              filter 220ms ease-out;
 }
 
 .btn-bar-submit:hover:not(:disabled) {
-  background: #fff;
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #ebd094 0%, #d4b06a 52%, #c5a059 100%);
+  transform: translateY(-2px) scale(1.018);
+  box-shadow: 0 10px 24px -4px rgba(197, 160, 89, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  filter: brightness(1.03);
+}
+
+.btn-bar-submit:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 90ms;
 }
 
 .btn-bar-submit:disabled {
-  opacity: 0.3;
+  opacity: 0.35;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* =======================================================

@@ -30,7 +30,50 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --duration-fast: 0.25s;
+  --duration-fast: 0.22s;
   --duration-normal: 0.5s;
   --duration-slow: 0.8s;
+
+  /* Sistema de Botones Contemporáneo (Tokens Reutilizables) */
+  --btn-radius-pill: 9999px;
+  --btn-radius-modern: 14px;
+  --btn-transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+                    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
+                    background 220ms ease-out,
+                    border-color 220ms ease-out,
+                    color 200ms ease-out,
+                    filter 220ms ease-out;
+
+  /* Primario (Acento Dorado / Lino Editorial con relieve tridimensional) */
+  --btn-primary-bg: linear-gradient(135deg, #dfbe78 0%, #c5a059 52%, #b0893e 100%);
+  --btn-primary-bg-hover: linear-gradient(135deg, #ebd094 0%, #d4b06a 52%, #c5a059 100%);
+  --btn-primary-text: #09090b;
+  --btn-primary-border: rgba(245, 224, 181, 0.45);
+  --btn-primary-shadow: 0 4px 14px -2px rgba(197, 160, 89, 0.28),
+                        0 2px 6px -1px rgba(0, 0, 0, 0.45),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  --btn-primary-shadow-hover: 0 10px 26px -4px rgba(197, 160, 89, 0.45),
+                              0 4px 12px -2px rgba(0, 0, 0, 0.55),
+                              inset 0 1px 0 rgba(255, 255, 255, 0.58);
+
+  /* Secundario (Glassmorphism & Ghost Ultrafino) */
+  --btn-glass-bg: rgba(255, 255, 255, 0.055);
+  --btn-glass-bg-hover: rgba(227, 213, 184, 0.13);
+  --btn-glass-border: rgba(255, 255, 255, 0.12);
+  --btn-glass-border-hover: rgba(227, 213, 184, 0.42);
+  --btn-glass-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.45),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  --btn-glass-shadow-hover: 0 10px 24px -4px rgba(0, 0, 0, 0.65),
+                            0 0 20px -3px rgba(227, 213, 184, 0.18),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+  /* Acción Directa WhatsApp (Tono Esmeralda Equilibrado + Relieve Sutil) */
+  --btn-whatsapp-bg: linear-gradient(135deg, #2ee370 0%, #22c35e 54%, #19a94d 100%);
+  --btn-whatsapp-bg-hover: linear-gradient(135deg, #43eb80 0%, #27d167 54%, #1fb857 100%);
+  --btn-whatsapp-shadow: 0 4px 14px -2px rgba(34, 195, 94, 0.26),
+                         0 2px 6px -1px rgba(0, 0, 0, 0.45),
+                         inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  --btn-whatsapp-shadow-hover: 0 10px 26px -4px rgba(34, 195, 94, 0.42),
+                               0 4px 12px -2px rgba(0, 0, 0, 0.55),
+                               inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }

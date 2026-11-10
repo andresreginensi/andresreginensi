@@ -92,22 +92,33 @@
       color: var(--accent-warm);
     }
     .btn-manage-cookies {
+      position: relative;
+      overflow: hidden;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      background: var(--accent-gold);
-      color: #09090b;
-      padding: 0.85rem 1.6rem;
-      border-radius: 8px;
+      gap: 0.55rem;
+      background: var(--btn-primary-bg);
+      color: var(--btn-primary-text);
+      padding: 0.88rem 1.75rem;
+      border-radius: var(--btn-radius-pill);
       font-weight: 600;
-      font-size: 0.88rem;
+      font-size: 0.86rem;
+      letter-spacing: 0.03em;
       cursor: pointer;
-      border: none;
+      border: 1px solid var(--btn-primary-border);
+      box-shadow: var(--btn-primary-shadow);
       margin: 1.25rem 0 1.5rem;
-      transition: background var(--duration-fast);
+      transition: var(--btn-transition);
     }
     .btn-manage-cookies:hover {
-      background: #deb66c;
+      background: var(--btn-primary-bg-hover);
+      transform: translateY(-2px) scale(1.015);
+      box-shadow: var(--btn-primary-shadow-hover);
+      filter: brightness(1.03);
+    }
+    .btn-manage-cookies:active {
+      transform: translateY(0) scale(0.97);
+      transition-duration: 90ms;
     }
     .legal-notice-box {
       background: rgba(197, 160, 89, 0.06);
