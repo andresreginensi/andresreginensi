@@ -28,7 +28,9 @@
 }
 
 /* Resets y base */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -485,7 +487,9 @@ body {
   color: var(--text-muted);
 }
 
-.form-field input, .form-field textarea, .form-field select {
+.form-field input,
+.form-field textarea,
+.form-field select {
   background: var(--bg-deep);
   border: 1px solid var(--border-hairline);
   color: #fff;
@@ -497,7 +501,8 @@ body {
   transition: border-color var(--duration-fast);
 }
 
-.form-field input:focus, .form-field textarea:focus {
+.form-field input:focus,
+.form-field textarea:focus {
   border-color: var(--accent-warm);
 }
 
@@ -650,9 +655,11 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
 }
-

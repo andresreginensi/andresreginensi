@@ -186,7 +186,7 @@
           }
           return;
         }
-      } catch (err) {}
+      } catch (err) { }
 
       const rawCode = (dom.authCodeInput ? dom.authCodeInput.value.trim() : '').toLowerCase();
       const enteredCode = rawCode.replace(/[^a-z0-9_-]/g, '');
@@ -216,7 +216,7 @@
             const nextCount = (lock.count || 0) + 1;
             const nextUntil = nextCount >= MAX_PIN_ATTEMPTS ? Date.now() + PIN_LOCKOUT_MS : 0;
             sessionStorage.setItem(PIN_LOCK_KEY, JSON.stringify({ count: nextCount, until: nextUntil }));
-          } catch (e2) {}
+          } catch (e2) { }
 
           if (dom.authError) {
             dom.authError.textContent = 'Código PIN incorrecto. Por favor verifícalo con el fotógrafo.';
@@ -227,7 +227,7 @@
 
         try {
           sessionStorage.removeItem(PIN_LOCK_KEY);
-        } catch (e3) {}
+        } catch (e3) { }
         if (dom.authError) dom.authError.style.display = 'none';
         if (dom.authModal) dom.authModal.close();
         unlockSession(sessionData);
@@ -259,7 +259,7 @@
     try {
       const res = await fetch(`data/sessions/${encodeURIComponent(sessionId)}.json`);
       if (res.ok) return await res.json();
-    } catch (e) {}
+    } catch (e) { }
 
     return null;
   }

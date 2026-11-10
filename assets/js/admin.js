@@ -189,7 +189,7 @@
       .replace(/'/g, '&#39;');
   }
 
-  const LOGIN_LOCK_KEY = 'andres_admin_lockout';
+  const LOGIN_LOCK_KEY = 'andres_admin_lockout_v2';
   const MAX_LOGIN_ATTEMPTS = 5;
   const LOCKOUT_MS = 60 * 1000;
 

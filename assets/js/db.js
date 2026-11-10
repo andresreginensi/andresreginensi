@@ -199,18 +199,92 @@
 
   const DEFAULT_AUTH = {
     username: 'admin',
-    passwordHash: '6051fc84a7a0d74c225fb18a496b09952da5642e60723ecae543298edd7d82d6'
+    passwordHash: '01563515ba1e225d4db45b7081342d0e421a936050fd608c654430408c816b23'
   };
+
+  // Fallback SHA-256 puro en JS para entornos file:// donde window.crypto.subtle no está disponible
+  function sha256FallbackAscii(ascii) {
+    function rightRotate(value, amount) {
+      return (value >>> amount) | (value << (32 - amount));
+    }
+    const mathPow = Math.pow;
+    const maxWord = mathPow(2, 32);
+    const lengthProperty = 'length';
+    let i, j;
+    let result = '';
+    const words = [];
+    const asciiBitLength = ascii[lengthProperty] * 8;
+    let hash = [];
+    const k = [];
+    let primeCounter = 0;
+    const isComposite = {};
+    for (let candidate = 2; primeCounter < 64; candidate++) {
+      if (!isComposite[candidate]) {
+        for (i = 0; i < 313; i += candidate) {
+          isComposite[i] = candidate;
+        }
+        hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+        k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+      }
+    }
+    ascii += '\x80';
+    while ((ascii[lengthProperty] % 64) - 56) ascii += '\x00';
+    for (i = 0; i < ascii[lengthProperty]; i++) {
+      j = ascii.charCodeAt(i);
+      words[i >> 2] |= j << (((3 - i) % 4) * 8);
+    }
+    words[words[lengthProperty]] = (asciiBitLength / maxWord) | 0;
+    words[words[lengthProperty]] = asciiBitLength;
+    for (j = 0; j < words[lengthProperty]; ) {
+      const w = words.slice(j, (j += 16));
+      const oldHash = hash.slice(0);
+      for (i = 0; i < 64; i++) {
+        const w15 = w[i - 15], w2 = w[i - 2];
+        const a = hash[0], e = hash[4];
+        const temp1 =
+          hash[7] +
+          (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) +
+          ((e & hash[5]) ^ (~e & hash[6])) +
+          k[i] +
+          (w[i] =
+            i < 16
+              ? w[i]
+              : (w[i - 16] +
+                  (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) +
+                  w[i - 7] +
+                  (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) |
+                0);
+        const temp2 =
+          (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) +
+          ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+        hash = [(temp1 + temp2) | 0].concat(hash);
+        hash[4] = (hash[4] + temp1) | 0;
+        hash.pop();
+      }
+      for (i = 0; i < 8; i++) {
+        hash[i] = (hash[i] + oldHash[i]) | 0;
+      }
+    }
+    for (i = 0; i < 8; i++) {
+      for (j = 3; j + 1; j--) {
+        const b = (hash[i] >> (j * 8)) & 255;
+        result += (b < 16 ? 0 : '') + b.toString(16);
+      }
+    }
+    return result;
+  }
 
   async function sha256Hex(value) {
     const str = String(value || '');
-    if (window.crypto && window.crypto.subtle && window.TextEncoder) {
-      const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
-    }
-    return '';
+    try {
+      if (window.crypto && window.crypto.subtle && window.TextEncoder) {
+        const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+      }
+    } catch (e) {}
+    return sha256FallbackAscii(unescape(encodeURIComponent(str)));
   }
 
   const DEFAULT_HERO = 'assets/images/portada.jpg';
@@ -353,13 +427,24 @@
   async function verifyAdminLogin(username, password) {
     let auth = await getAdminCredentials();
     if (!auth) auth = DEFAULT_AUTH;
-    const uMatch = (auth.username || 'admin').trim().toLowerCase() === (username || '').trim().toLowerCase();
-    const inputHash = await sha256Hex(password);
+    const expectedUser = (auth.username || DEFAULT_AUTH.username || 'admin').trim().toLowerCase();
+    const uMatch = expectedUser === (username || '').trim().toLowerCase();
+    const inputHash = await sha256Hex((password || '').trim());
 
+    // 1. Verificar contra la credencial maestra actual (DEFAULT_AUTH) y actualizar caché local si tenía el hash inicial antiguo
+    if (uMatch && inputHash && inputHash === DEFAULT_AUTH.passwordHash) {
+      if (auth.passwordHash !== DEFAULT_AUTH.passwordHash) {
+        await saveAdminCredentials(DEFAULT_AUTH.username, (password || '').trim());
+      }
+      return true;
+    }
+
+    // 2. Verificar contra credencial personalizada guardada en este navegador
     if (auth.passwordHash && inputHash) {
       return uMatch && auth.passwordHash === inputHash;
     }
-    // Migración transparente si existía credencial local antigua sin hash
+
+    // 3. Migración transparente si existía credencial local antigua sin hash
     if (auth.password) {
       const legacyMatch = uMatch && String(auth.password) === String(password);
       if (legacyMatch && inputHash) {
