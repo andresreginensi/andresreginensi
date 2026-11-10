@@ -258,7 +258,7 @@
    */
   function enableAnalyticsCookies() {
     console.info('[Cookies] Consentimiento de Analítica concedido.');
-    
+
     /*
     if (!window.gtagLoaded) {
       window.gtagLoaded = true;
@@ -279,10 +279,10 @@
     // Si el usuario rechaza o revoca su consentimiento, se purgan los eventos locales de inmediato
     try {
       localStorage.removeItem('andres_analytics_events');
-    } catch (e) {}
+    } catch (e) { }
     try {
       sessionStorage.removeItem('andres_analytics_session');
-    } catch (e) {}
+    } catch (e) { }
   }
 
   /**
@@ -291,7 +291,7 @@
    */
   function enableMarketingCookies() {
     console.info('[Cookies] Consentimiento de Marketing concedido.');
-    
+
     /*
     if (!window.fbqLoaded) {
       window.fbqLoaded = true;

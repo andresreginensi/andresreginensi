@@ -189,25 +189,20 @@
       .replace(/'/g, '&#39;');
   }
 
-  const LOGIN_LOCK_KEY = 'andres_admin_lockout_v2';
+  const LOGIN_LOCK_KEY = 'andres_admin_lockout_v3';
   const MAX_LOGIN_ATTEMPTS = 5;
   const LOCKOUT_MS = 60 * 1000;
 
   async function handleLoginAttempt() {
     try {
+      sessionStorage.removeItem('andres_admin_lockout');
+      sessionStorage.removeItem('andres_admin_lockout_v2');
+
       const lockState = JSON.parse(sessionStorage.getItem(LOGIN_LOCK_KEY) || '{"count":0,"until":0}');
       const now = Date.now();
-      if (lockState.until && now < lockState.until) {
-        const waitSec = Math.ceil((lockState.until - now) / 1000);
-        if (dom.loginError) {
-          dom.loginError.textContent = `Demasiados intentos fallidos. Espera ${waitSec} segundos antes de volver a intentarlo.`;
-          dom.loginError.style.display = 'block';
-        }
-        return;
-      }
 
-      const username = (dom.loginUsername.value || '').trim();
-      const password = (dom.loginPassword.value || '').trim();
+      const username = (dom.loginUsername && dom.loginUsername.value ? dom.loginUsername.value : 'admin').trim();
+      const password = (dom.loginPassword && dom.loginPassword.value ? dom.loginPassword.value : '').trim();
 
       let isValid = false;
       if (db && db.verifyAdminLogin) {
@@ -219,17 +214,27 @@
         sessionStorage.setItem('andres_admin_auth', 'true');
         showDashboard();
         showToast('¡Bienvenido al Panel de Gestión, Andrés!');
-      } else {
-        const nextCount = (lockState.count || 0) + 1;
-        const nextUntil = nextCount >= MAX_LOGIN_ATTEMPTS ? now + LOCKOUT_MS : 0;
-        sessionStorage.setItem(LOGIN_LOCK_KEY, JSON.stringify({ count: nextCount, until: nextUntil }));
+        return;
+      }
 
+      if (lockState.until && now < lockState.until) {
+        const waitSec = Math.ceil((lockState.until - now) / 1000);
         if (dom.loginError) {
-          dom.loginError.textContent = nextUntil
-            ? 'Acceso bloqueado temporalmente durante 60 segundos por seguridad.'
-            : 'Usuario o contraseña incorrectos. Por favor, verifica tus datos.';
+          dom.loginError.textContent = `Demasiados intentos fallidos. Espera ${waitSec} segundos antes de volver a intentarlo.`;
           dom.loginError.style.display = 'block';
         }
+        return;
+      }
+
+      const nextCount = (lockState.count || 0) + 1;
+      const nextUntil = nextCount >= MAX_LOGIN_ATTEMPTS ? now + LOCKOUT_MS : 0;
+      sessionStorage.setItem(LOGIN_LOCK_KEY, JSON.stringify({ count: nextCount, until: nextUntil }));
+
+      if (dom.loginError) {
+        dom.loginError.textContent = nextUntil
+          ? 'Contraseña incorrecta. Acceso bloqueado temporalmente durante 60 segundos.'
+          : 'Usuario o contraseña incorrectos. Por favor, verifica tus datos.';
+        dom.loginError.style.display = 'block';
       }
     } catch (err) {
       if (dom.loginError) {
@@ -243,14 +248,6 @@
     // Login form submit
     if (dom.loginForm) {
       dom.loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        handleLoginAttempt();
-      });
-    }
-
-    // Login button direct click
-    if (dom.btnLoginSubmit) {
-      dom.btnLoginSubmit.addEventListener('click', (e) => {
         e.preventDefault();
         handleLoginAttempt();
       });

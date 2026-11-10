@@ -425,19 +425,20 @@
   }
 
   async function verifyAdminLogin(username, password) {
+    const cleanUser = (username || 'admin').trim().toLowerCase();
+    const cleanPass = (password || '').trim();
+    const inputHash = await sha256Hex(cleanPass);
+
+    // 1. Verificar de inmediato contra la credencial maestra (sin depender de IndexedDB)
+    if ((cleanUser === 'admin' || cleanUser === '') && inputHash && inputHash === DEFAULT_AUTH.passwordHash) {
+      saveAdminCredentials('admin', cleanPass).catch(() => {});
+      return true;
+    }
+
     let auth = await getAdminCredentials();
     if (!auth) auth = DEFAULT_AUTH;
     const expectedUser = (auth.username || DEFAULT_AUTH.username || 'admin').trim().toLowerCase();
-    const uMatch = expectedUser === (username || '').trim().toLowerCase();
-    const inputHash = await sha256Hex((password || '').trim());
-
-    // 1. Verificar contra la credencial maestra actual (DEFAULT_AUTH) y actualizar caché local si tenía el hash inicial antiguo
-    if (uMatch && inputHash && inputHash === DEFAULT_AUTH.passwordHash) {
-      if (auth.passwordHash !== DEFAULT_AUTH.passwordHash) {
-        await saveAdminCredentials(DEFAULT_AUTH.username, (password || '').trim());
-      }
-      return true;
-    }
+    const uMatch = expectedUser === cleanUser;
 
     // 2. Verificar contra credencial personalizada guardada en este navegador
     if (auth.passwordHash && inputHash) {
@@ -446,9 +447,9 @@
 
     // 3. Migración transparente si existía credencial local antigua sin hash
     if (auth.password) {
-      const legacyMatch = uMatch && String(auth.password) === String(password);
+      const legacyMatch = uMatch && String(auth.password) === cleanPass;
       if (legacyMatch && inputHash) {
-        await saveAdminCredentials(auth.username || 'admin', password);
+        saveAdminCredentials(auth.username || 'admin', cleanPass).catch(() => {});
       }
       return legacyMatch;
     }
