@@ -616,21 +616,41 @@ summary:focus-visible,
 
 .seo-card {
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
   background: var(--bg-surface);
   border: 1px solid var(--border-hairline);
-  border-radius: 14px;
-  padding: 1.75rem 1.6rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 16px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.32s ease,
+              box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 1;
 }
 
 .seo-card:hover,
 .seo-card.is-popup-open {
-  border-color: rgba(197, 160, 89, 0.48);
-  z-index: 30;
+  transform: translateY(-5px);
+  border-color: rgba(212, 175, 55, 0.52);
+  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.78), 0 0 30px rgba(197, 160, 89, 0.14);
+  z-index: 20;
+}
+
+.seo-card-front {
+  grid-area: 1 / 1;
+  padding: 1.75rem 1.65rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  transition: opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+              visibility 0.24s;
+  z-index: 2;
 }
 
 .seo-card-top {
@@ -638,73 +658,88 @@ summary:focus-visible,
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.85rem;
   flex-wrap: wrap;
 }
 
 .seo-card-num {
   font-family: var(--font-mono);
-  font-size: 0.74rem;
+  font-size: 0.73rem;
   color: var(--accent-gold);
   letter-spacing: 0.1em;
   display: inline-block;
   margin-bottom: 0;
 }
 
+/* Etiqueta cápsula de precio (Desde + Importe separados en Flexbox sin colisión) */
 .price-pill {
+  font-family: var(--font-sans);
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.3rem;
-  padding: 0.3rem 0.78rem;
+  align-items: center;
+  gap: 0.42rem;
+  padding: 0.34rem 0.82rem;
   border-radius: var(--btn-radius-pill);
-  background: rgba(197, 160, 89, 0.12);
-  border: 1px solid rgba(227, 213, 184, 0.3);
+  background: linear-gradient(135deg, rgba(197, 160, 89, 0.15) 0%, rgba(227, 213, 184, 0.06) 100%);
+  border: 1px solid rgba(227, 213, 184, 0.32);
   color: var(--accent-warm);
-  font-size: 0.74rem;
-  font-weight: 500;
-  letter-spacing: 0.03em;
+  line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  position: relative;
+  z-index: 3;
   transition: var(--btn-transition);
 }
 
+.price-pill-label {
+  display: inline-block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.price-pill-value,
 .price-pill strong {
+  display: inline-block;
   color: var(--text-pure) !important;
   font-family: var(--font-display);
-  font-size: 0.92rem;
+  font-size: 0.96rem;
   font-weight: 600;
   letter-spacing: -0.01em;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), color 0.24s ease;
 }
 
 .price-pill-plus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: rgba(212, 175, 55, 0.22);
+  background: rgba(212, 175, 55, 0.24);
   color: var(--text-pure);
   font-size: 0.72rem;
   font-weight: 700;
   line-height: 1;
-  margin-left: 0.15rem;
-  transition: transform 0.25s ease, background 0.25s ease;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
 }
 
-.seo-card:hover .price-pill,
+.price-pill:hover,
 .deliverable-card:hover .price-pill {
-  background: rgba(197, 160, 89, 0.22);
-  border-color: rgba(227, 213, 184, 0.55);
-  box-shadow: 0 4px 16px rgba(197, 160, 89, 0.18);
+  background: linear-gradient(135deg, rgba(197, 160, 89, 0.26) 0%, rgba(227, 213, 184, 0.12) 100%);
+  border-color: rgba(227, 213, 184, 0.58);
+  box-shadow: 0 6px 18px rgba(197, 160, 89, 0.2);
 }
 
-.seo-card:hover .price-pill-plus {
-  transform: rotate(90deg);
-  background: var(--accent-gold);
-  color: #09090b;
+.price-pill:hover .price-pill-value,
+.deliverable-card:hover .price-pill-value {
+  color: var(--accent-warm) !important;
+  transform: translateX(1px);
 }
 
 .seo-card-footer {
@@ -713,19 +748,20 @@ summary:focus-visible,
   justify-content: space-between;
   gap: 0.75rem;
   margin-top: auto;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   flex-wrap: wrap;
 }
 
 .seo-card-tariff-btn {
+  font-family: var(--font-sans);
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--btn-radius-pill);
-  padding: 0.38rem 0.85rem;
+  padding: 0.4rem 0.9rem;
   cursor: pointer;
   transition: var(--btn-transition);
 }
@@ -736,38 +772,45 @@ summary:focus-visible,
   color: var(--text-pure);
 }
 
-/* POP-UP EMERGENTE SOBRE CADA CUADRADO DE ESPECIALIDAD (.seo-card-popup) */
+/* CAPA POP-UP DE TARIFA (MISMA CELDA DE GRID, CERO COLISIÓN CON LA CARA FRONTAL) */
 .seo-card-popup {
-  position: absolute;
-  top: -8px;
-  left: -8px;
-  right: -8px;
-  min-height: calc(100% + 16px);
-  background: linear-gradient(165deg, rgba(24, 23, 29, 0.98) 0%, rgba(12, 12, 16, 0.99) 100%);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  border: 1px solid rgba(212, 175, 55, 0.48);
-  border-radius: 16px;
-  padding: 1.45rem 1.5rem 1.35rem;
-  box-shadow: 0 26px 56px rgba(0, 0, 0, 0.88), 0 0 32px rgba(197, 160, 89, 0.16);
+  grid-area: 1 / 1;
+  background: linear-gradient(165deg, #19181f 0%, #0e0e13 100%);
+  padding: 1.55rem 1.6rem 1.45rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(10px) scale(0.97);
-  transition: opacity 0.26s cubic-bezier(0.22, 1, 0.36, 1), transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.26s;
-  z-index: 40;
+  transform: translateY(10px) scale(0.98);
+  transition: opacity 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              visibility 0.26s;
+  z-index: 5;
 }
 
 @media (hover: hover) and (pointer: fine) {
+  .seo-card:hover .seo-card-front {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-6px) scale(0.98);
+  }
+
   .seo-card:hover .seo-card-popup {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
     transform: translateY(0) scale(1);
   }
+}
+
+.seo-card.is-popup-open .seo-card-front {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-6px) scale(0.98);
 }
 
 .seo-card.is-popup-open .seo-card-popup {
@@ -782,7 +825,7 @@ summary:focus-visible,
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.65rem;
 }
 
 .seo-popup-close {
@@ -806,25 +849,83 @@ summary:focus-visible,
   color: var(--text-pure);
 }
 
-.seo-popup-price-row {
+/* Bloque destacado de precio dentro del Pop-up (Desde + Importe + Unidad con separación garantizada) */
+.seo-popup-price-box {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.38rem;
-  padding: 0.55rem 0 0.65rem;
-  margin-bottom: 0.65rem;
-  border-bottom: 1px solid rgba(227, 213, 184, 0.16);
+  gap: 0.5rem 0.85rem;
+  padding: 0.65rem 0.95rem;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(135deg, rgba(197, 160, 89, 0.13) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border: 1px solid rgba(227, 213, 184, 0.24);
+  border-radius: 12px;
+}
+
+.seo-popup-price-main {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.seo-popup-price-main .pricing-from {
+  display: inline-block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-muted);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.seo-popup-price-main .pricing-value {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--accent-warm);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1) 0.05s,
+              transform 0.32s cubic-bezier(0.22, 1, 0.36, 1) 0.05s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .seo-card:hover .seo-popup-price-main .pricing-value {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.seo-card.is-popup-open .seo-popup-price-main .pricing-value {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.seo-popup-price-box .pricing-unit {
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.22rem 0.62rem;
+  border-radius: var(--btn-radius-pill);
+  white-space: nowrap;
 }
 
 .seo-popup-desc {
   font-size: 0.82rem !important;
   line-height: 1.48 !important;
   color: var(--text-muted) !important;
-  margin-bottom: 0.75rem !important;
+  margin-bottom: 0.7rem !important;
 }
 
 .seo-card-popup .pricing-features {
-  margin: 0 0 1rem;
+  margin: 0 0 0.95rem;
   gap: 0.42rem;
 }
 
@@ -873,24 +974,34 @@ summary:focus-visible,
 .discipline-price-badge {
   display: inline-flex;
   align-items: baseline;
-  gap: 0.35rem;
+  flex-wrap: wrap;
+  gap: 0.42rem;
   margin-top: 0.85rem;
-  padding: 0.38rem 0.95rem;
+  padding: 0.42rem 1.05rem;
   border-radius: var(--btn-radius-pill);
   background: linear-gradient(135deg, rgba(197, 160, 89, 0.16) 0%, rgba(227, 213, 184, 0.06) 100%);
   border: 1px solid rgba(227, 213, 184, 0.32);
   color: var(--text-primary);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   letter-spacing: 0.02em;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.25s ease,
+              box-shadow 0.25s ease;
+}
+
+.discipline-price-badge:hover {
+  transform: translateY(-2px);
+  border-color: rgba(227, 213, 184, 0.55);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), 0 0 18px rgba(197, 160, 89, 0.14);
 }
 
 .discipline-price-badge strong {
+  display: inline-block;
   color: var(--accent-warm);
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 1.02rem;
   font-weight: 600;
+  margin-left: 0.12rem;
 }
 
 .deliverable-card-top {
@@ -2254,22 +2365,9 @@ summary:focus-visible,
     gap: 1.5rem;
   }
 
+  .seo-card-front,
   .seo-card-popup {
-    top: 0;
-    left: 0;
-    right: 0;
-    min-height: 100%;
-  }
-
-  .seo-card.is-popup-open > div:not(.seo-card-popup) {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .seo-card.is-popup-open .seo-card-popup {
-    position: relative;
-    margin: -1.75rem -1.6rem;
-    min-height: auto;
+    padding: 1.45rem 1.35rem;
   }
 
   .discipline-section,
