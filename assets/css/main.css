@@ -624,13 +624,98 @@ summary:focus-visible,
   border-color: rgba(197, 160, 89, 0.42);
 }
 
+.seo-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .seo-card-num {
   font-family: var(--font-mono);
   font-size: 0.74rem;
   color: var(--accent-gold);
   letter-spacing: 0.1em;
-  display: block;
-  margin-bottom: 0.65rem;
+  display: inline-block;
+  margin-bottom: 0;
+}
+
+.price-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28rem;
+  padding: 0.28rem 0.72rem;
+  border-radius: var(--btn-radius-pill);
+  background: rgba(197, 160, 89, 0.11);
+  border: 1px solid rgba(227, 213, 184, 0.28);
+  color: var(--accent-warm);
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: var(--btn-transition);
+}
+
+.price-pill strong {
+  color: var(--text-pure) !important;
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.seo-card:hover .price-pill,
+.deliverable-card:hover .price-pill {
+  background: rgba(197, 160, 89, 0.2);
+  border-color: rgba(227, 213, 184, 0.5);
+  box-shadow: 0 4px 16px rgba(197, 160, 89, 0.15);
+}
+
+.discipline-title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.discipline-price-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin-top: 0.85rem;
+  padding: 0.38rem 0.95rem;
+  border-radius: var(--btn-radius-pill);
+  background: linear-gradient(135deg, rgba(197, 160, 89, 0.16) 0%, rgba(227, 213, 184, 0.06) 100%);
+  border: 1px solid rgba(227, 213, 184, 0.32);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.discipline-price-badge strong {
+  color: var(--accent-warm);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.deliverable-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.deliverable-card-top h3 {
+  margin-bottom: 0 !important;
 }
 
 .seo-card-h3 {
@@ -879,6 +964,162 @@ summary:focus-visible,
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+/* =======================================================
+   5B. SECCIÓN DE TARIFAS Y PACKS ORIENTATIVOS (#tarifas)
+   ======================================================= */
+.pricing-section {
+  border-top: 1px solid var(--border-hairline);
+  padding: 6.5rem 2.5rem 5.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.pricing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2.5rem;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border-hairline);
+  flex-wrap: wrap;
+}
+
+.pricing-market-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-radius: var(--btn-radius-pill);
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  color: #6ee7b7;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.pricing-card {
+  background: linear-gradient(180deg, rgba(24, 24, 29, 0.92) 0%, rgba(15, 15, 19, 0.96) 100%);
+  border: 1px solid var(--border-hairline);
+  border-radius: 16px;
+  padding: 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pricing-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(227, 213, 184, 0.38);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.65), 0 0 28px rgba(197, 160, 89, 0.1);
+}
+
+.pricing-card.featured {
+  border-color: rgba(197, 160, 89, 0.42);
+  background: linear-gradient(180deg, rgba(31, 27, 22, 0.94) 0%, rgba(16, 16, 20, 0.98) 100%);
+}
+
+.pricing-card-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-gold);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.pricing-card-title {
+  font-family: var(--font-display);
+  font-size: 1.22rem;
+  font-weight: 600;
+  color: var(--text-pure);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.pricing-card-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.58;
+  margin-bottom: 1.35rem;
+}
+
+.pricing-amount-box {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 1rem 0;
+  margin-bottom: 1.25rem;
+  border-top: 1px solid var(--border-hairline);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.pricing-from {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.pricing-value {
+  font-family: var(--font-serif);
+  font-size: 2.35rem;
+  font-weight: 400;
+  color: var(--accent-warm);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.pricing-unit {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.pricing-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.pricing-features li {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  line-height: 1.45;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.pricing-features li::before {
+  content: '✓';
+  color: var(--accent-gold);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.pricing-card-cta {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
 }
 
 /* =======================================================
@@ -1670,6 +1911,7 @@ summary:focus-visible,
   }
 
   .seo-cards-grid,
+  .pricing-grid,
   .deliverables-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1809,6 +2051,7 @@ summary:focus-visible,
   }
 
   .seo-cards-grid,
+  .pricing-grid,
   .workflow-grid,
   .deliverables-grid,
   .inquiry-grid,
@@ -1824,6 +2067,7 @@ summary:focus-visible,
   }
 
   .discipline-section,
+  .pricing-section,
   .workflow-faq-section,
   .manifesto-section,
   .service-hero {

@@ -421,6 +421,21 @@
     if (!form) return;
 
     const btnEmail = document.getElementById('btn-inquiry-email');
+    const serviceSelect = document.getElementById('inq-service');
+
+    // Al pulsar cualquier tarjeta de tarifas con data-select-service, preselecciona la disciplina en el formulario
+    document.querySelectorAll('[data-select-service]').forEach((cta) => {
+      cta.addEventListener('click', () => {
+        const targetService = cta.getAttribute('data-select-service');
+        if (serviceSelect && targetService) {
+          Array.from(serviceSelect.options).forEach((opt) => {
+            if (opt.value === targetService) {
+              serviceSelect.value = targetService;
+            }
+          });
+        }
+      });
+    });
 
     function buildInquiryData() {
       const name = (document.getElementById('inq-name')?.value || '').trim();
