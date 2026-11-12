@@ -434,6 +434,9 @@
             }
           });
         }
+        document.querySelectorAll('.seo-card.is-popup-open').forEach((card) => {
+          card.classList.remove('is-popup-open');
+        });
       });
     });
 
@@ -477,12 +480,67 @@
     }
   }
 
+  // 7. Pop-ups interactivos de tarifas sobre los 6 cuadrados de especialidad (.seo-card)
+  function initServicePricingPopups() {
+    const cards = Array.from(document.querySelectorAll('.seo-card'));
+    if (!cards.length) return;
+
+    function closeAllPopups(exceptCard) {
+      cards.forEach((c) => {
+        if (c !== exceptCard) {
+          c.classList.remove('is-popup-open');
+          const pill = c.querySelector('.price-pill[aria-expanded]');
+          if (pill) pill.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    cards.forEach((card) => {
+      const triggers = card.querySelectorAll('[data-popup-trigger]');
+      const closeBtn = card.querySelector('[data-popup-close]');
+      const pill = card.querySelector('.price-pill[aria-expanded]');
+
+      triggers.forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const willOpen = !card.classList.contains('is-popup-open');
+          closeAllPopups(card);
+          card.classList.toggle('is-popup-open', willOpen);
+          if (pill) pill.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        });
+      });
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          card.classList.remove('is-popup-open');
+          if (pill) pill.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.seo-card')) {
+        closeAllPopups(null);
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAllPopups(null);
+      }
+    });
+  }
+
   function init() {
     initHeaderScroll();
     setupScrollReveal();
     initLightboxControls();
     initMobileNavigation();
     initInquiryForm();
+    initServicePricingPopups();
     loadAndRenderSections();
     initLivePortfolioSync();
   }

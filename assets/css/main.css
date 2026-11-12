@@ -601,27 +601,36 @@ summary:focus-visible,
   font-weight: 500;
 }
 
+.seo-cards-toolbar {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  scroll-margin-top: 110px;
+}
+
 .seo-cards-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.35rem;
-  margin: 2.25rem 0 2.75rem;
+  margin: 0.5rem 0 2.75rem;
 }
 
 .seo-card {
+  position: relative;
   background: var(--bg-surface);
   border: 1px solid var(--border-hairline);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1.75rem 1.6rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  z-index: 1;
 }
 
-.seo-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(197, 160, 89, 0.42);
+.seo-card:hover,
+.seo-card.is-popup-open {
+  border-color: rgba(197, 160, 89, 0.48);
+  z-index: 30;
 }
 
 .seo-card-top {
@@ -645,16 +654,17 @@ summary:focus-visible,
 .price-pill {
   display: inline-flex;
   align-items: baseline;
-  gap: 0.28rem;
-  padding: 0.28rem 0.72rem;
+  gap: 0.3rem;
+  padding: 0.3rem 0.78rem;
   border-radius: var(--btn-radius-pill);
-  background: rgba(197, 160, 89, 0.11);
-  border: 1px solid rgba(227, 213, 184, 0.28);
+  background: rgba(197, 160, 89, 0.12);
+  border: 1px solid rgba(227, 213, 184, 0.3);
   color: var(--accent-warm);
   font-size: 0.74rem;
   font-weight: 500;
   letter-spacing: 0.03em;
   white-space: nowrap;
+  cursor: pointer;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   transition: var(--btn-transition);
@@ -668,11 +678,189 @@ summary:focus-visible,
   letter-spacing: -0.01em;
 }
 
+.price-pill-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.22);
+  color: var(--text-pure);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-left: 0.15rem;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
 .seo-card:hover .price-pill,
 .deliverable-card:hover .price-pill {
-  background: rgba(197, 160, 89, 0.2);
-  border-color: rgba(227, 213, 184, 0.5);
-  box-shadow: 0 4px 16px rgba(197, 160, 89, 0.15);
+  background: rgba(197, 160, 89, 0.22);
+  border-color: rgba(227, 213, 184, 0.55);
+  box-shadow: 0 4px 16px rgba(197, 160, 89, 0.18);
+}
+
+.seo-card:hover .price-pill-plus {
+  transform: rotate(90deg);
+  background: var(--accent-gold);
+  color: #09090b;
+}
+
+.seo-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  flex-wrap: wrap;
+}
+
+.seo-card-tariff-btn {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--btn-radius-pill);
+  padding: 0.38rem 0.85rem;
+  cursor: pointer;
+  transition: var(--btn-transition);
+}
+
+.seo-card-tariff-btn:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(227, 213, 184, 0.45);
+  color: var(--text-pure);
+}
+
+/* POP-UP EMERGENTE SOBRE CADA CUADRADO DE ESPECIALIDAD (.seo-card-popup) */
+.seo-card-popup {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  min-height: calc(100% + 16px);
+  background: linear-gradient(165deg, rgba(24, 23, 29, 0.98) 0%, rgba(12, 12, 16, 0.99) 100%);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid rgba(212, 175, 55, 0.48);
+  border-radius: 16px;
+  padding: 1.45rem 1.5rem 1.35rem;
+  box-shadow: 0 26px 56px rgba(0, 0, 0, 0.88), 0 0 32px rgba(197, 160, 89, 0.16);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(10px) scale(0.97);
+  transition: opacity 0.26s cubic-bezier(0.22, 1, 0.36, 1), transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.26s;
+  z-index: 40;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .seo-card:hover .seo-card-popup {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.seo-card.is-popup-open .seo-card-popup {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.seo-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.seo-popup-close {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--btn-transition);
+}
+
+.seo-popup-close:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--text-pure);
+}
+
+.seo-popup-price-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.38rem;
+  padding: 0.55rem 0 0.65rem;
+  margin-bottom: 0.65rem;
+  border-bottom: 1px solid rgba(227, 213, 184, 0.16);
+}
+
+.seo-popup-desc {
+  font-size: 0.82rem !important;
+  line-height: 1.48 !important;
+  color: var(--text-muted) !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.seo-card-popup .pricing-features {
+  margin: 0 0 1rem;
+  gap: 0.42rem;
+}
+
+.seo-card-popup .pricing-features li {
+  font-size: 0.8rem;
+  line-height: 1.38;
+}
+
+.seo-popup-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.seo-popup-cta {
+  padding: 0.55rem 1.05rem !important;
+  font-size: 0.78rem !important;
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+.seo-popup-sublink {
+  font-size: 0.76rem;
+  color: var(--accent-warm);
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 0.35rem 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.seo-popup-sublink:hover {
+  color: var(--text-pure);
+  text-decoration: underline;
 }
 
 .discipline-title-row {
@@ -2064,6 +2252,24 @@ summary:focus-visible,
   .gallery-3col {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+
+  .seo-card-popup {
+    top: 0;
+    left: 0;
+    right: 0;
+    min-height: 100%;
+  }
+
+  .seo-card.is-popup-open > div:not(.seo-card-popup) {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .seo-card.is-popup-open .seo-card-popup {
+    position: relative;
+    margin: -1.75rem -1.6rem;
+    min-height: auto;
   }
 
   .discipline-section,
