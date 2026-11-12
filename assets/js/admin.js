@@ -418,10 +418,19 @@
           await db.savePortfolioPhoto(photoObj);
           closePhotoModal();
           await refreshPortfolio();
-          const cloudMsg = db.isCloudEnabled && db.isCloudEnabled() ? ' · Publicada en GitHub / Cloudflare' : '';
+          const isCloud = db.isCloudEnabled && db.isCloudEnabled();
+          const cloudMsg = isCloud
+            ? ' · Publicada en GitHub / Cloudflare'
+            : ' · Visible en este navegador (Conecta GitHub para móviles)';
           showToast(editId ? `✓ Fotografía actualizada${cloudMsg}` : `✓ ¡Nueva fotografía añadida${cloudMsg}!`);
         } catch (err) {
-          alert('Error al guardar la fotografía: ' + (err.message || err));
+          closePhotoModal();
+          await refreshPortfolio();
+          alert(
+            'La foto se ha guardado en este navegador, pero no se pudo publicar en GitHub:\n\n' +
+              (err.message || err) +
+              '\n\nVerifica tu conexión o pulsa "Gestionar GitHub" para revisar tu Token.'
+          );
         } finally {
           if (saveBtn) {
             saveBtn.disabled = false;

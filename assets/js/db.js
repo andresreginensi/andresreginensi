@@ -59,7 +59,7 @@
       aspect: 'landscape',
       thumbUrl: 'assets/images/uploads/bodas-la-salida-thumb-1793484078424-w7qb.jpg',
       fullUrl: 'assets/images/uploads/bodas-la-salida-full-1793484078424-114u.jpg',
-      createdAt: 1793406876568
+      createdAt: 1700000000020
     },
     {
       id: 'port-boda-3',
@@ -71,7 +71,7 @@
       aspect: 'landscape',
       thumbUrl: 'assets/images/uploads/bodas-orilla-dorada-thumb-1793484078424-kg3p.jpg',
       fullUrl: 'assets/images/uploads/bodas-orilla-dorada-full-1793484078424-j38e.jpg',
-      createdAt: 1793406675069
+      createdAt: 1700000000019
     },
     {
       id: 'port-boda-2',
@@ -149,12 +149,12 @@
       id: 'port-corp-3',
       category: 'empresarial',
       categoryLabel: 'Empresarial & Corporativo',
-      title: 'Edificio Burgueras',
-      tag: 'Sede & Arquitectura Comercial',
-      caption: 'Edificio Burgueras — Geometría, Cristales & Fachada Moderna',
+      title: '25 años MEDIAMARKT',
+      tag: 'Empresariales',
+      caption: '25 años MEDIAMARKT — Empresariales',
       aspect: 'landscape',
-      thumbUrl: 'assets/images/realestate/burgueras-fachada-thumb.jpg',
-      fullUrl: 'assets/images/realestate/burgueras-fachada.jpg',
+      thumbUrl: 'assets/images/uploads/empresarial-25-anos-mediamarkt-thumb-1794269820352-we5q.jpg',
+      fullUrl: 'assets/images/uploads/empresarial-25-anos-mediamarkt-full-1794269820352-s4ka.jpg',
       createdAt: 1700000000012
     }
   ];
@@ -463,7 +463,7 @@
   const SUPABASE_LS_KEY = 'andres_supabase_config';
   const SITE_DATA_REPO_PATH = 'assets/data/site-data.json';
 
-  // Caché temporal de vistas previas (persistida en sessionStorage para que en todas las pestañas
+  // Caché temporal de vistas previas (persistida en IndexedDB + sessionStorage para que en todas las pestañas
   // las imágenes recién subidas se vean al instante mientras Cloudflare construye el despliegue)
   const PREVIEW_STORAGE_KEY = 'andres_instant_previews';
   const memoryPreviewMap = {};
@@ -471,6 +471,21 @@
   let cachedGitHubSiteDataTime = 0;
   let publicSiteDataPromise = null;
   let publicSiteDataTime = 0;
+  let autoSyncInProgress = false;
+
+  const cmsChannel = typeof window.BroadcastChannel !== 'undefined'
+    ? new window.BroadcastChannel('andres_cms_channel')
+    : null;
+
+  function notifyPortfolioChanged() {
+    const ts = Date.now();
+    setLS('portfolio_broadcast_ts', ts);
+    if (cmsChannel) {
+      try {
+        cmsChannel.postMessage({ type: 'portfolio_updated', ts });
+      } catch (e) {}
+    }
+  }
 
   function loadStoredPreviews() {
     try {
@@ -479,7 +494,7 @@
       const parsed = JSON.parse(raw);
       const now = Date.now();
       Object.keys(parsed).forEach((k) => {
-        if (parsed[k] && now - parsed[k].ts < 300000) {
+        if (parsed[k] && now - parsed[k].ts < 600000) {
           memoryPreviewMap[k] = parsed[k];
         }
       });
@@ -487,19 +502,50 @@
   }
   loadStoredPreviews();
 
+  async function loadStoredPreviewsFromIDB() {
+    loadStoredPreviews();
+    try {
+      const db = await openDB();
+      await new Promise((resolve) => {
+        const tx = db.transaction('settings', 'readonly');
+        const st = tx.objectStore('settings');
+        const req = st.get('instant_previews');
+        req.onsuccess = () => {
+          const val = req.result && req.result.value ? req.result.value : null;
+          if (val && typeof val === 'object') {
+            const now = Date.now();
+            Object.keys(val).forEach((k) => {
+              if (val[k] && now - val[k].ts < 600000) {
+                memoryPreviewMap[k] = val[k];
+              }
+            });
+          }
+          resolve(true);
+        };
+        req.onerror = () => resolve(false);
+      });
+    } catch (e) {}
+  }
+
   function saveInstantPreview(repoPath, dataUrl) {
     if (!repoPath || !dataUrl) return;
     memoryPreviewMap[repoPath] = { dataUrl, ts: Date.now() };
     try {
       sessionStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(memoryPreviewMap));
     } catch (e) {}
+    openDB()
+      .then((db) => {
+        const tx = db.transaction('settings', 'readwrite');
+        tx.objectStore('settings').put({ key: 'instant_previews', value: memoryPreviewMap });
+      })
+      .catch(() => {});
   }
 
   function resolvePreviewUrl(url) {
     if (!url || typeof url !== 'string') return url;
     if (!memoryPreviewMap[url]) loadStoredPreviews();
     const entry = memoryPreviewMap[url];
-    if (entry && Date.now() - entry.ts < 300000) {
+    if (entry && Date.now() - entry.ts < 600000) {
       return entry.dataUrl;
     }
     return url;
@@ -653,9 +699,20 @@
     }
 
     try {
+      let targetRef = cfg.branch;
+      const recentSyncTs = Number(getLS('last_cloud_sync_ts', 0)) || 0;
+      if (bypassCache || Date.now() - recentSyncTs < 180000) {
+        try {
+          const refObj = await githubApi(cfg, `/git/ref/heads/${encodeURIComponent(cfg.branch)}`);
+          if (refObj && refObj.object && refObj.object.sha) {
+            targetRef = refObj.object.sha;
+          }
+        } catch (e) {}
+      }
+
       const fileObj = await githubApi(
         cfg,
-        `/contents/${SITE_DATA_REPO_PATH}?ref=${encodeURIComponent(cfg.branch)}`
+        `/contents/${SITE_DATA_REPO_PATH}?ref=${encodeURIComponent(targetRef)}`
       );
       if (fileObj && fileObj.content) {
         const jsonStr = decodeBase64Utf8(fileObj.content);
@@ -803,7 +860,14 @@
     }
 
     const filesToUpload = [];
-    const localPhotos = await getLocalPortfolioPhotos();
+    const rawLocalPhotos = await getLocalPortfolioPhotos();
+    const pubData = await fetchPublicDeployedSiteData().catch(() => null);
+    const localUpdatedAt = Number(getLS('local_portfolio_updated_at', 0)) || 0;
+    const pubUpdatedAt = pubData && pubData.updatedAt ? Number(pubData.updatedAt) : 0;
+    const localPhotos = pubData && Array.isArray(pubData.portfolio)
+      ? mergeRemoteAndLocalPortfolio(pubData.portfolio, rawLocalPhotos, pubUpdatedAt, localUpdatedAt)
+      : rawLocalPhotos;
+
     const cleanPhotos = localPhotos.map((p) => {
       const copy = Object.assign({}, p);
       const safeSlug = slugify(copy.title || copy.id || 'foto');
@@ -942,7 +1006,7 @@
         const req = st.getAll();
         req.onsuccess = () => {
           const list = req.result || [];
-          list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          list.sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
           resolve(list.length > 0 ? list : DEFAULT_PORTFOLIO);
         };
         req.onerror = () => resolve(getLS('portfolio', DEFAULT_PORTFOLIO));
@@ -968,68 +1032,197 @@
     }
   }
 
-  async function getAllPortfolioPhotos() {
-    const localUpdatedAt = Number(getLS('local_portfolio_updated_at', 0)) || 0;
+  const DEFAULT_PORTFOLIO_MAP = new Map(DEFAULT_PORTFOLIO.map((p) => [p.id, p]));
 
-    // 1. Si GitHub está conectado en este navegador, consultar estado real de GitHub
+  function isPhotoLocallyModified(lp, remoteItem, localUpdatedAt, remoteUpdatedAt) {
+    if (!lp) return false;
+    if ((lp.fullUrl && lp.fullUrl.startsWith('data:')) || (lp.thumbUrl && lp.thumbUrl.startsWith('data:'))) {
+      return true;
+    }
+    if (!remoteItem) {
+      return true;
+    }
+    if (lp.updatedAt && Number(lp.updatedAt) > (Number(remoteItem.updatedAt) || Number(remoteItem.createdAt) || 0)) {
+      return true;
+    }
+    const def = DEFAULT_PORTFOLIO_MAP.get(lp.id);
+    if (def) {
+      const changedFromDefault =
+        lp.title !== def.title ||
+        lp.tag !== def.tag ||
+        lp.category !== def.category ||
+        lp.aspect !== def.aspect ||
+        lp.fullUrl !== def.fullUrl;
+      const changedFromRemote =
+        lp.title !== remoteItem.title ||
+        lp.tag !== remoteItem.tag ||
+        lp.category !== remoteItem.category ||
+        lp.aspect !== remoteItem.aspect ||
+        lp.fullUrl !== remoteItem.fullUrl;
+      if (changedFromDefault && changedFromRemote) {
+        return true;
+      }
+    }
+    if (localUpdatedAt > remoteUpdatedAt) {
+      return (
+        lp.title !== remoteItem.title ||
+        lp.tag !== remoteItem.tag ||
+        lp.category !== remoteItem.category ||
+        lp.aspect !== remoteItem.aspect ||
+        lp.fullUrl !== remoteItem.fullUrl
+      );
+    }
+    return false;
+  }
+
+  function mergeRemoteAndLocalPortfolio(remoteList, localList, remoteUpdatedAt, localUpdatedAt) {
+    const deletedIds = new Set(getLS('local_deleted_photo_ids', []) || []);
+    const cleanRemote = Array.isArray(remoteList)
+      ? remoteList.filter((p) => p && p.id && !deletedIds.has(p.id))
+      : [];
+    const cleanLocal = Array.isArray(localList)
+      ? localList.filter((p) => p && p.id && !deletedIds.has(p.id))
+      : [];
+
+    if (cleanRemote.length === 0) return cleanLocal;
+    if (cleanLocal.length === 0) return cleanRemote;
+
+    const remoteMap = new Map(cleanRemote.map((p) => [p.id, p]));
+    const localMap = new Map(cleanLocal.map((p) => [p.id, p]));
+
+    const merged = [];
+    const seenIds = new Set();
+
+    // 1. Incluir fotos nuevas subidas en este navegador que aún no están en remoteList (ej. "que bo es")
+    cleanLocal.forEach((lp) => {
+      if (!remoteMap.has(lp.id) && !DEFAULT_PORTFOLIO_MAP.has(lp.id)) {
+        merged.push(lp);
+        seenIds.add(lp.id);
+      }
+    });
+
+    // 2. Combinar fotos existentes en remoteList, priorizando ediciones locales más recientes
+    cleanRemote.forEach((rp) => {
+      if (seenIds.has(rp.id)) return;
+      const lp = localMap.get(rp.id);
+      if (lp && isPhotoLocallyModified(lp, rp, localUpdatedAt, remoteUpdatedAt)) {
+        merged.push(lp);
+      } else {
+        merged.push(rp);
+      }
+      seenIds.add(rp.id);
+    });
+
+    // 3. Ordenar dando prioridad a las fotos añadidas por el usuario y ediciones recientes
+    merged.sort((a, b) => {
+      const aCustom = !DEFAULT_PORTFOLIO_MAP.has(a.id) ? 1 : 0;
+      const bCustom = !DEFAULT_PORTFOLIO_MAP.has(b.id) ? 1 : 0;
+      if (aCustom !== bCustom) return bCustom - aCustom;
+      const aTime = Number(a.updatedAt || a.createdAt || 0);
+      const bTime = Number(b.updatedAt || b.createdAt || 0);
+      return bTime - aTime;
+    });
+
+    return merged;
+  }
+
+  async function getAllPortfolioPhotos() {
+    await loadStoredPreviewsFromIDB();
+    const localUpdatedAt = Number(getLS('local_portfolio_updated_at', 0)) || 0;
+    const localList = await getLocalPortfolioPhotos();
+
+    // 1. Si GitHub está conectado en este navegador, consultar estado real de GitHub y fusionar cambios locales
     if (isGitHubEnabled()) {
       try {
         const ghData = await fetchGitHubSiteData();
         if (ghData && Array.isArray(ghData.portfolio) && ghData.portfolio.length > 0) {
-          const sorted = [...ghData.portfolio].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-          return sorted.map(applyPreviewUrlsToPhoto);
+          const ghUpdatedAt = Number(ghData.updatedAt) || 0;
+          const mergedGh = mergeRemoteAndLocalPortfolio(ghData.portfolio, localList, ghUpdatedAt, localUpdatedAt);
+
+          // Si existen fotos locales con data:image aún no sincronizadas con GitHub, sincronizarlas en segundo plano
+          const hasPendingDataUrl = mergedGh.some(
+            (p) => (p.fullUrl && p.fullUrl.startsWith('data:')) || !ghData.portfolio.some((gp) => gp.id === p.id)
+          );
+          if (hasPendingDataUrl && !autoSyncInProgress) {
+            autoSyncInProgress = true;
+            replaceAllLocalPortfolioPhotos(mergedGh)
+              .then(() => syncLocalDataToGitHub())
+              .then(() => notifyPortfolioChanged())
+              .catch((e) => console.warn('Auto-sync GitHub diferido:', e))
+              .finally(() => {
+                autoSyncInProgress = false;
+              });
+          }
+
+          return mergedGh.map(applyPreviewUrlsToPhoto);
         }
       } catch (err) {
         console.warn('Error leyendo portafolio desde GitHub API, usando respaldo:', err);
       }
     }
 
-    // 2. Si el administrador ha editado fotos localmente en este navegador más recientemente que site-data.json
+    // 2. Consultar site-data.json desplegado en Cloudflare Pages y fusionar con fotos subidas/editadas en este navegador
     const pubData = await fetchPublicDeployedSiteData();
     const pubUpdatedAt = pubData && pubData.updatedAt ? Number(pubData.updatedAt) : 0;
 
-    if (localUpdatedAt > pubUpdatedAt) {
-      const localList = await getLocalPortfolioPhotos();
-      if (Array.isArray(localList) && localList.length > 0) {
-        return localList.map(applyPreviewUrlsToPhoto);
-      }
-    }
-
-    // 3. Para todos los visitantes (móviles, tablets, clientes), leer assets/data/site-data.json de Cloudflare Pages
     if (pubData && pubUpdatedAt > BASE_INITIAL_TIMESTAMP && Array.isArray(pubData.portfolio) && pubData.portfolio.length > 0) {
-      const sorted = [...pubData.portfolio].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-      return sorted.map(applyPreviewUrlsToPhoto);
+      const mergedPub = mergeRemoteAndLocalPortfolio(pubData.portfolio, localList, pubUpdatedAt, localUpdatedAt);
+      return mergedPub.map(applyPreviewUrlsToPhoto);
     }
 
-    // 4. Respaldo local (IndexedDB)
-    const fallbackList = await getLocalPortfolioPhotos();
-    return fallbackList.map(applyPreviewUrlsToPhoto);
+    // 3. Respaldo local (IndexedDB)
+    return localList.map(applyPreviewUrlsToPhoto);
   }
 
   async function savePortfolioPhoto(photo) {
     const currentList = await getAllPortfolioPhotos().catch(() => []);
     const existingItem = photo.id ? currentList.find((p) => p.id === photo.id) : null;
+    const now = Date.now();
 
     if (!photo.id) {
-      photo.id = 'photo-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+      photo.id = 'photo-' + now + '-' + Math.random().toString(36).substr(2, 5);
     }
     if (!photo.createdAt) {
-      photo.createdAt = existingItem && existingItem.createdAt ? existingItem.createdAt : Date.now();
+      photo.createdAt = existingItem && existingItem.createdAt ? existingItem.createdAt : now;
     }
+    photo.updatedAt = now;
+
+    // Si estaba marcada como eliminada anteriormente, restaurarla
+    const deletedIds = (getLS('local_deleted_photo_ids', []) || []).filter((delId) => delId !== photo.id);
+    setLS('local_deleted_photo_ids', deletedIds);
 
     const rawFullData = photo.fullUrl;
     const rawThumbData = photo.thumbUrl || photo.fullUrl;
 
+    // 1. Guardar primero en almacenamiento local (IndexedDB) para garantizar disponibilidad inmediata en todas las pestañas
+    const localPhotoCopy = Object.assign({}, photo, {
+      fullUrl: rawFullData && rawFullData.startsWith('data:') ? rawFullData : photo.fullUrl,
+      thumbUrl: rawThumbData && rawThumbData.startsWith('data:') ? rawThumbData : photo.thumbUrl
+    });
+
+    const updatedList = currentList.length > 0 ? [...currentList] : [...DEFAULT_PORTFOLIO];
+    const localIdx = updatedList.findIndex((p) => p.id === photo.id);
+    if (localIdx >= 0) {
+      updatedList[localIdx] = localPhotoCopy;
+    } else {
+      updatedList.unshift(localPhotoCopy);
+    }
+
+    setLS('local_portfolio_updated_at', now);
+    await replaceAllLocalPortfolioPhotos(updatedList);
+    notifyPortfolioChanged();
+
+    // 2. Si GitHub está conectado, publicar en el repositorio (Cloudflare Pages)
     if (isGitHubEnabled()) {
       const ghData = (await fetchGitHubSiteData(null, true)) || {
         version: 1,
         heroImage: await getLocalHeroImage(),
-        portfolio: currentList.length > 0 ? currentList : await getLocalPortfolioPhotos(),
+        portfolio: updatedList,
         sessions: await getLocalClientSessions()
       };
 
       if (!Array.isArray(ghData.portfolio) || ghData.portfolio.length === 0) {
-        ghData.portfolio = currentList.length > 0 ? [...currentList] : await getLocalPortfolioPhotos();
+        ghData.portfolio = [...updatedList];
       }
 
       const filesToUpload = [];
@@ -1046,25 +1239,15 @@
 
       const actionLabel = existingItem ? `Editar foto "${photo.title}"` : `Publicar foto "${photo.title}"`;
       await commitToGitHub(filesToUpload, ghData, `📸 Admin: ${actionLabel}`);
+
+      // Actualizar copia local con las rutas definitivas del repositorio (las vistas previas siguen en instant_previews)
+      const syncedIdx = updatedList.findIndex((p) => p.id === photo.id);
+      if (syncedIdx >= 0) {
+        updatedList[syncedIdx] = Object.assign({}, photo);
+      }
+      await replaceAllLocalPortfolioPhotos(updatedList);
+      notifyPortfolioChanged();
     }
-
-    // Actualizar la lista completa en almacenamiento local (con vistas previas inmediatas si aún no está en disco)
-    const localPhotoCopy = Object.assign({}, photo, {
-      fullUrl: rawFullData && rawFullData.startsWith('data:') ? rawFullData : photo.fullUrl,
-      thumbUrl: rawThumbData && rawThumbData.startsWith('data:') ? rawThumbData : photo.thumbUrl
-    });
-
-    const updatedList = currentList.length > 0 ? [...currentList] : [...DEFAULT_PORTFOLIO];
-    const localIdx = updatedList.findIndex((p) => p.id === photo.id);
-    if (localIdx >= 0) {
-      updatedList[localIdx] = localPhotoCopy;
-    } else {
-      updatedList.unshift(localPhotoCopy);
-    }
-
-    setLS('local_portfolio_updated_at', Date.now());
-    await replaceAllLocalPortfolioPhotos(updatedList);
-    setLS('portfolio', updatedList);
 
     return applyPreviewUrlsToPhoto(localPhotoCopy);
   }
@@ -1072,19 +1255,25 @@
   async function deletePortfolioPhoto(id) {
     const currentList = await getAllPortfolioPhotos().catch(() => []);
 
+    const deletedIds = new Set(getLS('local_deleted_photo_ids', []) || []);
+    deletedIds.add(id);
+    setLS('local_deleted_photo_ids', Array.from(deletedIds));
+
+    const updatedList = (currentList.length > 0 ? currentList : [...DEFAULT_PORTFOLIO]).filter((p) => p.id !== id);
+    setLS('local_portfolio_updated_at', Date.now());
+    await replaceAllLocalPortfolioPhotos(updatedList);
+    notifyPortfolioChanged();
+
     if (isGitHubEnabled()) {
       const ghData = await fetchGitHubSiteData(null, true);
       if (ghData && Array.isArray(ghData.portfolio)) {
         const target = ghData.portfolio.find((p) => p.id === id);
         ghData.portfolio = ghData.portfolio.filter((p) => p.id !== id);
         await commitToGitHub([], ghData, `🗑️ Admin: Eliminar foto "${target ? target.title : id}"`);
+        notifyPortfolioChanged();
       }
     }
 
-    const updatedList = (currentList.length > 0 ? currentList : [...DEFAULT_PORTFOLIO]).filter((p) => p.id !== id);
-    setLS('local_portfolio_updated_at', Date.now());
-    await replaceAllLocalPortfolioPhotos(updatedList);
-    setLS('portfolio', updatedList);
     return true;
   }
 

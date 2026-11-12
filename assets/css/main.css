@@ -834,6 +834,13 @@ summary:focus-visible,
   gap: 2rem;
 }
 
+.realestate-extra-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
 .grid-weddings,
 .grid-portraits,
 .grid-corporate,
@@ -1688,6 +1695,7 @@ summary:focus-visible,
 
   .grid-weddings,
   .grid-corporate,
+  .realestate-extra-grid,
   .gallery-3col {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
@@ -1806,6 +1814,7 @@ summary:focus-visible,
   .inquiry-grid,
   .grid-realestate,
   .realestate-subgrid,
+  .realestate-extra-grid,
   .grid-weddings,
   .grid-corporate,
   .grid-portraits,

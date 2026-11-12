@@ -188,11 +188,12 @@
     }, { passive: true });
   }
 
-  // 4. Carga dinámica del portafolio desde GitHub CMS / site-data.json (solo en index.html)
+  // 4. Carga dinámica del portafolio desde GitHub CMS / site-data.json + IndexedDB (en index.html y páginas de especialidad)
   let allPortfolioPhotos = [];
 
   function buildPhotoCardHtml(p, forcedAspect) {
     const aspectClass = forcedAspect || (p.aspect === 'landscape' ? 'aspect-landscape' : 'aspect-portrait');
+    const safeId = escapeHtml(p.id || '');
     const safeFull = escapeHtml(p.fullUrl);
     const safeThumb = escapeHtml(p.thumbUrl || p.fullUrl);
     const safeTitle = escapeHtml(p.title);
@@ -202,7 +203,7 @@
     const h = aspectClass === 'aspect-landscape' ? 666 : 1000;
 
     return `
-      <article class="photo-item ${aspectClass} reveal" data-full="${safeFull}" data-caption="${safeCaption}">
+      <article class="photo-item ${aspectClass} reveal visible" data-photo-id="${safeId}" data-full="${safeFull}" data-caption="${safeCaption}">
         <div class="img-box">
           <img src="${safeThumb}" alt="${safeCaption}" loading="lazy" decoding="async" width="${w}" height="${h}">
         </div>
@@ -223,11 +224,15 @@
 
     if (category === 'realestate') {
       const mainPhoto = photos[0];
-      const subPhotos = photos.slice(1);
+      const subPhotos = photos.slice(1, 3);
+      const extraPhotos = photos.slice(3);
       let html = buildPhotoCardHtml(mainPhoto, 'aspect-landscape');
 
       if (subPhotos.length > 0) {
         html += `<div class="realestate-subgrid">${subPhotos.map((p) => buildPhotoCardHtml(p, 'aspect-landscape')).join('')}</div>`;
+      }
+      if (extraPhotos.length > 0) {
+        html += `<div class="realestate-extra-grid">${extraPhotos.map((p) => buildPhotoCardHtml(p, 'aspect-landscape')).join('')}</div>`;
       }
       container.innerHTML = html;
     } else {
@@ -235,9 +240,58 @@
     }
   }
 
+  function renderServicePageGallery() {
+    const serviceGrid = document.querySelector('.gallery-3col[data-gallery-category]');
+    if (!serviceGrid || allPortfolioPhotos.length === 0) return;
+
+    const cats = (serviceGrid.getAttribute('data-gallery-category') || '')
+      .split(',')
+      .map((c) => c.trim())
+      .filter(Boolean);
+    if (cats.length === 0) return;
+
+    const matchingPhotos = allPortfolioPhotos.filter((p) => cats.includes(p.category));
+    if (matchingPhotos.length === 0) return;
+
+    // Eliminar tarjetas inyectadas previamente en re-renderizados en vivo
+    serviceGrid.querySelectorAll('[data-dynamic-injected="true"]').forEach((el) => el.remove());
+
+    const existingArticles = Array.from(serviceGrid.querySelectorAll('.photo-item'));
+    const defaultIds = new Set(
+      (window.AndresDB && Array.isArray(window.AndresDB.DEFAULT_PORTFOLIO)
+        ? window.AndresDB.DEFAULT_PORTFOLIO
+        : []
+      ).map((d) => d.id)
+    );
+
+    const toPrepend = [];
+    matchingPhotos.forEach((p) => {
+      const alreadyExists = existingArticles.some(
+        (art) =>
+          art.getAttribute('data-full') === p.fullUrl ||
+          (art.querySelector('.photo-name') &&
+            art.querySelector('.photo-name').textContent.trim().toLowerCase() === (p.title || '').trim().toLowerCase())
+      );
+      if (!alreadyExists && !defaultIds.has(p.id)) {
+        toPrepend.push(p);
+      }
+    });
+
+    if (toPrepend.length > 0) {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = toPrepend.map((p) => buildPhotoCardHtml(p)).join('');
+      const newNodes = Array.from(wrapper.children);
+      newNodes.reverse().forEach((node) => {
+        node.setAttribute('data-dynamic-injected', 'true');
+        serviceGrid.insertBefore(node, serviceGrid.firstChild);
+      });
+    }
+  }
+
   async function loadAndRenderSections() {
     const hasHomeGrids = document.querySelector('.grid-realestate, .grid-weddings, .grid-portraits, .grid-corporate');
-    if (!hasHomeGrids) {
+    const hasServiceGrid = document.querySelector('.gallery-3col[data-gallery-category]');
+    if (!hasHomeGrids && !hasServiceGrid) {
       setupPhotoLightboxEvents();
       observeReveals();
       return;
@@ -250,7 +304,7 @@
         allPortfolioPhotos = await db.getAllPortfolioPhotos();
       }
 
-      if (db && db.getHeroImage) {
+      if (hasHomeGrids && db && db.getHeroImage) {
         const heroUrl = await db.getHeroImage();
         const heroImg = document.querySelector('.hero-backdrop img');
         // Si el administrador subió una foto de portada personalizada distinta a la de serie, actualizarla
@@ -260,10 +314,16 @@
         }
       }
 
-      renderSectionGrid('realestate', '.grid-realestate');
-      renderSectionGrid('bodas', '.grid-weddings');
-      renderSectionGrid('retratos', '.grid-portraits');
-      renderSectionGrid('empresarial', '.grid-corporate');
+      if (hasHomeGrids) {
+        renderSectionGrid('realestate', '.grid-realestate');
+        renderSectionGrid('bodas', '.grid-weddings');
+        renderSectionGrid('retratos', '.grid-portraits');
+        renderSectionGrid('empresarial', '.grid-corporate');
+      }
+
+      if (hasServiceGrid) {
+        renderServicePageGallery();
+      }
 
       setupPhotoLightboxEvents();
       observeReveals();
@@ -272,6 +332,36 @@
       setupPhotoLightboxEvents();
       observeReveals();
     }
+  }
+
+  function initLivePortfolioSync() {
+    window.addEventListener('storage', (e) => {
+      if (
+        !e.key ||
+        e.key === 'andres_portfolio_broadcast_ts' ||
+        e.key === 'andres_local_portfolio_updated_at' ||
+        e.key === 'andres_portfolio'
+      ) {
+        loadAndRenderSections();
+      }
+    });
+
+    if (typeof window.BroadcastChannel !== 'undefined') {
+      try {
+        const channel = new window.BroadcastChannel('andres_cms_channel');
+        channel.addEventListener('message', (ev) => {
+          if (ev && ev.data && ev.data.type === 'portfolio_updated') {
+            loadAndRenderSections();
+          }
+        });
+      } catch (e) {}
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        loadAndRenderSections();
+      }
+    });
   }
 
   // 5. Navegación móvil accesible
@@ -379,6 +469,7 @@
     initMobileNavigation();
     initInquiryForm();
     loadAndRenderSections();
+    initLivePortfolioSync();
   }
 
   if (document.readyState === 'loading') {
