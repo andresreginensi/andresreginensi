@@ -603,7 +603,7 @@ summary:focus-visible,
 
 .seo-cards-toolbar {
   margin-top: 2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.15rem;
   scroll-margin-top: 110px;
 }
 
@@ -612,45 +612,28 @@ summary:focus-visible,
   grid-template-columns: repeat(3, 1fr);
   gap: 1.35rem;
   margin: 0.5rem 0 2.75rem;
+  align-items: start;
 }
 
 .seo-card {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
   background: var(--bg-surface);
   border: 1px solid var(--border-hairline);
   border-radius: 16px;
-  padding: 0;
-  display: grid;
-  grid-template-columns: 1fr;
-  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-              border-color 0.32s ease,
-              box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-  z-index: 1;
-}
-
-.seo-card:hover,
-.seo-card.is-popup-open {
-  transform: translateY(-5px);
-  border-color: rgba(212, 175, 55, 0.52);
-  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.78), 0 0 30px rgba(197, 160, 89, 0.14);
-  z-index: 20;
-}
-
-.seo-card-front {
-  grid-area: 1 / 1;
   padding: 1.75rem 1.65rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0) scale(1);
-  transition: opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.26s cubic-bezier(0.22, 1, 0.36, 1),
-              visibility 0.24s;
-  z-index: 2;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.3s ease,
+              box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.seo-card:hover,
+.seo-card:focus-within {
+  transform: translateY(-4px);
+  border-color: rgba(212, 175, 55, 0.52);
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.72), 0 0 28px rgba(197, 160, 89, 0.12);
 }
 
 .seo-card-top {
@@ -658,7 +641,7 @@ summary:focus-visible,
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.9rem;
   flex-wrap: wrap;
 }
 
@@ -671,22 +654,23 @@ summary:focus-visible,
   margin-bottom: 0;
 }
 
-/* Etiqueta cápsula de precio (Desde + Importe separados en Flexbox sin colisión) */
+/* Botón cápsula de precio ("Desde 120€ ▾") siempre visible y sin colisión */
 .price-pill {
+  appearance: none;
+  -webkit-appearance: none;
   font-family: var(--font-sans);
   display: inline-flex;
   align-items: center;
   gap: 0.42rem;
-  padding: 0.34rem 0.82rem;
+  padding: 0.38rem 0.88rem;
   border-radius: var(--btn-radius-pill);
-  background: linear-gradient(135deg, rgba(197, 160, 89, 0.15) 0%, rgba(227, 213, 184, 0.06) 100%);
-  border: 1px solid rgba(227, 213, 184, 0.32);
+  background: linear-gradient(135deg, rgba(197, 160, 89, 0.22) 0%, rgba(227, 213, 184, 0.08) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.48);
   color: var(--accent-warm);
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  position: relative;
-  z-index: 3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   transition: var(--btn-transition);
 }
 
@@ -695,8 +679,8 @@ summary:focus-visible,
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: var(--text-muted);
-  font-weight: 500;
+  color: var(--accent-warm);
+  font-weight: 600;
   flex-shrink: 0;
 }
 
@@ -705,162 +689,136 @@ summary:focus-visible,
   display: inline-block;
   color: var(--text-pure) !important;
   font-family: var(--font-display);
-  font-size: 0.96rem;
-  font-weight: 600;
+  font-size: 0.98rem;
+  font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1;
   flex-shrink: 0;
-  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), color 0.24s ease;
+  transition: transform 0.22s ease, color 0.22s ease;
 }
 
-.price-pill-plus {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: rgba(212, 175, 55, 0.24);
-  color: var(--text-pure);
-  font-size: 0.72rem;
-  font-weight: 700;
+.price-pill-chevron {
+  display: inline-block;
+  font-size: 0.75rem;
+  color: var(--accent-gold);
   line-height: 1;
-  flex-shrink: 0;
-  transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .price-pill:hover,
 .deliverable-card:hover .price-pill {
-  background: linear-gradient(135deg, rgba(197, 160, 89, 0.26) 0%, rgba(227, 213, 184, 0.12) 100%);
-  border-color: rgba(227, 213, 184, 0.58);
-  box-shadow: 0 6px 18px rgba(197, 160, 89, 0.2);
+  background: linear-gradient(135deg, rgba(197, 160, 89, 0.34) 0%, rgba(227, 213, 184, 0.16) 100%);
+  border-color: rgba(245, 224, 181, 0.75);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(197, 160, 89, 0.25);
 }
 
-.price-pill:hover .price-pill-value,
-.deliverable-card:hover .price-pill-value {
-  color: var(--accent-warm) !important;
-  transform: translateX(1px);
+.seo-card.is-tariff-open .price-pill-chevron {
+  transform: rotate(180deg);
 }
 
-.seo-card-footer {
+/* DESPLEGABLE INTERACTIVO DE TARIFA DENTRO DE CADA CUADRADO (.seo-tariff-dropdown) */
+.seo-tariff-dropdown {
+  margin-top: 0.35rem;
+  margin-bottom: 0.85rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(212, 175, 55, 0.32);
+  overflow: hidden;
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.seo-tariff-dropdown:hover {
+  border-color: rgba(212, 175, 55, 0.58);
+  background: rgba(197, 160, 89, 0.06);
+}
+
+.seo-tariff-dropdown[open] {
+  background: linear-gradient(165deg, rgba(26, 24, 31, 0.98) 0%, rgba(15, 15, 20, 0.99) 100%);
+  border-color: rgba(212, 175, 55, 0.62);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+}
+
+.seo-card-tariff-btn {
+  list-style: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-top: auto;
-  padding-top: 0.85rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  flex-wrap: wrap;
+  width: 100%;
+  padding: 0.68rem 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-warm);
+  background: linear-gradient(90deg, rgba(197, 160, 89, 0.14) 0%, rgba(197, 160, 89, 0.04) 100%);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.22s ease, color 0.22s ease;
 }
 
-.seo-card-tariff-btn {
-  font-family: var(--font-sans);
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--btn-radius-pill);
-  padding: 0.4rem 0.9rem;
-  cursor: pointer;
-  transition: var(--btn-transition);
+.seo-card-tariff-btn::-webkit-details-marker {
+  display: none;
+}
+
+.seo-card-tariff-btn::marker {
+  content: '';
 }
 
 .seo-card-tariff-btn:hover {
-  background: rgba(212, 175, 55, 0.15);
-  border-color: rgba(227, 213, 184, 0.45);
+  background: linear-gradient(90deg, rgba(197, 160, 89, 0.24) 0%, rgba(197, 160, 89, 0.1) 100%);
   color: var(--text-pure);
 }
 
-/* CAPA POP-UP DE TARIFA (MISMA CELDA DE GRID, CERO COLISIÓN CON LA CARA FRONTAL) */
-.seo-card-popup {
-  grid-area: 1 / 1;
-  background: linear-gradient(165deg, #19181f 0%, #0e0e13 100%);
-  padding: 1.55rem 1.6rem 1.45rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translateY(10px) scale(0.98);
-  transition: opacity 0.26s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-              visibility 0.26s;
-  z-index: 5;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .seo-card:hover .seo-card-front {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transform: translateY(-6px) scale(0.98);
-  }
-
-  .seo-card:hover .seo-card-popup {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.seo-card.is-popup-open .seo-card-front {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translateY(-6px) scale(0.98);
-}
-
-.seo-card.is-popup-open .seo-card-popup {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translateY(0) scale(1);
-}
-
-.seo-popup-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.65rem;
-}
-
-.seo-popup-close {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: var(--text-muted);
-  font-size: 1.05rem;
-  line-height: 1;
+.tariff-btn-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: var(--btn-transition);
-}
-
-.seo-popup-close:hover {
-  background: rgba(255, 255, 255, 0.14);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.2);
   color: var(--text-pure);
+  font-size: 0.78rem;
+  line-height: 1;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background 0.22s ease;
 }
 
-/* Bloque destacado de precio dentro del Pop-up (Desde + Importe + Unidad con separación garantizada) */
+.seo-tariff-dropdown[open] .tariff-btn-icon {
+  transform: rotate(180deg);
+  background: var(--accent-gold);
+  color: #09090b;
+}
+
+.seo-tariff-panel {
+  padding: 0.95rem 1rem 1.05rem;
+  border-top: 1px solid rgba(227, 213, 184, 0.14);
+  animation: tariffSlideDown 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes tariffSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Bloque destacado de precio dentro del desplegable (Desde + Importe + Unidad con separación garantizada) */
 .seo-popup-price-box {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.5rem 0.85rem;
-  padding: 0.65rem 0.95rem;
-  margin-bottom: 0.75rem;
-  background: linear-gradient(135deg, rgba(197, 160, 89, 0.13) 0%, rgba(255, 255, 255, 0.03) 100%);
-  border: 1px solid rgba(227, 213, 184, 0.24);
-  border-radius: 12px;
+  padding: 0.65rem 0.9rem;
+  margin-bottom: 0.85rem;
+  background: linear-gradient(135deg, rgba(197, 160, 89, 0.15) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border: 1px solid rgba(227, 213, 184, 0.26);
+  border-radius: 10px;
 }
 
 .seo-popup-price-main {
@@ -883,85 +841,50 @@ summary:focus-visible,
 .seo-popup-price-main .pricing-value {
   display: inline-block;
   font-family: var(--font-display);
-  font-size: 1.85rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: var(--accent-warm);
   line-height: 1;
   letter-spacing: -0.02em;
   flex-shrink: 0;
-  opacity: 0;
-  transform: translateX(-6px);
-  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1) 0.05s,
-              transform 0.32s cubic-bezier(0.22, 1, 0.36, 1) 0.05s;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .seo-card:hover .seo-popup-price-main .pricing-value {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.seo-card.is-popup-open .seo-popup-price-main .pricing-value {
-  opacity: 1;
-  transform: translateX(0);
 }
 
 .seo-popup-price-box .pricing-unit {
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   padding: 0.22rem 0.62rem;
   border-radius: var(--btn-radius-pill);
   white-space: nowrap;
 }
 
-.seo-popup-desc {
-  font-size: 0.82rem !important;
-  line-height: 1.48 !important;
-  color: var(--text-muted) !important;
-  margin-bottom: 0.7rem !important;
+.seo-tariff-panel .pricing-features {
+  margin: 0 0 1rem;
+  gap: 0.45rem;
 }
 
-.seo-card-popup .pricing-features {
-  margin: 0 0 0.95rem;
-  gap: 0.42rem;
+.seo-tariff-panel .pricing-features li {
+  font-size: 0.81rem;
+  line-height: 1.42;
 }
 
-.seo-card-popup .pricing-features li {
-  font-size: 0.8rem;
-  line-height: 1.38;
+.seo-popup-cta {
+  width: 100%;
+  padding: 0.6rem 1.1rem !important;
+  font-size: 0.8rem !important;
+  justify-content: center;
 }
 
-.seo-popup-actions {
+.seo-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  margin-top: auto;
   padding-top: 0.65rem;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.seo-popup-cta {
-  padding: 0.55rem 1.05rem !important;
-  font-size: 0.78rem !important;
-  flex: 1 1 auto;
-  justify-content: center;
-}
-
-.seo-popup-sublink {
-  font-size: 0.76rem;
-  color: var(--accent-warm);
-  font-weight: 500;
-  white-space: nowrap;
-  padding: 0.35rem 0.5rem;
-  transition: color 0.2s ease;
-}
-
-.seo-popup-sublink:hover {
-  color: var(--text-pure);
-  text-decoration: underline;
+  flex-wrap: wrap;
 }
 
 .discipline-title-row {

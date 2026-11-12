@@ -124,8 +124,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/css/main.css?v=4">
-  <link rel="stylesheet" href="assets/css/cookies.css?v=4">
+  <link rel="stylesheet" href="assets/css/main.css?v=25">
+  <link rel="stylesheet" href="assets/css/cookies.css?v=25">
 </head>
 <body>
   <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
@@ -288,38 +288,29 @@
           </p>
 
           <div class="seo-cards-toolbar" id="tarifas">
-            <span class="pricing-market-badge">&#10003; Tarifas locales competitivas en Tarragona &middot; Pasa el cursor o pulsa sobre cada especialidad para ver qué incluye</span>
+            <span class="pricing-market-badge">&#10003; Tarifas locales competitivas en Tarragona &middot; Pulsa en «Desde X€» o en «Ver tarifa y qué incluye» para desplegar cada servicio</span>
           </div>
 
           <div class="seo-cards-grid">
             <!-- 01 / INMOBILIARIA -->
-            <article class="seo-card" tabindex="0">
-              <div class="seo-card-front">
-                <div>
-                  <div class="seo-card-top">
-                    <span class="seo-card-num">01 / INMOBILIARIA</span>
-                    <button type="button" class="price-pill" data-popup-trigger aria-expanded="false">
-                      <span class="price-pill-label">Desde</span>
-                      <span class="price-pill-value">120€</span>
-                      <span class="price-pill-plus" aria-hidden="true">+</span>
-                    </button>
-                  </div>
-                  <h3 class="seo-card-h3">Fotografía Inmobiliaria en Tarragona y Salou</h3>
-                  <p>Reportajes orientados a agencias, promotoras y alquiler vacacional que multiplican el atractivo de viviendas, áticos y villas en portales nacionales e internacionales.</p>
-                </div>
-                <div class="seo-card-footer">
-                  <button type="button" class="seo-card-tariff-btn" data-popup-trigger>Ver tarifa y qué incluye</button>
-                  <a href="fotografia-inmobiliaria-tarragona.html" class="seo-card-link">Explorar <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
-                </div>
+            <article class="seo-card">
+              <div class="seo-card-top">
+                <span class="seo-card-num">01 / INMOBILIARIA</span>
+                <button type="button" class="price-pill" data-toggle-tariff aria-label="Desplegar tarifa Fotografía Inmobiliaria desde 120€">
+                  <span class="price-pill-label">Desde</span>
+                  <span class="price-pill-value">120€</span>
+                  <span class="price-pill-chevron" aria-hidden="true">&#9662;</span>
+                </button>
               </div>
+              <h3 class="seo-card-h3">Fotografía Inmobiliaria en Tarragona y Salou</h3>
+              <p>Reportajes orientados a agencias, promotoras y alquiler vacacional que multiplican el atractivo de viviendas, áticos y villas en portales nacionales e internacionales.</p>
 
-              <!-- POP-UP DE TARIFA SOBRE EL CUADRADO 01 -->
-              <div class="seo-card-popup" role="dialog" aria-label="Tarifa Fotografía Inmobiliaria">
-                <div>
-                  <div class="seo-popup-header">
-                    <span class="seo-card-num">01 / TARIFA INMOBILIARIA</span>
-                    <button type="button" class="seo-popup-close" data-popup-close aria-label="Cerrar detalle de tarifa">&times;</button>
-                  </div>
+              <details class="seo-tariff-dropdown">
+                <summary class="seo-card-tariff-btn">
+                  <span>Ver tarifa y qué incluye</span>
+                  <span class="tariff-btn-icon" aria-hidden="true">&#9662;</span>
+                </summary>
+                <div class="seo-tariff-panel">
                   <div class="seo-popup-price-box">
                     <div class="seo-popup-price-main">
                       <span class="pricing-from">Desde</span>
@@ -327,49 +318,40 @@
                     </div>
                     <span class="pricing-unit">por inmueble</span>
                   </div>
-                  <p class="seo-popup-desc">Para agencias inmobiliarias, propietarios y alquiler vacacional en Tarragona y Costa Daurada.</p>
                   <ul class="pricing-features">
                     <li>Ópticas gran angular sin distorsión y verticales corregidas</li>
                     <li>Control de rango dinámico (interior y vistas exteriores)</li>
                     <li>Doble entrega: web/portales (Idealista, Airbnb) + Alta Res.</li>
                     <li>Descuentos por volumen para carteras de agencias</li>
                   </ul>
-                </div>
-                <div class="seo-popup-actions">
                   <a href="#contacto" class="btn-primary-gold seo-popup-cta" data-select-service="Fotografía Inmobiliaria / Arquitectura">Solicitar esta tarifa <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
-                  <a href="fotografia-inmobiliaria-tarragona.html" class="seo-popup-sublink">Ver galería</a>
                 </div>
+              </details>
+
+              <div class="seo-card-footer">
+                <a href="fotografia-inmobiliaria-tarragona.html" class="seo-card-link">Ver servicio inmobiliario <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
               </div>
             </article>
 
             <!-- 02 / ARQUITECTURA & INTERIORES -->
-            <article class="seo-card" tabindex="0">
-              <div class="seo-card-front">
-                <div>
-                  <div class="seo-card-top">
-                    <span class="seo-card-num">02 / ARQUITECTURA &amp; INTERIORES</span>
-                    <button type="button" class="price-pill" data-popup-trigger aria-expanded="false">
-                      <span class="price-pill-label">Desde</span>
-                      <span class="price-pill-value">180€</span>
-                      <span class="price-pill-plus" aria-hidden="true">+</span>
-                    </button>
-                  </div>
-                  <h3 class="seo-card-h3">Fotografía de Arquitectura e Interiorismo</h3>
-                  <p>Documentación rigurosa de obra nueva, reformas, hoteles y espacios comerciales con control de líneas verticales, luz natural y fidelidad cromática de materiales.</p>
-                </div>
-                <div class="seo-card-footer">
-                  <button type="button" class="seo-card-tariff-btn" data-popup-trigger>Ver tarifa y qué incluye</button>
-                  <a href="fotografia-inmobiliaria-tarragona.html#arquitectura-interiores" class="seo-card-link">Explorar <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
-                </div>
+            <article class="seo-card">
+              <div class="seo-card-top">
+                <span class="seo-card-num">02 / ARQUITECTURA &amp; INTERIORES</span>
+                <button type="button" class="price-pill" data-toggle-tariff aria-label="Desplegar tarifa Arquitectura e Interiorismo desde 180€">
+                  <span class="price-pill-label">Desde</span>
+                  <span class="price-pill-value">180€</span>
+                  <span class="price-pill-chevron" aria-hidden="true">&#9662;</span>
+                </button>
               </div>
+              <h3 class="seo-card-h3">Fotografía de Arquitectura e Interiorismo</h3>
+              <p>Documentación rigurosa de obra nueva, reformas, hoteles y espacios comerciales con control de líneas verticales, luz natural y fidelidad cromática de materiales.</p>
 
-              <!-- POP-UP DE TARIFA SOBRE EL CUADRADO 02 -->
-              <div class="seo-card-popup" role="dialog" aria-label="Tarifa Fotografía de Arquitectura e Interiorismo">
-                <div>
-                  <div class="seo-popup-header">
-                    <span class="seo-card-num">02 / TARIFA ARQUITECTURA</span>
-                    <button type="button" class="seo-popup-close" data-popup-close aria-label="Cerrar detalle de tarifa">&times;</button>
-                  </div>
+              <details class="seo-tariff-dropdown">
+                <summary class="seo-card-tariff-btn">
+                  <span>Ver tarifa y qué incluye</span>
+                  <span class="tariff-btn-icon" aria-hidden="true">&#9662;</span>
+                </summary>
+                <div class="seo-tariff-panel">
                   <div class="seo-popup-price-box">
                     <div class="seo-popup-price-main">
                       <span class="pricing-from">Desde</span>
@@ -377,49 +359,40 @@
                     </div>
                     <span class="pricing-unit">por proyecto</span>
                   </div>
-                  <p class="seo-popup-desc">Reportajes de autor para estudios de arquitectura, interioristas, constructoras, villas y hoteles.</p>
                   <ul class="pricing-features">
                     <li>Planificación según orientación solar y hora azul / crepúsculo</li>
                     <li>Vistas generales y encuadres de detalle constructivo</li>
                     <li>Fidelidad cromática de materiales e iluminación técnica</li>
                     <li>Entrega en alta resolución para dosieres, prensa y premios</li>
                   </ul>
-                </div>
-                <div class="seo-popup-actions">
                   <a href="#contacto" class="btn-primary-gold seo-popup-cta" data-select-service="Fotografía Inmobiliaria / Arquitectura">Solicitar esta tarifa <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
-                  <a href="fotografia-inmobiliaria-tarragona.html#arquitectura-interiores" class="seo-popup-sublink">Ver proyectos</a>
                 </div>
+              </details>
+
+              <div class="seo-card-footer">
+                <a href="fotografia-inmobiliaria-tarragona.html#arquitectura-interiores" class="seo-card-link">Ver arquitectura e interiores <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
               </div>
             </article>
 
             <!-- 03 / BODAS & EVENTOS -->
-            <article class="seo-card" tabindex="0">
-              <div class="seo-card-front">
-                <div>
-                  <div class="seo-card-top">
-                    <span class="seo-card-num">03 / BODAS &amp; EVENTOS</span>
-                    <button type="button" class="price-pill" data-popup-trigger aria-expanded="false">
-                      <span class="price-pill-label">Desde</span>
-                      <span class="price-pill-value">390€</span>
-                      <span class="price-pill-plus" aria-hidden="true">+</span>
-                    </button>
-                  </div>
-                  <h3 class="seo-card-h3">Fotógrafo de Bodas y Celebraciones</h3>
-                  <p>Narrativa documental sin posados artificiales. Capturo la atmósfera real, los gestos espontáneos y cada detalle de tu boda o evento social en Cataluña.</p>
-                </div>
-                <div class="seo-card-footer">
-                  <button type="button" class="seo-card-tariff-btn" data-popup-trigger>Ver tarifa y qué incluye</button>
-                  <a href="fotografo-bodas-tarragona.html" class="seo-card-link">Explorar <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
-                </div>
+            <article class="seo-card">
+              <div class="seo-card-top">
+                <span class="seo-card-num">03 / BODAS &amp; EVENTOS</span>
+                <button type="button" class="price-pill" data-toggle-tariff aria-label="Desplegar tarifa Bodas y Eventos desde 390€">
+                  <span class="price-pill-label">Desde</span>
+                  <span class="price-pill-value">390€</span>
+                  <span class="price-pill-chevron" aria-hidden="true">&#9662;</span>
+                </button>
               </div>
+              <h3 class="seo-card-h3">Fotógrafo de Bodas y Celebraciones</h3>
+              <p>Narrativa documental sin posados artificiales. Capturo la atmósfera real, los gestos espontáneos y cada detalle de tu boda o evento social en Cataluña.</p>
 
-              <!-- POP-UP DE TARIFA SOBRE EL CUADRADO 03 -->
-              <div class="seo-card-popup" role="dialog" aria-label="Tarifa Fotografía de Bodas y Eventos">
-                <div>
-                  <div class="seo-popup-header">
-                    <span class="seo-card-num">03 / TARIFA BODAS &amp; EVENTOS</span>
-                    <button type="button" class="seo-popup-close" data-popup-close aria-label="Cerrar detalle de tarifa">&times;</button>
-                  </div>
+              <details class="seo-tariff-dropdown">
+                <summary class="seo-card-tariff-btn">
+                  <span>Ver tarifa y qué incluye</span>
+                  <span class="tariff-btn-icon" aria-hidden="true">&#9662;</span>
+                </summary>
+                <div class="seo-tariff-panel">
                   <div class="seo-popup-price-box">
                     <div class="seo-popup-price-main">
                       <span class="pricing-from">Desde</span>
@@ -427,49 +400,40 @@
                     </div>
                     <span class="pricing-unit">íntima &middot; completa 850€</span>
                   </div>
-                  <p class="seo-popup-desc">Cobertura documental y espontánea en masías, fincas y ceremonias en Tarragona y Cataluña.</p>
                   <ul class="pricing-features">
                     <li>Boda íntima / civil (desde 390€) o día completo (desde 850€)</li>
                     <li>Reunión previa y planificación personalizada sin prisas</li>
                     <li>Edición individual en color y blanco y negro atemporal</li>
                     <li>Galería privada con PIN en alta resolución sin marcas de agua</li>
                   </ul>
-                </div>
-                <div class="seo-popup-actions">
                   <a href="#contacto" class="btn-primary-gold seo-popup-cta" data-select-service="Reportaje de Boda / Evento Social">Consultar fecha y tarifa <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
-                  <a href="fotografo-bodas-tarragona.html" class="seo-popup-sublink">Ver bodas</a>
                 </div>
+              </details>
+
+              <div class="seo-card-footer">
+                <a href="fotografo-bodas-tarragona.html" class="seo-card-link">Ver reportajes de boda <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
               </div>
             </article>
 
             <!-- 04 / RETRATOS & EDITORIAL -->
-            <article class="seo-card" tabindex="0">
-              <div class="seo-card-front">
-                <div>
-                  <div class="seo-card-top">
-                    <span class="seo-card-num">04 / RETRATOS &amp; EDITORIAL</span>
-                    <button type="button" class="price-pill" data-popup-trigger aria-expanded="false">
-                      <span class="price-pill-label">Desde</span>
-                      <span class="price-pill-value">100€</span>
-                      <span class="price-pill-plus" aria-hidden="true">+</span>
-                    </button>
-                  </div>
-                  <h3 class="seo-card-h3">Retratos Profesionales y Editoriales</h3>
-                  <p>Sesiones en estudio o localización exterior para artistas, profesionales independientes, marca personal y proyectos editoriales con carácter propio.</p>
-                </div>
-                <div class="seo-card-footer">
-                  <button type="button" class="seo-card-tariff-btn" data-popup-trigger>Ver tarifa y qué incluye</button>
-                  <a href="fotografia-corporativa-retratos-tarragona.html#retrato-editorial" class="seo-card-link">Explorar <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
-                </div>
+            <article class="seo-card">
+              <div class="seo-card-top">
+                <span class="seo-card-num">04 / RETRATOS &amp; EDITORIAL</span>
+                <button type="button" class="price-pill" data-toggle-tariff aria-label="Desplegar tarifa Retratos desde 100€">
+                  <span class="price-pill-label">Desde</span>
+                  <span class="price-pill-value">100€</span>
+                  <span class="price-pill-chevron" aria-hidden="true">&#9662;</span>
+                </button>
               </div>
+              <h3 class="seo-card-h3">Retratos Profesionales y Editoriales</h3>
+              <p>Sesiones en estudio o localización exterior para artistas, profesionales independientes, marca personal y proyectos editoriales con carácter propio.</p>
 
-              <!-- POP-UP DE TARIFA SOBRE EL CUADRADO 04 -->
-              <div class="seo-card-popup" role="dialog" aria-label="Tarifa Retratos Profesionales y Editoriales">
-                <div>
-                  <div class="seo-popup-header">
-                    <span class="seo-card-num">04 / TARIFA RETRATOS</span>
-                    <button type="button" class="seo-popup-close" data-popup-close aria-label="Cerrar detalle de tarifa">&times;</button>
-                  </div>
+              <details class="seo-tariff-dropdown">
+                <summary class="seo-card-tariff-btn">
+                  <span>Ver tarifa y qué incluye</span>
+                  <span class="tariff-btn-icon" aria-hidden="true">&#9662;</span>
+                </summary>
+                <div class="seo-tariff-panel">
                   <div class="seo-popup-price-box">
                     <div class="seo-popup-price-main">
                       <span class="pricing-from">Desde</span>
@@ -477,49 +441,40 @@
                     </div>
                     <span class="pricing-unit">por sesión</span>
                   </div>
-                  <p class="seo-popup-desc">Ideal para marca personal, LinkedIn, artistas, actores, músicos y books en exterior o estudio.</p>
                   <ul class="pricing-features">
                     <li>Sesión guiada de 60–90 min en localización o estudio</li>
                     <li>Dirección de pose natural y asesoramiento de estilismo</li>
                     <li>Galería privada con PIN para seleccionar tus favoritas</li>
                     <li>Edición editorial de piel, color y blanco y negro</li>
                   </ul>
-                </div>
-                <div class="seo-popup-actions">
                   <a href="#contacto" class="btn-primary-gold seo-popup-cta" data-select-service="Retrato Profesional / Editorial / Book">Reservar sesión <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
-                  <a href="fotografia-corporativa-retratos-tarragona.html#retrato-editorial" class="seo-popup-sublink">Ver retratos</a>
                 </div>
+              </details>
+
+              <div class="seo-card-footer">
+                <a href="fotografia-corporativa-retratos-tarragona.html#retrato-editorial" class="seo-card-link">Ver retrato profesional <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
               </div>
             </article>
 
             <!-- 05 / CORPORATIVO & B2B -->
-            <article class="seo-card" tabindex="0">
-              <div class="seo-card-front">
-                <div>
-                  <div class="seo-card-top">
-                    <span class="seo-card-num">05 / CORPORATIVO &amp; B2B</span>
-                    <button type="button" class="price-pill" data-popup-trigger aria-expanded="false">
-                      <span class="price-pill-label">Desde</span>
-                      <span class="price-pill-value">160€</span>
-                      <span class="price-pill-plus" aria-hidden="true">+</span>
-                    </button>
-                  </div>
-                  <h3 class="seo-card-h3">Fotografía Corporativa y Empresarial</h3>
-                  <p>Retratos ejecutivos homogéneos para equipos, fotografía de sedes e instalaciones industriales, congresos y bancos de imágenes propios para marcas.</p>
-                </div>
-                <div class="seo-card-footer">
-                  <button type="button" class="seo-card-tariff-btn" data-popup-trigger>Ver tarifa y qué incluye</button>
-                  <a href="fotografia-corporativa-retratos-tarragona.html" class="seo-card-link">Explorar <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
-                </div>
+            <article class="seo-card">
+              <div class="seo-card-top">
+                <span class="seo-card-num">05 / CORPORATIVO &amp; B2B</span>
+                <button type="button" class="price-pill" data-toggle-tariff aria-label="Desplegar tarifa Fotografía Corporativa desde 160€">
+                  <span class="price-pill-label">Desde</span>
+                  <span class="price-pill-value">160€</span>
+                  <span class="price-pill-chevron" aria-hidden="true">&#9662;</span>
+                </button>
               </div>
+              <h3 class="seo-card-h3">Fotografía Corporativa y Empresarial</h3>
+              <p>Retratos ejecutivos homogéneos para equipos, fotografía de sedes e instalaciones industriales, congresos y bancos de imágenes propios para marcas.</p>
 
-              <!-- POP-UP DE TARIFA SOBRE EL CUADRADO 05 -->
-              <div class="seo-card-popup" role="dialog" aria-label="Tarifa Fotografía Corporativa y Empresarial">
-                <div>
-                  <div class="seo-popup-header">
-                    <span class="seo-card-num">05 / TARIFA CORPORATIVA</span>
-                    <button type="button" class="seo-popup-close" data-popup-close aria-label="Cerrar detalle de tarifa">&times;</button>
-                  </div>
+              <details class="seo-tariff-dropdown">
+                <summary class="seo-card-tariff-btn">
+                  <span>Ver tarifa y qué incluye</span>
+                  <span class="tariff-btn-icon" aria-hidden="true">&#9662;</span>
+                </summary>
+                <div class="seo-tariff-panel">
                   <div class="seo-popup-price-box">
                     <div class="seo-popup-price-main">
                       <span class="pricing-from">Desde</span>
@@ -527,49 +482,40 @@
                     </div>
                     <span class="pricing-unit">sesión o evento</span>
                   </div>
-                  <p class="seo-popup-desc">Imagen ejecutiva en vuestras propias oficinas, sedes industriales, congresos y eventos de empresa.</p>
                   <ul class="pricing-features">
                     <li>Desplazamiento in-company con iluminación de estudio portátil</li>
                     <li>Headshots homogéneos para directivos y equipos de trabajo</li>
                     <li>Cobertura ágil de congresos, jornadas y notas de prensa</li>
                     <li>Licencia de uso corporativo para web, LinkedIn y medios</li>
                   </ul>
-                </div>
-                <div class="seo-popup-actions">
                   <a href="#contacto" class="btn-primary-gold seo-popup-cta" data-select-service="Fotografía Corporativa / Eventos de Empresa">Solicitar tarifa empresa <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
-                  <a href="fotografia-corporativa-retratos-tarragona.html" class="seo-popup-sublink">Ver corporativo</a>
                 </div>
+              </details>
+
+              <div class="seo-card-footer">
+                <a href="fotografia-corporativa-retratos-tarragona.html" class="seo-card-link">Ver servicio para empresas <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
               </div>
             </article>
 
             <!-- 06 / DEPORTE & ACCIÓN -->
-            <article class="seo-card" tabindex="0">
-              <div class="seo-card-front">
-                <div>
-                  <div class="seo-card-top">
-                    <span class="seo-card-num">06 / DEPORTE &amp; ACCIÓN</span>
-                    <button type="button" class="price-pill" data-popup-trigger aria-expanded="false">
-                      <span class="price-pill-label">Desde</span>
-                      <span class="price-pill-value">120€</span>
-                      <span class="price-pill-plus" aria-hidden="true">+</span>
-                    </button>
-                  </div>
-                  <h3 class="seo-card-h3">Fotografía Deportiva y de Acción</h3>
-                  <p>Cobertura de competiciones, clubes, motor, náutica y entrenamientos de alto rendimiento con teleobjetivos luminosos y obturación de alta velocidad.</p>
-                </div>
-                <div class="seo-card-footer">
-                  <button type="button" class="seo-card-tariff-btn" data-popup-trigger>Ver tarifa y qué incluye</button>
-                  <a href="fotografia-corporativa-retratos-tarragona.html#deportiva-accion" class="seo-card-link">Explorar <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
-                </div>
+            <article class="seo-card">
+              <div class="seo-card-top">
+                <span class="seo-card-num">06 / DEPORTE &amp; ACCIÓN</span>
+                <button type="button" class="price-pill" data-toggle-tariff aria-label="Desplegar tarifa Fotografía Deportiva desde 120€">
+                  <span class="price-pill-label">Desde</span>
+                  <span class="price-pill-value">120€</span>
+                  <span class="price-pill-chevron" aria-hidden="true">&#9662;</span>
+                </button>
               </div>
+              <h3 class="seo-card-h3">Fotografía Deportiva y de Acción</h3>
+              <p>Cobertura de competiciones, clubes, motor, náutica y entrenamientos de alto rendimiento con teleobjetivos luminosos y obturación de alta velocidad.</p>
 
-              <!-- POP-UP DE TARIFA SOBRE EL CUADRADO 06 -->
-              <div class="seo-card-popup" role="dialog" aria-label="Tarifa Fotografía Deportiva y de Acción">
-                <div>
-                  <div class="seo-popup-header">
-                    <span class="seo-card-num">06 / TARIFA DEPORTE &amp; ACCIÓN</span>
-                    <button type="button" class="seo-popup-close" data-popup-close aria-label="Cerrar detalle de tarifa">&times;</button>
-                  </div>
+              <details class="seo-tariff-dropdown">
+                <summary class="seo-card-tariff-btn">
+                  <span>Ver tarifa y qué incluye</span>
+                  <span class="tariff-btn-icon" aria-hidden="true">&#9662;</span>
+                </summary>
+                <div class="seo-tariff-panel">
                   <div class="seo-popup-price-box">
                     <div class="seo-popup-price-main">
                       <span class="pricing-from">Desde</span>
@@ -577,18 +523,18 @@
                     </div>
                     <span class="pricing-unit">por cobertura</span>
                   </div>
-                  <p class="seo-popup-desc">Cobertura dinámica de torneos, clubes deportivos, motor, hípica, náutica, running y atletas.</p>
                   <ul class="pricing-features">
                     <li>Teleobjetivos luminosos y enfoque continuo de alta velocidad</li>
                     <li>Entrega rápida para redes sociales y comunicación del club</li>
                     <li>Galería privada accesible con PIN para participantes</li>
                     <li>Disponible para eventos puntuales o temporadas completas</li>
                   </ul>
-                </div>
-                <div class="seo-popup-actions">
                   <a href="#contacto" class="btn-primary-gold seo-popup-cta" data-select-service="Fotografía Deportiva y de Acción">Solicitar cobertura <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
-                  <a href="fotografia-corporativa-retratos-tarragona.html#deportiva-accion" class="seo-popup-sublink">Ver acción</a>
                 </div>
+              </details>
+
+              <div class="seo-card-footer">
+                <a href="fotografia-corporativa-retratos-tarragona.html#deportiva-accion" class="seo-card-link">Ver fotografía deportiva <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
               </div>
             </article>
           </div>
@@ -1162,9 +1108,9 @@
     </div>
   </div>
 
-  <script src="assets/js/db.js?v=12" defer></script>
-  <script src="assets/js/main.js?v=12" defer></script>
-  <script src="assets/js/cookies.js?v=12" defer></script>
-  <script src="assets/js/analytics-tracker.js?v=12" defer></script>
+  <script src="assets/js/db.js?v=25" defer></script>
+  <script src="assets/js/main.js?v=25" defer></script>
+  <script src="assets/js/cookies.js?v=25" defer></script>
+  <script src="assets/js/analytics-tracker.js?v=25" defer></script>
 </body>
 </html>

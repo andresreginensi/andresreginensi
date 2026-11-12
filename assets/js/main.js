@@ -434,8 +434,11 @@
             }
           });
         }
-        document.querySelectorAll('.seo-card.is-popup-open').forEach((card) => {
-          card.classList.remove('is-popup-open');
+        document.querySelectorAll('.seo-tariff-dropdown[open]').forEach((det) => {
+          det.removeAttribute('open');
+        });
+        document.querySelectorAll('.seo-card.is-tariff-open').forEach((card) => {
+          card.classList.remove('is-tariff-open');
         });
       });
     });
@@ -480,56 +483,50 @@
     }
   }
 
-  // 7. Pop-ups interactivos de tarifas sobre los 6 cuadrados de especialidad (.seo-card)
+  // 7. Desplegables interactivos de tarifas en los 6 cuadrados de especialidad (.seo-card)
   function initServicePricingPopups() {
     const cards = Array.from(document.querySelectorAll('.seo-card'));
     if (!cards.length) return;
 
-    function closeAllPopups(exceptCard) {
+    function closeOtherTariffs(activeCard) {
       cards.forEach((c) => {
-        if (c !== exceptCard) {
-          c.classList.remove('is-popup-open');
-          const pill = c.querySelector('.price-pill[aria-expanded]');
-          if (pill) pill.setAttribute('aria-expanded', 'false');
+        if (c !== activeCard) {
+          c.classList.remove('is-tariff-open');
+          const det = c.querySelector('.seo-tariff-dropdown');
+          if (det && det.hasAttribute('open')) {
+            det.removeAttribute('open');
+          }
         }
       });
     }
 
     cards.forEach((card) => {
-      const triggers = card.querySelectorAll('[data-popup-trigger]');
-      const closeBtn = card.querySelector('[data-popup-close]');
-      const pill = card.querySelector('.price-pill[aria-expanded]');
+      const details = card.querySelector('.seo-tariff-dropdown');
+      const pillBtn = card.querySelector('[data-toggle-tariff]');
 
-      triggers.forEach((btn) => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const willOpen = !card.classList.contains('is-popup-open');
-          closeAllPopups(card);
-          card.classList.toggle('is-popup-open', willOpen);
-          if (pill) pill.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-        });
-      });
-
-      if (closeBtn) {
-        closeBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          card.classList.remove('is-popup-open');
-          if (pill) pill.setAttribute('aria-expanded', 'false');
+      if (details) {
+        details.addEventListener('toggle', () => {
+          if (details.open) {
+            closeOtherTariffs(card);
+            card.classList.add('is-tariff-open');
+          } else {
+            card.classList.remove('is-tariff-open');
+          }
         });
       }
-    });
 
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.seo-card')) {
-        closeAllPopups(null);
+      if (pillBtn && details) {
+        pillBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          details.open = !details.open;
+        });
       }
     });
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        closeAllPopups(null);
+        closeOtherTariffs(null);
       }
     });
   }
