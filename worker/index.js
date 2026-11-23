@@ -18,6 +18,7 @@ import * as galleriesSession from '../functions/api/galleries/session.js';
 import * as galleriesLogout from '../functions/api/galleries/logout.js';
 import * as galleriesAdmin from '../functions/api/galleries/admin.js';
 import * as galleriesMedia from '../functions/api/galleries/media.js';
+import * as contactApi from '../functions/api/contact.js';
 
 import { jsonResponse } from '../functions/_lib/security.js';
 
@@ -33,7 +34,8 @@ const API_ROUTES = {
   '/api/galleries/session': galleriesSession,
   '/api/galleries/logout': galleriesLogout,
   '/api/galleries/admin': galleriesAdmin,
-  '/api/galleries/media': galleriesMedia
+  '/api/galleries/media': galleriesMedia,
+  '/api/contact': contactApi
 };
 
 const METHOD_MAP = {

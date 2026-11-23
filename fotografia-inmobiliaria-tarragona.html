@@ -67,8 +67,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/css/main.css?v=25">
-  <link rel="stylesheet" href="assets/css/cookies.css?v=25">
+  <link rel="stylesheet" href="assets/css/main.css?v=27">
+  <link rel="stylesheet" href="assets/css/cookies.css?v=27">
 </head>
 <body>
   <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
@@ -258,32 +258,41 @@
         <p class="contact-desc">Indícame ubicación del inmueble, tipología aproximada y urgencia de publicación.</p>
 
         <form id="project-inquiry-form" class="inquiry-form-card">
+          <div class="inquiry-honeypot" aria-hidden="true">
+            <label for="inq-website">Sitio web</label>
+            <input type="text" id="inq-website" name="website" tabindex="-1" autocomplete="off">
+          </div>
           <div class="inquiry-grid">
             <div class="inquiry-field">
               <label for="inq-name">Nombre / Agencia / Estudio</label>
-              <input type="text" id="inq-name" required maxlength="100" placeholder="Tu nombre o empresa">
+              <input type="text" id="inq-name" name="name" required maxlength="100" placeholder="Tu nombre o empresa" autocomplete="name">
+            </div>
+            <div class="inquiry-field">
+              <label for="inq-contact">Email o Teléfono de contacto</label>
+              <input type="text" id="inq-contact" name="contact" required maxlength="150" placeholder="Ej. agencia@correo.es o +34 600 000 000" autocomplete="email">
             </div>
             <div class="inquiry-field">
               <label for="inq-service">Tipo de reportaje</label>
-              <select id="inq-service" required>
+              <select id="inq-service" name="service" required>
                 <option value="Fotografía Inmobiliaria (Venta / Alquiler)">Fotografía Inmobiliaria (Venta / Alquiler)</option>
                 <option value="Fotografía de Arquitectura e Interiorismo">Fotografía de Arquitectura e Interiorismo</option>
                 <option value="Hotel / Alojamiento Turístico">Hotel / Alojamiento Turístico</option>
               </select>
             </div>
-            <div class="inquiry-field full-span">
+            <div class="inquiry-field">
               <label for="inq-meta">Municipio y superficie aproximada</label>
-              <input type="text" id="inq-meta" maxlength="140" placeholder="Ej. Ático en Salou 120 m² / Unifamiliar en Cambrils">
+              <input type="text" id="inq-meta" name="meta" maxlength="140" placeholder="Ej. Ático en Salou 120 m² / Cambrils">
             </div>
             <div class="inquiry-field full-span">
               <label for="inq-message">Detalles adicionales</label>
-              <textarea id="inq-message" rows="3" required maxlength="1000" placeholder="Número de habitaciones, zonas exteriores, si necesitas sesión al atardecer..."></textarea>
+              <textarea id="inq-message" name="message" rows="3" required maxlength="1200" placeholder="Número de habitaciones, zonas exteriores, si necesitas sesión al atardecer..."></textarea>
             </div>
           </div>
           <div class="inquiry-actions">
-            <button type="button" id="btn-inquiry-email" class="btn-client-access btn-contact-email">Enviar por Email</button>
-            <button type="submit" class="btn-whatsapp-action">Consultar por WhatsApp</button>
+            <button type="button" id="btn-inquiry-whatsapp" class="btn-whatsapp-action" data-track="form_inquiry_whatsapp">Consultar por WhatsApp</button>
+            <button type="submit" id="btn-inquiry-submit" class="btn-primary-gold" data-track="form_inquiry_submit">Enviar solicitud <span class="btn-arrow" aria-hidden="true">&rarr;</span></button>
           </div>
+          <div id="inquiry-feedback" class="inquiry-feedback" role="status" aria-live="polite"></div>
           <p style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.9rem; line-height: 1.55;">
             Responsable: Andrés Reginensi (Salou, Tarragona). Finalidad: atender tu solicitud de presupuesto. Más información en nuestra <a href="politica-privacidad.html" style="color: var(--accent-warm); text-decoration: underline;">Política de Privacidad</a>.
           </p>
@@ -303,7 +312,7 @@
     <button type="button" class="lightbox-arrow lightbox-prev" id="lightbox-prev" aria-label="Anterior">&#8249;</button>
     <button type="button" class="lightbox-arrow lightbox-next" id="lightbox-next" aria-label="Siguiente">&#8250;</button>
     <div class="lightbox-content">
-      <img id="lightbox-img" src="" alt="Fotografía ampliada">
+      <img id="lightbox-img" alt="Fotografía ampliada">
       <div class="lightbox-caption" id="lightbox-caption"></div>
     </div>
   </div>
@@ -363,10 +372,10 @@
     </div>
   </div>
 
-  <script src="assets/js/db.js?v=26" defer></script>
-  <script src="assets/js/main.js?v=26" defer></script>
-  <script src="assets/js/cookies.js?v=26" defer></script>
-  <script src="assets/js/analytics-tracker.js?v=26" defer></script>
+  <script src="assets/js/db.js?v=27" defer></script>
+  <script src="assets/js/main.js?v=27" defer></script>
+  <script src="assets/js/cookies.js?v=27" defer></script>
+  <script src="assets/js/analytics-tracker.js?v=27" defer></script>
 </body>
 </html>
 

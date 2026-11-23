@@ -107,7 +107,7 @@
     if (!lightbox) return;
     lightbox.classList.remove('active');
     lightbox.setAttribute('aria-hidden', 'true');
-    if (lightboxImg) lightboxImg.src = '';
+    if (lightboxImg) lightboxImg.removeAttribute('src');
     document.body.style.overflow = '';
 
     if (lastTriggerElement && typeof lastTriggerElement.focus === 'function') {
@@ -188,11 +188,34 @@
     }, { passive: true });
   }
 
-  // 4. Carga dinámica del portafolio desde GitHub CMS / site-data.json + IndexedDB (en index.html y páginas de especialidad)
+  // 4. Carga dinámica del portafolio desde site-data.json + autodetección de orientación vertical/horizontal
   let allPortfolioPhotos = [];
+  let lastRenderedSignature = '';
+
+  function syncCardOrientationFromImage(img) {
+    if (!img || !img.naturalWidth || !img.naturalHeight) return;
+    const card = img.closest('.photo-item');
+    if (!card) return;
+    // En la grilla de arquitectura/inmobiliaria respetamos el encuadre panorámico editorial
+    if (card.closest('.grid-realestate')) return;
+    const isPortrait = img.naturalHeight > img.naturalWidth * 1.05;
+    card.classList.toggle('aspect-portrait', isPortrait);
+    card.classList.toggle('aspect-landscape', !isPortrait);
+  }
+
+  function bindAutoOrientation(root = document) {
+    root.querySelectorAll('.photo-item img').forEach((img) => {
+      if (img.complete && img.naturalWidth > 0) {
+        syncCardOrientationFromImage(img);
+      } else if (img.dataset.orientBound !== 'true') {
+        img.dataset.orientBound = 'true';
+        img.addEventListener('load', () => syncCardOrientationFromImage(img), { once: true });
+      }
+    });
+  }
 
   function buildPhotoCardHtml(p, forcedAspect) {
-    const aspectClass = forcedAspect || (p.aspect === 'landscape' ? 'aspect-landscape' : 'aspect-portrait');
+    const aspectClass = forcedAspect || (p.aspect === 'portrait' ? 'aspect-portrait' : 'aspect-landscape');
     const safeId = escapeHtml(p.id || '');
     const safeFull = escapeHtml(p.fullUrl);
     const safeThumb = escapeHtml(p.thumbUrl || p.fullUrl);
@@ -203,7 +226,7 @@
     const h = aspectClass === 'aspect-landscape' ? 666 : 1000;
 
     return `
-      <article class="photo-item ${aspectClass} reveal visible" data-photo-id="${safeId}" data-full="${safeFull}" data-caption="${safeCaption}">
+      <article class="photo-item ${aspectClass} reveal is-visible" data-photo-id="${safeId}" data-full="${safeFull}" data-caption="${safeCaption}">
         <div class="img-box">
           <img src="${safeThumb}" alt="${safeCaption}" loading="lazy" decoding="async" width="${w}" height="${h}">
         </div>
@@ -314,21 +337,31 @@
         }
       }
 
-      if (hasHomeGrids) {
-        renderSectionGrid('realestate', '.grid-realestate');
-        renderSectionGrid('bodas', '.grid-weddings');
-        renderSectionGrid('retratos', '.grid-portraits');
-        renderSectionGrid('empresarial', '.grid-corporate');
+      const signature = JSON.stringify(
+        allPortfolioPhotos.map((p) => [p.id, p.category, p.aspect, p.thumbUrl, p.fullUrl, p.title, p.tag])
+      );
+
+      if (signature !== lastRenderedSignature) {
+        lastRenderedSignature = signature;
+
+        if (hasHomeGrids) {
+          renderSectionGrid('realestate', '.grid-realestate');
+          renderSectionGrid('bodas', '.grid-weddings');
+          renderSectionGrid('retratos', '.grid-portraits');
+          renderSectionGrid('empresarial', '.grid-corporate');
+        }
+
+        if (hasServiceGrid) {
+          renderServicePageGallery();
+        }
       }
 
-      if (hasServiceGrid) {
-        renderServicePageGallery();
-      }
-
+      bindAutoOrientation();
       setupPhotoLightboxEvents();
       observeReveals();
     } catch (err) {
       console.warn('Cargando con contenido estático:', err);
+      bindAutoOrientation();
       setupPhotoLightboxEvents();
       observeReveals();
     }
@@ -415,25 +448,56 @@
     });
   }
 
-  // 6. Formulario rápido de presupuesto (WhatsApp o Correo pre-estructurado sin fricción)
+  // 6. Formulario de contacto real (envío directo a /api/contact + confirmación visual + opción WhatsApp)
   function initInquiryForm() {
     const form = document.getElementById('project-inquiry-form');
     if (!form) return;
 
-    const btnEmail = document.getElementById('btn-inquiry-email');
+    const btnWhatsapp = document.getElementById('btn-inquiry-whatsapp');
+    const btnSubmit = document.getElementById('btn-inquiry-submit');
     const serviceSelect = document.getElementById('inq-service');
+    const feedbackBox = document.getElementById('inquiry-feedback');
 
-    // Al pulsar cualquier tarjeta de tarifas con data-select-service, preselecciona la disciplina en el formulario
+    function normalizeService(str) {
+      return String(str || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    }
+
+    function selectMatchingService(targetService) {
+      if (!serviceSelect || !targetService) return false;
+      const targetNorm = normalizeService(targetService);
+      const options = Array.from(serviceSelect.options);
+
+      let matched = options.find((opt) => opt.value === targetService);
+      if (!matched) {
+        matched = options.find((opt) => normalizeService(opt.value) === targetNorm);
+      }
+      if (!matched) {
+        matched = options.find(
+          (opt) =>
+            normalizeService(opt.value).includes(targetNorm) ||
+            normalizeService(opt.textContent).includes(targetNorm)
+        );
+      }
+
+      if (matched) {
+        serviceSelect.value = matched.value;
+        serviceSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        serviceSelect.classList.add('is-highlighted');
+        setTimeout(() => serviceSelect.classList.remove('is-highlighted'), 1800);
+        return true;
+      }
+      return false;
+    }
+
+    // Al pulsar cualquier tarjeta de tarifas o CTA de sección con data-select-service, preselecciona el servicio exacto
     document.querySelectorAll('[data-select-service]').forEach((cta) => {
       cta.addEventListener('click', () => {
         const targetService = cta.getAttribute('data-select-service');
-        if (serviceSelect && targetService) {
-          Array.from(serviceSelect.options).forEach((opt) => {
-            if (opt.value === targetService) {
-              serviceSelect.value = targetService;
-            }
-          });
-        }
+        selectMatchingService(targetService);
         document.querySelectorAll('.seo-tariff-dropdown[open]').forEach((det) => {
           det.removeAttribute('open');
         });
@@ -445,40 +509,97 @@
 
     function buildInquiryData() {
       const name = (document.getElementById('inq-name')?.value || '').trim();
+      const contact = (document.getElementById('inq-contact')?.value || '').trim();
       const service = (document.getElementById('inq-service')?.value || '').trim();
-      const locationDate = (document.getElementById('inq-meta')?.value || '').trim();
-      const details = (document.getElementById('inq-message')?.value || '').trim();
+      const meta = (document.getElementById('inq-meta')?.value || '').trim();
+      const message = (document.getElementById('inq-message')?.value || '').trim();
+      const website = (document.getElementById('inq-website')?.value || '').trim();
 
       const lines = [
         `Hola Andrés, soy ${name || 'un cliente interesado'}.`,
+        contact ? `Contacto: ${contact}` : '',
         `Servicio: ${service || 'Fotografía profesional'}`,
-        locationDate ? `Ubicación / Fecha: ${locationDate}` : '',
-        details ? `Detalles del encargo: ${details}` : ''
+        meta ? `Ubicación / Fecha: ${meta}` : '',
+        message ? `Detalles del encargo: ${message}` : ''
       ].filter(Boolean);
 
-      return { name, service, text: lines.join('\n') };
+      return { name, contact, service, meta, message, website, text: lines.join('\n') };
     }
 
-    form.addEventListener('submit', (e) => {
+    function showFeedback(type, htmlContent) {
+      if (!feedbackBox) return;
+      feedbackBox.className = `inquiry-feedback is-visible ${type === 'success' ? 'is-success' : 'is-error'}`;
+      feedbackBox.innerHTML = htmlContent;
+    }
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!form.reportValidity()) return;
+
       const data = buildInquiryData();
-      if (window.AndresAnalytics && window.AndresAnalytics.trackEvent) {
-        window.AndresAnalytics.trackEvent('conversion', 'submit_inquiry_whatsapp', data.service);
+      const origHtml = btnSubmit ? btnSubmit.innerHTML : '';
+      if (btnSubmit) {
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Enviando solicitud...';
       }
-      const waUrl = `https://wa.me/34664848096?text=${encodeURIComponent(data.text)}`;
-      window.open(waUrl, '_blank', 'noopener');
+      if (feedbackBox) {
+        feedbackBox.className = 'inquiry-feedback';
+        feedbackBox.innerHTML = '';
+      }
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            name: data.name,
+            contact: data.contact,
+            service: data.service,
+            meta: data.meta,
+            message: data.message,
+            website: data.website,
+            pageUrl: window.location.pathname
+          })
+        });
+        const result = await res.json().catch(() => ({}));
+
+        if (!res.ok || !result.ok) {
+          throw new Error(result.error || 'No se pudo enviar tu solicitud en este momento.');
+        }
+
+        if (window.AndresAnalytics && window.AndresAnalytics.trackEvent) {
+          window.AndresAnalytics.trackEvent('conversion', 'submit_inquiry_form', data.service);
+        }
+
+        const waUrl = `https://wa.me/34664848096?text=${encodeURIComponent(data.text)}`;
+        showFeedback(
+          'success',
+          `<strong>✓ ¡Solicitud enviada correctamente!</strong><br>Gracias, ${escapeHtml(data.name)}. He recibido tu consulta sobre <strong>${escapeHtml(data.service)}</strong> y te responderé personalmente en menos de 24 horas en <strong>${escapeHtml(data.contact)}</strong>. Si lo prefieres, también puedes <a href="${waUrl}" target="_blank" rel="noopener">escribirme ahora por WhatsApp</a>.`
+        );
+        form.reset();
+      } catch (err) {
+        const waUrl = `https://wa.me/34664848096?text=${encodeURIComponent(data.text)}`;
+        showFeedback(
+          'error',
+          `<strong>No se pudo completar el envío automático:</strong> ${escapeHtml(err.message || 'Error de conexión')}. Puedes enviarme tu consulta al instante por <a href="${waUrl}" target="_blank" rel="noopener">WhatsApp</a> o escribir a <a href="mailto:andresreginensi@gmail.com">andresreginensi@gmail.com</a>.`
+        );
+      } finally {
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.innerHTML = origHtml;
+        }
+      }
     });
 
-    if (btnEmail) {
-      btnEmail.addEventListener('click', () => {
-        if (!form.reportValidity()) return;
+    if (btnWhatsapp) {
+      btnWhatsapp.addEventListener('click', () => {
         const data = buildInquiryData();
+        if (!data.name && !data.message && !form.reportValidity()) return;
         if (window.AndresAnalytics && window.AndresAnalytics.trackEvent) {
-          window.AndresAnalytics.trackEvent('conversion', 'submit_inquiry_email', data.service);
+          window.AndresAnalytics.trackEvent('conversion', 'submit_inquiry_whatsapp', data.service);
         }
-        const subject = `Solicitud de presupuesto — ${data.service} (${data.name})`;
-        window.location.href = `mailto:andresreginensi@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(data.text)}`;
+        const waUrl = `https://wa.me/34664848096?text=${encodeURIComponent(data.text)}`;
+        window.open(waUrl, '_blank', 'noopener');
       });
     }
   }

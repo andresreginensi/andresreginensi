@@ -67,8 +67,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/css/main.css?v=25">
-  <link rel="stylesheet" href="assets/css/cookies.css?v=25">
+  <link rel="stylesheet" href="assets/css/main.css?v=27">
+  <link rel="stylesheet" href="assets/css/cookies.css?v=27">
 </head>
 <body>
   <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
@@ -164,12 +164,12 @@
       </div>
 
       <div class="gallery-3col reveal" data-gallery-category="bodas">
-        <article class="photo-item aspect-landscape" data-full="assets/images/uploads/bodas-la-salida-full-1793484078424-114u.jpg" data-caption="La Salida — Ceremonia B&amp;N">
+        <article class="photo-item aspect-portrait" data-full="assets/images/uploads/bodas-la-salida-full-1793484078424-114u.jpg" data-caption="La Salida — Ceremonia B&amp;N">
           <div class="img-box"><img src="assets/images/uploads/bodas-la-salida-thumb-1793484078424-w7qb.jpg" alt="La Salida — Fotografía documental de ceremonia de boda en blanco y negro" width="470" height="700" fetchpriority="high" decoding="async"></div>
           <div class="photo-info"><h3 class="photo-name">La Salida</h3><span class="photo-tag">Ceremonia B&amp;N</span></div>
         </article>
 
-        <article class="photo-item aspect-landscape" data-full="assets/images/uploads/bodas-orilla-dorada-full-1793484078424-j38e.jpg" data-caption="Orilla Dorada — Atardecer &amp; Pareja">
+        <article class="photo-item aspect-portrait" data-full="assets/images/uploads/bodas-orilla-dorada-full-1793484078424-j38e.jpg" data-caption="Orilla Dorada — Atardecer &amp; Pareja">
           <div class="img-box"><img src="assets/images/uploads/bodas-orilla-dorada-thumb-1793484078424-kg3p.jpg" alt="Orilla Dorada — Retrato de pareja de boda al atardecer" loading="lazy" decoding="async" width="470" height="700"></div>
           <div class="photo-info"><h3 class="photo-name">Orilla Dorada</h3><span class="photo-tag">Atardecer &amp; Pareja</span></div>
         </article>
@@ -228,32 +228,41 @@
         <p class="contact-desc">Contadme la fecha prevista y el lugar de la celebración para enviaros información detallada.</p>
 
         <form id="project-inquiry-form" class="inquiry-form-card">
+          <div class="inquiry-honeypot" aria-hidden="true">
+            <label for="inq-website">Sitio web</label>
+            <input type="text" id="inq-website" name="website" tabindex="-1" autocomplete="off">
+          </div>
           <div class="inquiry-grid">
             <div class="inquiry-field">
               <label for="inq-name">Vuestros nombres</label>
-              <input type="text" id="inq-name" required maxlength="100" placeholder="Ej. Clara y Marc">
+              <input type="text" id="inq-name" name="name" required maxlength="100" placeholder="Ej. Clara y Marc" autocomplete="name">
+            </div>
+            <div class="inquiry-field">
+              <label for="inq-contact">Email o Teléfono de contacto</label>
+              <input type="text" id="inq-contact" name="contact" required maxlength="150" placeholder="Ej. clara@correo.es o +34 600 000 000" autocomplete="email">
             </div>
             <div class="inquiry-field">
               <label for="inq-service">Tipo de celebración</label>
-              <select id="inq-service" required>
+              <select id="inq-service" name="service" required>
                 <option value="Reportaje de Boda Completo">Reportaje de Boda Completo</option>
                 <option value="Boda Íntima / Ceremonia Civil">Boda Íntima / Ceremonia Civil</option>
                 <option value="Evento Privado / Celebración">Evento Privado / Celebración</option>
               </select>
             </div>
-            <div class="inquiry-field full-span">
+            <div class="inquiry-field">
               <label for="inq-meta">Fecha y finca o localidad</label>
-              <input type="text" id="inq-meta" required maxlength="140" placeholder="Ej. 19 de septiembre en Tarragona / Masía en Reus">
+              <input type="text" id="inq-meta" name="meta" required maxlength="140" placeholder="Ej. 19 de septiembre en Tarragona / Masía en Reus">
             </div>
             <div class="inquiry-field full-span">
               <label for="inq-message">Contadme un poco sobre vuestro día</label>
-              <textarea id="inq-message" rows="3" required maxlength="1000" placeholder="Ceremonia de mañana o tarde, número aproximado de invitados, si os interesa preboda..."></textarea>
+              <textarea id="inq-message" name="message" rows="3" required maxlength="1200" placeholder="Ceremonia de mañana o tarde, número aproximado de invitados, si os interesa preboda..."></textarea>
             </div>
           </div>
           <div class="inquiry-actions">
-            <button type="button" id="btn-inquiry-email" class="btn-client-access btn-contact-email">Enviar por Email</button>
-            <button type="submit" class="btn-whatsapp-action">Consultar fecha por WhatsApp</button>
+            <button type="button" id="btn-inquiry-whatsapp" class="btn-whatsapp-action" data-track="form_inquiry_whatsapp">Consultar fecha por WhatsApp</button>
+            <button type="submit" id="btn-inquiry-submit" class="btn-primary-gold" data-track="form_inquiry_submit">Enviar solicitud <span class="btn-arrow" aria-hidden="true">&rarr;</span></button>
           </div>
+          <div id="inquiry-feedback" class="inquiry-feedback" role="status" aria-live="polite"></div>
           <p style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.9rem; line-height: 1.55;">
             Responsable: Andrés Reginensi (Salou, Tarragona). Finalidad: atender tu consulta de disponibilidad y presupuesto. Más información en nuestra <a href="politica-privacidad.html" style="color: var(--accent-warm); text-decoration: underline;">Política de Privacidad</a>.
           </p>
@@ -273,7 +282,7 @@
     <button type="button" class="lightbox-arrow lightbox-prev" id="lightbox-prev" aria-label="Anterior">&#8249;</button>
     <button type="button" class="lightbox-arrow lightbox-next" id="lightbox-next" aria-label="Siguiente">&#8250;</button>
     <div class="lightbox-content">
-      <img id="lightbox-img" src="" alt="Fotografía ampliada">
+      <img id="lightbox-img" alt="Fotografía ampliada">
       <div class="lightbox-caption" id="lightbox-caption"></div>
     </div>
   </div>
@@ -333,10 +342,10 @@
     </div>
   </div>
 
-  <script src="assets/js/db.js?v=26" defer></script>
-  <script src="assets/js/main.js?v=26" defer></script>
-  <script src="assets/js/cookies.js?v=26" defer></script>
-  <script src="assets/js/analytics-tracker.js?v=26" defer></script>
+  <script src="assets/js/db.js?v=27" defer></script>
+  <script src="assets/js/main.js?v=27" defer></script>
+  <script src="assets/js/cookies.js?v=27" defer></script>
+  <script src="assets/js/analytics-tracker.js?v=27" defer></script>
 </body>
 </html>
 

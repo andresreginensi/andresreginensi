@@ -74,7 +74,7 @@
       title: 'La Salida',
       tag: 'Ceremonia B&N',
       caption: 'La Salida — Ceremonia B&N',
-      aspect: 'landscape',
+      aspect: 'portrait',
       thumbUrl: 'assets/images/uploads/bodas-la-salida-thumb-1793484078424-w7qb.jpg',
       fullUrl: 'assets/images/uploads/bodas-la-salida-full-1793484078424-114u.jpg',
       createdAt: 1700000000020
@@ -86,7 +86,7 @@
       title: 'Orilla Dorada',
       tag: 'Atardecer & Pareja',
       caption: 'Orilla Dorada — Atardecer & Pareja',
-      aspect: 'landscape',
+      aspect: 'portrait',
       thumbUrl: 'assets/images/uploads/bodas-orilla-dorada-thumb-1793484078424-kg3p.jpg',
       fullUrl: 'assets/images/uploads/bodas-orilla-dorada-full-1793484078424-j38e.jpg',
       createdAt: 1700000000019
