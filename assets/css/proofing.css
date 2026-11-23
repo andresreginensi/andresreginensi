@@ -323,6 +323,11 @@ body {
   transform: scale(1);
 }
 
+.photo-card.is-filtered-out,
+.proofing-empty-state.is-hidden {
+  display: none !important;
+}
+
 /* Botón de Zoom (Lupa sutil) */
 .zoom-btn {
   position: absolute;

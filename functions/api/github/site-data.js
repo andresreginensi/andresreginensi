@@ -58,7 +58,7 @@ export async function onRequestGet(context) {
     const publicOnly = {
       version: parsed.version || 1,
       updatedAt: parsed.updatedAt || 0,
-      heroImage: parsed.heroImage || 'assets/images/portada.jpg',
+      heroImage: parsed.heroImage || 'assets/images/portada.webp',
       portfolio: Array.isArray(parsed.portfolio) ? parsed.portfolio : []
     };
     return jsonResponse(publicOnly, 200);

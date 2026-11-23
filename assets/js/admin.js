@@ -295,13 +295,13 @@
       });
     });
 
-    // Filtros de categoría en portafolio
+    // Filtros de categoría en portafolio (filtrado CSS limpio sin destruir ni reconstruir el DOM)
     dom.categoryPills.forEach((pill) => {
       pill.addEventListener('click', () => {
         dom.categoryPills.forEach((p) => p.classList.remove('active'));
         pill.classList.add('active');
         activePortfolioFilter = pill.dataset.filter;
-        renderPortfolioGrid();
+        applyPortfolioFilter();
       });
     });
 
@@ -650,27 +650,38 @@
     if (elEmp) elEmp.textContent = counts.empresarial;
   }
 
+  function applyPortfolioFilter() {
+    if (!dom.photoGrid) return;
+    let visibleCount = 0;
+    dom.photoGrid.querySelectorAll('.admin-photo-card').forEach((card) => {
+      const matches = activePortfolioFilter === 'all' || card.dataset.category === activePortfolioFilter;
+      card.hidden = !matches;
+      card.style.display = matches ? '' : 'none';
+      if (matches) visibleCount++;
+    });
+    const emptyEl = document.getElementById('admin-portfolio-empty');
+    if (emptyEl) {
+      emptyEl.style.display = visibleCount === 0 ? '' : 'none';
+    }
+  }
+
   function renderPortfolioGrid() {
     if (!dom.photoGrid) return;
     dom.photoGrid.innerHTML = '';
 
-    const filtered = activePortfolioFilter === 'all'
-      ? currentPortfolioPhotos
-      : currentPortfolioPhotos.filter((p) => p.category === activePortfolioFilter);
+    const emptyEl = document.createElement('div');
+    emptyEl.id = 'admin-portfolio-empty';
+    emptyEl.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted); background: var(--bg-surface); border-radius: 12px; border: 1px dashed var(--border-hairline); display: none;';
+    emptyEl.innerHTML = `
+      <p style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-primary);">No hay fotografías en esta sección aún.</p>
+      <p style="font-size: 0.85rem; margin-bottom: 1.5rem;">Haz clic en el botón de arriba para subir tu primera foto.</p>
+    `;
+    dom.photoGrid.appendChild(emptyEl);
 
-    if (filtered.length === 0) {
-      dom.photoGrid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted); background: var(--bg-surface); border-radius: 12px; border: 1px dashed var(--border-hairline);">
-          <p style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-primary);">No hay fotografías en esta sección aún.</p>
-          <p style="font-size: 0.85rem; margin-bottom: 1.5rem;">Haz clic en el botón de arriba para subir tu primera foto.</p>
-        </div>
-      `;
-      return;
-    }
-
-    filtered.forEach((photo) => {
+    currentPortfolioPhotos.forEach((photo) => {
       const card = document.createElement('div');
       card.className = 'admin-photo-card';
+      card.dataset.category = photo.category || '';
 
       const categoryLabels = {
         realestate: 'Inmobiliaria',
@@ -687,7 +698,7 @@
 
       card.innerHTML = `
         <div class="card-preview">
-          <img src="${safeThumb}" alt="${safeTitle}" loading="lazy">
+          <img src="${safeThumb}" alt="${safeTitle}" loading="lazy" decoding="async">
           <span class="badge-category">${safeCategory}</span>
         </div>
         <div class="card-details">
@@ -695,10 +706,10 @@
           <span class="card-item-tag">${safeTag}</span>
 
           <div class="card-actions">
-            <button class="btn-secondary btn-edit-photo" data-id="${safeId}" style="padding: 0.4rem 0.8rem; font-size: 0.78rem;">
+            <button type="button" class="btn-secondary btn-edit-photo" data-id="${safeId}" style="padding: 0.4rem 0.8rem; font-size: 0.78rem;">
               ✏️ Editar
             </button>
-            <button class="btn-danger btn-delete-photo" data-id="${safeId}" style="padding: 0.4rem 0.8rem; font-size: 0.78rem;">
+            <button type="button" class="btn-danger btn-delete-photo" data-id="${safeId}" style="padding: 0.4rem 0.8rem; font-size: 0.78rem;">
               🗑️ Eliminar
             </button>
           </div>
@@ -720,6 +731,8 @@
 
       dom.photoGrid.appendChild(card);
     });
+
+    applyPortfolioFilter();
   }
 
   async function handlePhotoFileSelect(file) {

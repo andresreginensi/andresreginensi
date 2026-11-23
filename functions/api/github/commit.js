@@ -100,7 +100,7 @@ export async function onRequestPost(context) {
     heroImage:
       typeof rawSiteData.heroImage === 'string' && rawSiteData.heroImage.trim()
         ? rawSiteData.heroImage.trim()
-        : 'assets/images/portada.jpg',
+        : 'assets/images/portada.webp',
     portfolio: rawSiteData.portfolio.map((p) => ({
       id: String(p.id || ''),
       category: String(p.category || 'realestate'),

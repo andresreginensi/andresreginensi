@@ -14,7 +14,7 @@
 
   const DB_NAME = 'AndresPhotographyDB';
   const DB_VERSION = 3;
-  const DEFAULT_HERO = 'assets/images/portada.jpg';
+  const DEFAULT_HERO = 'assets/images/portada.webp';
   const SITE_DATA_PUBLIC_PATH = 'assets/data/site-data.json';
   const BASE_INITIAL_TIMESTAMP = 1700000000099;
   const PREVIEW_STORAGE_KEY = 'andres_instant_previews';
@@ -39,8 +39,8 @@
       tag: 'Arquitectura Exterior & Piscina',
       caption: 'Villa Galileu — Arquitectura Contemporánea & Piscina',
       aspect: 'landscape',
-      thumbUrl: 'assets/images/realestate/galileu-piscina-thumb.jpg',
-      fullUrl: 'assets/images/realestate/galileu-piscina.jpg',
+      thumbUrl: 'assets/images/realestate/galileu-piscina-thumb.webp',
+      fullUrl: 'assets/images/realestate/galileu-piscina.webp',
       createdAt: 1700000000001
     },
     {
@@ -51,8 +51,8 @@
       tag: 'Interiorismo de Lujo',
       caption: 'Villa Galileu — Foyer de Entrada & Diseño Interior',
       aspect: 'landscape',
-      thumbUrl: 'assets/images/realestate/galileu-salon-thumb.jpg',
-      fullUrl: 'assets/images/realestate/galileu-salon.jpg',
+      thumbUrl: 'assets/images/realestate/galileu-salon-thumb.webp',
+      fullUrl: 'assets/images/realestate/galileu-salon.webp',
       createdAt: 1700000000002
     },
     {
@@ -63,8 +63,8 @@
       tag: 'Espacios Residenciales',
       caption: 'Villa Galileu — Cocina de Autor & Isla de Mármol',
       aspect: 'landscape',
-      thumbUrl: 'assets/images/realestate/galileu-cocina-thumb.jpg',
-      fullUrl: 'assets/images/realestate/galileu-cocina.jpg',
+      thumbUrl: 'assets/images/realestate/galileu-cocina-thumb.webp',
+      fullUrl: 'assets/images/realestate/galileu-cocina.webp',
       createdAt: 1700000000003
     },
     {
@@ -75,8 +75,8 @@
       tag: 'Ceremonia B&N',
       caption: 'La Salida — Ceremonia B&N',
       aspect: 'portrait',
-      thumbUrl: 'assets/images/uploads/bodas-la-salida-thumb-1793484078424-w7qb.jpg',
-      fullUrl: 'assets/images/uploads/bodas-la-salida-full-1793484078424-114u.jpg',
+      thumbUrl: 'assets/images/uploads/bodas-la-salida-thumb-1793484078424-w7qb.webp',
+      fullUrl: 'assets/images/uploads/bodas-la-salida-full-1793484078424-114u.webp',
       createdAt: 1700000000020
     },
     {
@@ -87,8 +87,8 @@
       tag: 'Atardecer & Pareja',
       caption: 'Orilla Dorada — Atardecer & Pareja',
       aspect: 'portrait',
-      thumbUrl: 'assets/images/uploads/bodas-orilla-dorada-thumb-1793484078424-kg3p.jpg',
-      fullUrl: 'assets/images/uploads/bodas-orilla-dorada-full-1793484078424-j38e.jpg',
+      thumbUrl: 'assets/images/uploads/bodas-orilla-dorada-thumb-1793484078424-kg3p.webp',
+      fullUrl: 'assets/images/uploads/bodas-orilla-dorada-full-1793484078424-j38e.webp',
       createdAt: 1700000000019
     },
     {
@@ -99,8 +99,8 @@
       tag: 'Documental Editorial',
       caption: 'Paseo Urbano — Retrato Editorial de Novios',
       aspect: 'landscape',
-      thumbUrl: 'assets/images/bodas/boda-editorial-calle-thumb.jpg',
-      fullUrl: 'assets/images/bodas/boda-editorial-calle.jpg',
+      thumbUrl: 'assets/images/bodas/boda-editorial-calle-thumb.webp',
+      fullUrl: 'assets/images/bodas/boda-editorial-calle.webp',
       createdAt: 1700000000005
     },
     {
@@ -111,8 +111,8 @@
       tag: 'Editorial Nocturno',
       caption: 'Steffa — Noche Urbana, Rascacielos & Bokeh',
       aspect: 'portrait',
-      thumbUrl: 'assets/images/retratos/retrato-steffa-noche-thumb.jpg',
-      fullUrl: 'assets/images/retratos/retrato-steffa-noche.jpg',
+      thumbUrl: 'assets/images/retratos/retrato-steffa-noche-thumb.webp',
+      fullUrl: 'assets/images/retratos/retrato-steffa-noche.webp',
       createdAt: 1700000000007
     },
     {
@@ -123,8 +123,8 @@
       tag: 'Luz Natural en Exterior',
       caption: 'Luz Dorada — Atardecer & Flare Natural',
       aspect: 'portrait',
-      thumbUrl: 'assets/images/retratos/retrato-golden-hour-thumb.jpg',
-      fullUrl: 'assets/images/retratos/retrato-golden-hour.jpg',
+      thumbUrl: 'assets/images/retratos/retrato-golden-hour-thumb.webp',
+      fullUrl: 'assets/images/retratos/retrato-golden-hour.webp',
       createdAt: 1700000000008
     },
     {
@@ -135,8 +135,8 @@
       tag: 'Luz Suave & Atmósfera',
       caption: 'Serenidad Marina — Retrato en la Playa',
       aspect: 'portrait',
-      thumbUrl: 'assets/images/retratos/retrato-playa-sombrero-thumb.jpg',
-      fullUrl: 'assets/images/retratos/retrato-playa-sombrero.jpg',
+      thumbUrl: 'assets/images/retratos/retrato-playa-sombrero-thumb.webp',
+      fullUrl: 'assets/images/retratos/retrato-playa-sombrero.webp',
       createdAt: 1700000000009
     },
     {
@@ -147,8 +147,8 @@
       tag: 'Headshot Profesional',
       caption: 'Identidad Corporativa — Retrato Profesional en Estudio',
       aspect: 'landscape',
-      thumbUrl: 'assets/images/retratos/retrato-corporativo-estudio-thumb.jpg',
-      fullUrl: 'assets/images/retratos/retrato-corporativo-estudio.jpg',
+      thumbUrl: 'assets/images/retratos/retrato-corporativo-estudio-thumb.webp',
+      fullUrl: 'assets/images/retratos/retrato-corporativo-estudio.webp',
       createdAt: 1700000000010
     },
     {
@@ -159,8 +159,8 @@
       tag: 'Perfil Ejecutivo',
       caption: 'Liderazgo Corporativo — Retrato de Negocios',
       aspect: 'landscape',
-      thumbUrl: 'assets/images/retratos/retrato-ejecutivo-profesional-thumb.jpg',
-      fullUrl: 'assets/images/retratos/retrato-ejecutivo-profesional.jpg',
+      thumbUrl: 'assets/images/retratos/retrato-ejecutivo-profesional-thumb.webp',
+      fullUrl: 'assets/images/retratos/retrato-ejecutivo-profesional.webp',
       createdAt: 1700000000011
     },
     {
@@ -171,8 +171,8 @@
       tag: 'Empresariales',
       caption: '25 años MEDIAMARKT — Empresariales',
       aspect: 'landscape',
-      thumbUrl: 'assets/images/uploads/empresarial-25-anos-mediamarkt-thumb-1794269820352-we5q.jpg',
-      fullUrl: 'assets/images/uploads/empresarial-25-anos-mediamarkt-full-1794269820352-s4ka.jpg',
+      thumbUrl: 'assets/images/uploads/empresarial-25-anos-mediamarkt-thumb-1794269820352-we5q.webp',
+      fullUrl: 'assets/images/uploads/empresarial-25-anos-mediamarkt-full-1794269820352-s4ka.webp',
       createdAt: 1700000000012
     }
   ];
@@ -826,6 +826,10 @@
     canvas.height = height;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0, width, height);
+    const webpData = canvas.toDataURL('image/webp', quality);
+    if (webpData && webpData.startsWith('data:image/webp')) {
+      return webpData;
+    }
     return canvas.toDataURL('image/jpeg', quality);
   }
 

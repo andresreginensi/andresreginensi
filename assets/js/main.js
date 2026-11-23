@@ -280,12 +280,12 @@
     serviceGrid.querySelectorAll('[data-dynamic-injected="true"]').forEach((el) => el.remove());
 
     const existingArticles = Array.from(serviceGrid.querySelectorAll('.photo-item'));
-    const defaultIds = new Set(
-      (window.AndresDB && Array.isArray(window.AndresDB.DEFAULT_PORTFOLIO)
-        ? window.AndresDB.DEFAULT_PORTFOLIO
-        : []
-      ).map((d) => d.id)
-    );
+    const staticDefaultIds = new Set([
+      'port-real-1', 'port-real-2', 'port-real-3',
+      'port-boda-1', 'port-boda-2', 'port-boda-3',
+      'port-ret-1', 'port-ret-2', 'port-ret-3',
+      'port-corp-1', 'port-corp-2', 'port-corp-3'
+    ]);
 
     const toPrepend = [];
     matchingPhotos.forEach((p) => {
@@ -295,7 +295,7 @@
           (art.querySelector('.photo-name') &&
             art.querySelector('.photo-name').textContent.trim().toLowerCase() === (p.title || '').trim().toLowerCase())
       );
-      if (!alreadyExists && !defaultIds.has(p.id)) {
+      if (!alreadyExists && !staticDefaultIds.has(p.id)) {
         toPrepend.push(p);
       }
     });
@@ -311,48 +311,73 @@
     }
   }
 
-  async function loadAndRenderSections() {
+  async function fetchPublicSiteData() {
+    try {
+      const res = await fetch('assets/data/site-data.json', { cache: 'no-cache' });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function sectionMatchesData(selector, photos) {
+    const container = document.querySelector(selector);
+    if (!container) return true;
+    const domItems = Array.from(container.querySelectorAll('.photo-item'));
+    if (domItems.length !== photos.length) return false;
+    return photos.every((p, idx) => domItems[idx].getAttribute('data-full') === p.fullUrl);
+  }
+
+  async function loadAndRenderSections(forceRefresh = false) {
     const hasHomeGrids = document.querySelector('.grid-realestate, .grid-weddings, .grid-portraits, .grid-corporate');
     const hasServiceGrid = document.querySelector('.gallery-3col[data-gallery-category]');
     if (!hasHomeGrids && !hasServiceGrid) {
+      bindAutoOrientation();
       setupPhotoLightboxEvents();
       observeReveals();
       return;
     }
 
     try {
-      const db = window.AndresDB;
-      if (db && db.initStorage) {
-        await db.initStorage();
-        allPortfolioPhotos = await db.getAllPortfolioPhotos();
-      }
+      const pubData = await fetchPublicSiteData();
+      allPortfolioPhotos = pubData && Array.isArray(pubData.portfolio) ? pubData.portfolio : [];
 
-      if (hasHomeGrids && db && db.getHeroImage) {
-        const heroUrl = await db.getHeroImage();
+      if (hasHomeGrids && pubData && pubData.heroImage) {
+        const heroUrl = pubData.heroImage;
         const heroImg = document.querySelector('.hero-backdrop img');
-        // Si el administrador subió una foto de portada personalizada distinta a la de serie, actualizarla
-        if (heroImg && heroUrl && heroUrl !== 'assets/images/portada.jpg') {
+        if (heroImg && heroUrl !== 'assets/images/portada.webp' && heroImg.getAttribute('src') !== heroUrl) {
           heroImg.removeAttribute('srcset');
           heroImg.src = heroUrl;
         }
       }
 
-      const signature = JSON.stringify(
-        allPortfolioPhotos.map((p) => [p.id, p.category, p.aspect, p.thumbUrl, p.fullUrl, p.title, p.tag])
-      );
+      if (allPortfolioPhotos.length > 0) {
+        const signature = JSON.stringify(
+          allPortfolioPhotos.map((p) => [p.id, p.category, p.aspect, p.thumbUrl, p.fullUrl, p.title, p.tag])
+        );
 
-      if (signature !== lastRenderedSignature) {
-        lastRenderedSignature = signature;
+        if (forceRefresh || signature !== lastRenderedSignature) {
+          lastRenderedSignature = signature;
 
-        if (hasHomeGrids) {
-          renderSectionGrid('realestate', '.grid-realestate');
-          renderSectionGrid('bodas', '.grid-weddings');
-          renderSectionGrid('retratos', '.grid-portraits');
-          renderSectionGrid('empresarial', '.grid-corporate');
-        }
+          if (hasHomeGrids) {
+            const sections = [
+              ['realestate', '.grid-realestate'],
+              ['bodas', '.grid-weddings'],
+              ['retratos', '.grid-portraits'],
+              ['empresarial', '.grid-corporate']
+            ];
+            sections.forEach(([cat, sel]) => {
+              const catPhotos = allPortfolioPhotos.filter((p) => p.category === cat);
+              if (catPhotos.length > 0 && !sectionMatchesData(sel, catPhotos)) {
+                renderSectionGrid(cat, sel);
+              }
+            });
+          }
 
-        if (hasServiceGrid) {
-          renderServicePageGallery();
+          if (hasServiceGrid) {
+            renderServicePageGallery();
+          }
         }
       }
 
@@ -360,7 +385,6 @@
       setupPhotoLightboxEvents();
       observeReveals();
     } catch (err) {
-      console.warn('Cargando con contenido estático:', err);
       bindAutoOrientation();
       setupPhotoLightboxEvents();
       observeReveals();
@@ -369,13 +393,8 @@
 
   function initLivePortfolioSync() {
     window.addEventListener('storage', (e) => {
-      if (
-        !e.key ||
-        e.key === 'andres_portfolio_broadcast_ts' ||
-        e.key === 'andres_local_portfolio_updated_at' ||
-        e.key === 'andres_portfolio'
-      ) {
-        loadAndRenderSections();
+      if (e.key === 'andres_portfolio_broadcast_ts') {
+        loadAndRenderSections(true);
       }
     });
 
@@ -384,17 +403,11 @@
         const channel = new window.BroadcastChannel('andres_cms_channel');
         channel.addEventListener('message', (ev) => {
           if (ev && ev.data && ev.data.type === 'portfolio_updated') {
-            loadAndRenderSections();
+            loadAndRenderSections(true);
           }
         });
       } catch (e) {}
     }
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        loadAndRenderSections();
-      }
-    });
   }
 
   // 5. Navegación móvil accesible

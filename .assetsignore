@@ -3,6 +3,8 @@ functions
 functions/**
 worker
 worker/**
+scripts
+scripts/**
 wrangler.jsonc
 wrangler.toml
 .assetsignore

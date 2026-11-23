@@ -214,22 +214,17 @@
     dom.grid.innerHTML = '';
 
     const photos = state.session.photos || [];
-    const photosToDisplay =
-      state.activeFilter === 'selected'
-        ? photos.filter((p) => state.selectedPhotoIds.has(p.id))
-        : photos;
+    const emptyEl = document.createElement('div');
+    emptyEl.id = 'proofing-empty-state';
+    emptyEl.className = 'proofing-empty-state is-hidden';
+    emptyEl.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);';
+    emptyEl.innerHTML = `
+      <p style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-pure);">No tienes ninguna fotografía seleccionada aún.</p>
+      <p style="font-size: 0.85rem;">Haz clic sobre cualquier foto para añadirla a tu selección.</p>
+    `;
+    dom.grid.appendChild(emptyEl);
 
-    if (photosToDisplay.length === 0 && state.activeFilter === 'selected') {
-      dom.grid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
-          <p style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-pure);">No tienes ninguna fotografía seleccionada aún.</p>
-          <p style="font-size: 0.85rem;">Haz clic sobre cualquier foto para añadirla a tu selección.</p>
-        </div>
-      `;
-      return;
-    }
-
-    photosToDisplay.forEach((photo) => {
+    photos.forEach((photo) => {
       const isSelected = state.selectedPhotoIds.has(photo.id);
       const card = document.createElement('article');
       card.className = `photo-card ${isSelected ? 'is-selected' : ''}`;
@@ -262,6 +257,25 @@
 
       dom.grid.appendChild(card);
     });
+
+    applyGalleryFilter();
+  }
+
+  // Filtrado limpio por clase CSS sin destruir ni reconstruir el DOM
+  function applyGalleryFilter() {
+    if (!dom.grid) return;
+    let visibleCount = 0;
+    dom.grid.querySelectorAll('.photo-card').forEach((card) => {
+      const isSelected = state.selectedPhotoIds.has(card.dataset.photoId);
+      const shouldShow = state.activeFilter !== 'selected' || isSelected;
+      card.classList.toggle('is-filtered-out', !shouldShow);
+      if (shouldShow) visibleCount++;
+    });
+
+    const emptyEl = document.getElementById('proofing-empty-state');
+    if (emptyEl) {
+      emptyEl.classList.toggle('is-hidden', !(state.activeFilter === 'selected' && visibleCount === 0));
+    }
   }
 
   function togglePhoto(photoId) {
@@ -287,7 +301,7 @@
     });
 
     if (state.activeFilter === 'selected') {
-      renderGallery();
+      applyGalleryFilter();
     }
 
     updateUI();
@@ -337,7 +351,7 @@
       dom.filterBtns.forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       state.activeFilter = btn.dataset.filter;
-      renderGallery();
+      applyGalleryFilter();
     });
   });
 
@@ -346,7 +360,11 @@
       if (state.selectedPhotoIds.size === 0) return;
       if (confirm('¿Deseas desmarcar todas las fotos de tu selección?')) {
         state.selectedPhotoIds.clear();
-        renderGallery();
+        dom.grid.querySelectorAll('.photo-card.is-selected').forEach((c) => {
+          c.classList.remove('is-selected');
+          c.setAttribute('aria-checked', 'false');
+        });
+        applyGalleryFilter();
         updateUI();
       }
     });
