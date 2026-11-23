@@ -144,6 +144,23 @@
     });
   }
 
+  function trapFocusInContainer(container, event) {
+    if (!container || event.key !== 'Tab') return;
+    const focusables = Array.from(
+      container.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')
+    ).filter((el) => el.offsetParent !== null);
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   function initLightboxControls() {
     if (!lightbox) return;
 
@@ -159,6 +176,7 @@
 
     document.addEventListener('keydown', (e) => {
       if (!lightbox.classList.contains('active')) return;
+      if (e.key === 'Tab') trapFocusInContainer(lightbox, e);
       if (e.key === 'Escape') closeLightbox();
       if (e.key === 'ArrowLeft') navigateLightbox(-1);
       if (e.key === 'ArrowRight') navigateLightbox(1);
@@ -455,7 +473,9 @@
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && drawer.classList.contains('is-active')) {
+      if (!drawer.classList.contains('is-active')) return;
+      if (e.key === 'Tab') trapFocusInContainer(drawer, e);
+      if (e.key === 'Escape') {
         closeDrawer();
       }
     });

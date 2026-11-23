@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Andrés Reginensi Photography">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e3d5b8"/>
+      <stop offset="50%" stop-color="#c5a059"/>
+      <stop offset="100%" stop-color="#9e7b38"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141418"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="104" fill="url(#bg)"/>
+  <rect x="30" y="30" width="452" height="452" rx="92" fill="none" stroke="url(#gold)" stroke-width="6" opacity="0.65"/>
+  <text x="256" y="314" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="226" font-weight="400" letter-spacing="-8" fill="url(#gold)">AR</text>
+</svg>

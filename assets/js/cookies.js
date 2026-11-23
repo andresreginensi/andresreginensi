@@ -128,10 +128,27 @@
       });
     }
 
-    // Accesibilidad: Cerrar con la tecla Escape
+    // Accesibilidad: Cerrar con Escape y mantener el foco dentro del modal (Focus Trap)
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modalOverlayEl && modalOverlayEl.classList.contains('is-visible')) {
+      if (!modalOverlayEl || !modalOverlayEl.classList.contains('is-visible')) return;
+      if (e.key === 'Escape') {
         closeModal();
+        return;
+      }
+      if (e.key === 'Tab' && modalEl) {
+        const focusables = Array.from(
+          modalEl.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])')
+        ).filter((el) => el.offsetParent !== null);
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     });
   }

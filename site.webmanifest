@@ -1,0 +1,22 @@
+{
+  "name": "Andrés Reginensi Photography",
+  "short_name": "A. Reginensi",
+  "description": "Fotógrafo profesional en Tarragona, Salou y Costa Daurada: inmobiliaria, arquitectura, bodas, retratos y empresas.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0c",
+  "theme_color": "#0a0a0c",
+  "lang": "es-ES",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
