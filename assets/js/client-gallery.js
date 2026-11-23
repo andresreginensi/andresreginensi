@@ -1,28 +1,24 @@
 /**
  * ==========================================================================
  * ANDRÉS REGINENSI PHOTOGRAPHY — SCRIPT DE GALERÍA PRIVADA DE CLIENTE
- * Validación de PIN con soporte SHA-256, límite de intentos, sanitización XSS
- * y descarga directa.
+ * Validación de PIN 100 % en servidor (/api/galleries/unlock y /session)
+ * con cookie HttpOnly firmada. Cero fotos, clientes o hashes en el HTML.
  * ==========================================================================
  */
 
 (function () {
   'use strict';
 
-  const config = window.GALLERY_CONFIG || {
-    title: 'Galería Privada',
-    client: 'Cliente',
-    date: '',
-    location: '',
-    pin: '',
-    pinHash: '',
-    zipDownloadUrl: '',
-    photos: []
-  };
+  const gallerySlug =
+    (document.body && document.body.getAttribute('data-gallery-slug')) ||
+    window.location.pathname
+      .replace(/\/index\.html$/i, '')
+      .replace(/\/+$/, '')
+      .split('/')
+      .pop() ||
+    '';
 
-  const cleanPath = window.location.pathname.replace(/\/+$/, '') || 'root';
-  const storageKey = 'auth_galeria_' + cleanPath;
-  const lockKey = 'lock_galeria_' + cleanPath;
+  const lockKey = 'lock_galeria_' + gallerySlug;
   const MAX_ATTEMPTS = 5;
   const LOCKOUT_MS = 60 * 1000;
 
@@ -50,6 +46,7 @@
   const lightboxBtnNext = document.getElementById('lightbox-btn-next');
   const lightboxBtnClose = document.getElementById('lightbox-btn-close');
 
+  let activeSession = null;
   let currentPhotoIndex = 0;
 
   function escapeHtml(value) {
@@ -61,29 +58,33 @@
       .replace(/'/g, '&#39;');
   }
 
-  async function sha256Hex(value) {
-    const str = String(value || '');
-    if (window.crypto && window.crypto.subtle && window.TextEncoder) {
-      const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
+  function resolveAssetPath(url) {
+    const clean = String(url || '').trim();
+    if (!clean) return '';
+    if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('/')) {
+      return clean;
     }
-    return '';
+    return '/' + clean.replace(/^\.?\//, '');
   }
 
-  function init() {
-    try {
-      if (sessionStorage.getItem(storageKey) === 'true') {
-        unlockGallery();
-      } else if (pinInput) {
-        pinInput.focus();
-      }
-    } catch (e) {
-      if (pinInput) pinInput.focus();
-    }
-
+  async function init() {
     setupEventListeners();
+
+    try {
+      const res = await fetch(`/api/galleries/session?session=${encodeURIComponent(gallerySlug)}`, {
+        credentials: 'same-origin',
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.authenticated && data.session) {
+          unlockGallery(data.session);
+          return;
+        }
+      }
+    } catch (e) {}
+
+    if (pinInput) pinInput.focus();
   }
 
   function setupEventListeners() {
@@ -107,20 +108,14 @@
       });
     }
 
-    if (lightboxBtnClose) {
-      lightboxBtnClose.addEventListener('click', closeLightbox);
-    }
+    if (lightboxBtnClose) lightboxBtnClose.addEventListener('click', closeLightbox);
     if (lightbox) {
       lightbox.addEventListener('click', (e) => {
         if (e.target === lightbox) closeLightbox();
       });
     }
-    if (lightboxBtnPrev) {
-      lightboxBtnPrev.addEventListener('click', showPrevPhoto);
-    }
-    if (lightboxBtnNext) {
-      lightboxBtnNext.addEventListener('click', showNextPhoto);
-    }
+    if (lightboxBtnPrev) lightboxBtnPrev.addEventListener('click', showPrevPhoto);
+    if (lightboxBtnNext) lightboxBtnNext.addEventListener('click', showNextPhoto);
 
     document.addEventListener('keydown', (e) => {
       if (!lightbox || !lightbox.classList.contains('active')) return;
@@ -145,36 +140,50 @@
     } catch (e) {}
 
     const entered = (pinInput ? pinInput.value : '').trim();
-    let matched = false;
+    if (!entered) return;
 
-    if (config.pinHash) {
-      const enteredHash = await sha256Hex(entered);
-      matched = Boolean(enteredHash && enteredHash === String(config.pinHash).trim());
-    } else if (config.pin) {
-      matched = entered === String(config.pin).trim();
+    const btn = document.getElementById('btn-unlock');
+    const origLabel = btn ? btn.textContent : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Verificando...';
     }
 
-    if (matched) {
-      if (pinError) pinError.classList.remove('visible');
-      try {
-        sessionStorage.removeItem(lockKey);
-        sessionStorage.setItem(storageKey, 'true');
-      } catch (e) {}
-      unlockGallery();
-    } else {
+    try {
+      const res = await fetch('/api/galleries/unlock', {
+        method: 'POST',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ sessionId: gallerySlug, pin: entered })
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.ok && data.session) {
+        if (pinError) pinError.classList.remove('visible');
+        try {
+          sessionStorage.removeItem(lockKey);
+        } catch (e) {}
+        if (pinInput) pinInput.value = '';
+        unlockGallery(data.session);
+        return;
+      }
+
       let blocked = false;
-      try {
-        const lockState = JSON.parse(sessionStorage.getItem(lockKey) || '{"count":0,"until":0}');
-        const nextCount = (lockState.count || 0) + 1;
-        const nextUntil = nextCount >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_MS : 0;
-        blocked = Boolean(nextUntil);
-        sessionStorage.setItem(lockKey, JSON.stringify({ count: nextCount, until: nextUntil }));
-      } catch (e) {}
+      if (res.status === 401) {
+        try {
+          const lockState = JSON.parse(sessionStorage.getItem(lockKey) || '{"count":0,"until":0}');
+          const nextCount = (lockState.count || 0) + 1;
+          const nextUntil = nextCount >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_MS : 0;
+          blocked = Boolean(nextUntil);
+          sessionStorage.setItem(lockKey, JSON.stringify({ count: nextCount, until: nextUntil }));
+        } catch (e) {}
+      }
 
       if (pinError) {
         pinError.textContent = blocked
           ? 'Acceso bloqueado durante 60 segundos tras varios intentos fallidos.'
-          : 'Código PIN incorrecto. Por favor, verifícalo con Andrés.';
+          : data.error || 'Código PIN incorrecto. Por favor, verifícalo con Andrés.';
         pinError.classList.add('visible');
       }
       if (pinInput) {
@@ -183,19 +192,32 @@
         pinInput.value = '';
         pinInput.focus();
       }
+    } catch (err) {
+      if (pinError) {
+        pinError.textContent = 'No se pudo contactar con el servidor de verificación.';
+        pinError.classList.add('visible');
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = origLabel;
+      }
     }
   }
 
-  function unlockGallery() {
+  function unlockGallery(sessionData) {
+    activeSession = sessionData;
     if (pinScreen) pinScreen.classList.add('unlocked');
     if (galleryLayout) galleryLayout.classList.add('active');
     renderGalleryData();
   }
 
-  function lockGallery() {
+  async function lockGallery() {
     try {
-      sessionStorage.removeItem(storageKey);
+      await fetch('/api/galleries/logout', { method: 'POST', credentials: 'same-origin' });
     } catch (e) {}
+    activeSession = null;
+    if (photoGrid) photoGrid.innerHTML = '';
     if (galleryLayout) galleryLayout.classList.remove('active');
     if (pinScreen) pinScreen.classList.remove('unlocked');
     if (pinInput) {
@@ -205,24 +227,29 @@
   }
 
   function renderGalleryData() {
-    if (elTitle) elTitle.textContent = config.title;
-    if (elClient) elClient.textContent = config.client || 'Cliente';
-    if (elMetaDate) elMetaDate.textContent = config.date ? `📅 ${config.date}` : '';
-    if (elMetaLocation) elMetaLocation.textContent = config.location ? `📍 ${config.location}` : '';
-    if (elMetaCount) elMetaCount.textContent = `🖼️ ${config.photos.length} fotografías en alta resolución`;
+    if (!activeSession) return;
+    const photos = Array.isArray(activeSession.photos) ? activeSession.photos : [];
+
+    if (elTitle) elTitle.textContent = activeSession.title || 'Galería Privada';
+    if (elClient) elClient.textContent = activeSession.clientName || 'Cliente';
+    if (elMetaDate) elMetaDate.textContent = activeSession.date ? `📅 ${activeSession.date}` : '';
+    if (elMetaLocation) elMetaLocation.textContent = activeSession.location ? `📍 ${activeSession.location}` : '';
+    if (elMetaCount) elMetaCount.textContent = `🖼️ ${photos.length} fotografías en alta resolución`;
 
     if (!photoGrid) return;
     photoGrid.innerHTML = '';
 
-    config.photos.forEach((photo, idx) => {
+    photos.forEach((photo, idx) => {
       const card = document.createElement('article');
       card.className = 'photo-card';
 
-      const filename = photo.full ? photo.full.split('/').pop() : `foto-${idx + 1}.jpg`;
-      const safeThumb = escapeHtml(photo.thumb || photo.full);
+      const fullResolved = resolveAssetPath(photo.fullUrl || photo.full);
+      const thumbResolved = resolveAssetPath(photo.thumbUrl || photo.thumb || photo.fullUrl || photo.full);
+      const filename = fullResolved ? fullResolved.split('/').pop().split('?')[0] : `foto-${idx + 1}.jpg`;
+      const safeThumb = escapeHtml(thumbResolved);
       const safeCaption = escapeHtml(photo.caption || photo.title || `Foto ${idx + 1}`);
       const safeId = escapeHtml(photo.id || `AR-${idx + 1}`);
-      const safeFull = escapeHtml(photo.full);
+      const safeFull = escapeHtml(fullResolved);
       const safeName = escapeHtml(filename);
 
       card.innerHTML = `
@@ -256,7 +283,7 @@
 
       card.querySelector('.btn-photo-download').addEventListener('click', (e) => {
         e.stopPropagation();
-        triggerDownload(photo.full, filename);
+        triggerDownload(fullResolved, filename);
       });
 
       photoGrid.appendChild(card);
@@ -276,16 +303,19 @@
   }
 
   function handleDownloadAll() {
-    if (config.zipDownloadUrl) {
-      window.open(config.zipDownloadUrl, '_blank', 'noopener');
+    if (!activeSession) return;
+    const photos = Array.isArray(activeSession.photos) ? activeSession.photos : [];
+    if (activeSession.zipDownloadUrl) {
+      window.open(activeSession.zipDownloadUrl, '_blank', 'noopener');
       return;
     }
 
-    if (confirm(`¿Deseas descargar las ${config.photos.length} fotografías de esta sesión a tu dispositivo?`)) {
-      config.photos.forEach((photo, idx) => {
+    if (confirm(`¿Deseas descargar las ${photos.length} fotografías de esta sesión a tu dispositivo?`)) {
+      photos.forEach((photo, idx) => {
         setTimeout(() => {
-          const filename = photo.full ? photo.full.split('/').pop() : `foto-${idx + 1}.jpg`;
-          triggerDownload(photo.full, filename);
+          const fullResolved = resolveAssetPath(photo.fullUrl || photo.full);
+          const filename = fullResolved ? fullResolved.split('/').pop().split('?')[0] : `foto-${idx + 1}.jpg`;
+          triggerDownload(fullResolved, filename);
         }, idx * 300);
       });
     }
@@ -305,36 +335,40 @@
     if (lightbox) {
       lightbox.classList.remove('active');
       lightbox.setAttribute('aria-hidden', 'true');
+      if (lightboxImg) lightboxImg.removeAttribute('src');
       document.body.style.overflow = '';
     }
   }
 
   function updateLightboxContent() {
-    const photo = config.photos[currentPhotoIndex];
+    if (!activeSession || !Array.isArray(activeSession.photos)) return;
+    const photo = activeSession.photos[currentPhotoIndex];
     if (!photo || !lightboxImg) return;
 
-    lightboxImg.src = photo.full || photo.thumb;
+    const fullResolved = resolveAssetPath(photo.fullUrl || photo.full || photo.thumbUrl || photo.thumb);
+    lightboxImg.src = fullResolved;
     if (lightboxCaption) {
-      lightboxCaption.textContent = photo.caption || photo.title || `Foto ${currentPhotoIndex + 1} de ${config.photos.length}`;
+      lightboxCaption.textContent =
+        photo.caption || photo.title || `Foto ${currentPhotoIndex + 1} de ${activeSession.photos.length}`;
     }
 
     if (lightboxBtnDownload) {
       lightboxBtnDownload.onclick = () => {
-        const filename = photo.full ? photo.full.split('/').pop() : `foto-${currentPhotoIndex + 1}.jpg`;
-        triggerDownload(photo.full, filename);
+        const filename = fullResolved ? fullResolved.split('/').pop().split('?')[0] : `foto-${currentPhotoIndex + 1}.jpg`;
+        triggerDownload(fullResolved, filename);
       };
     }
   }
 
   function showPrevPhoto() {
-    if (!config.photos.length) return;
-    currentPhotoIndex = (currentPhotoIndex - 1 + config.photos.length) % config.photos.length;
+    if (!activeSession || !activeSession.photos || !activeSession.photos.length) return;
+    currentPhotoIndex = (currentPhotoIndex - 1 + activeSession.photos.length) % activeSession.photos.length;
     updateLightboxContent();
   }
 
   function showNextPhoto() {
-    if (!config.photos.length) return;
-    currentPhotoIndex = (currentPhotoIndex + 1) % config.photos.length;
+    if (!activeSession || !activeSession.photos || !activeSession.photos.length) return;
+    currentPhotoIndex = (currentPhotoIndex + 1) % activeSession.photos.length;
     updateLightboxContent();
   }
 

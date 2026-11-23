@@ -1,0 +1,14 @@
+# Archivos internos que nunca deben servirse como activos estáticos públicos
+functions
+functions/**
+worker
+worker/**
+wrangler.jsonc
+wrangler.toml
+.assetsignore
+.git
+.git/**
+.gitignore
+README.md
+._*
+.DS_Store

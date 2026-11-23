@@ -85,8 +85,10 @@
       // Ajustes
       passwordForm: document.getElementById('password-form'),
       settingUsername: document.getElementById('setting-username'),
+      settingCurrentPassword: document.getElementById('setting-current-password'),
       settingNewPassword: document.getElementById('setting-new-password'),
       settingConfirmPassword: document.getElementById('setting-confirm-password'),
+      btnSavePassword: document.getElementById('btn-save-password'),
       btnExportBackup: document.getElementById('btn-export-backup'),
       btnResetData: document.getElementById('btn-reset-data'),
 
@@ -102,9 +104,12 @@
       await db.initStorage();
     }
 
-    // Verificar si ya está autenticado
-    const isAuth = sessionStorage.getItem('andres_admin_auth') === 'true';
-    if (isAuth) {
+    // Verificar sesión real en servidor (cookie HttpOnly firmada)
+    const sessionInfo = db && db.getAdminSession ? await db.getAdminSession() : { authenticated: false };
+    if (sessionInfo && sessionInfo.authenticated) {
+      if (dom.settingUsername && sessionInfo.username) {
+        dom.settingUsername.value = sessionInfo.username;
+      }
       showDashboard();
     } else {
       showLogin();
@@ -122,14 +127,14 @@
 
   async function loadCurrentSettings() {
     try {
-      if (db && db.getAdminCredentials && dom.settingUsername) {
-        const creds = await db.getAdminCredentials();
-        if (creds && creds.username) {
-          dom.settingUsername.value = creds.username;
+      if (db && db.getAdminSession && dom.settingUsername) {
+        const info = await db.getAdminSession();
+        if (info && info.username) {
+          dom.settingUsername.value = info.username;
         }
       }
     } catch (err) {
-      console.warn('Could not load admin credentials:', err);
+      console.warn('Could not load admin session:', err);
     }
   }
 
@@ -201,22 +206,7 @@
       const lockState = JSON.parse(sessionStorage.getItem(LOGIN_LOCK_KEY) || '{"count":0,"until":0}');
       const now = Date.now();
 
-      const username = (dom.loginUsername && dom.loginUsername.value ? dom.loginUsername.value : 'admin').trim();
-      const password = (dom.loginPassword && dom.loginPassword.value ? dom.loginPassword.value : '').trim();
-
-      let isValid = false;
-      if (db && db.verifyAdminLogin) {
-        isValid = await db.verifyAdminLogin(username, password);
-      }
-
-      if (isValid) {
-        sessionStorage.removeItem(LOGIN_LOCK_KEY);
-        sessionStorage.setItem('andres_admin_auth', 'true');
-        showDashboard();
-        showToast('¡Bienvenido al Panel de Gestión, Andrés!');
-        return;
-      }
-
+      // 1. Verificar bloqueo ANTES de enviar petición de login
       if (lockState.until && now < lockState.until) {
         const waitSec = Math.ceil((lockState.until - now) / 1000);
         if (dom.loginError) {
@@ -226,21 +216,44 @@
         return;
       }
 
-      const nextCount = (lockState.count || 0) + 1;
-      const nextUntil = nextCount >= MAX_LOGIN_ATTEMPTS ? now + LOCKOUT_MS : 0;
-      sessionStorage.setItem(LOGIN_LOCK_KEY, JSON.stringify({ count: nextCount, until: nextUntil }));
+      const username = (dom.loginUsername && dom.loginUsername.value ? dom.loginUsername.value : 'admin').trim();
+      const password = (dom.loginPassword && dom.loginPassword.value ? dom.loginPassword.value : '').trim();
 
-      if (dom.loginError) {
-        dom.loginError.textContent = nextUntil
-          ? 'Contraseña incorrecta. Acceso bloqueado temporalmente durante 60 segundos.'
-          : 'Usuario o contraseña incorrectos. Por favor, verifica tus datos.';
-        dom.loginError.style.display = 'block';
+      if (dom.btnLoginSubmit) dom.btnLoginSubmit.disabled = true;
+
+      if (!db || !db.loginAdmin) {
+        throw new Error('Servicio de autenticación de servidor no disponible.');
+      }
+
+      const res = await db.loginAdmin(username, password);
+      if (res && res.ok) {
+        sessionStorage.removeItem(LOGIN_LOCK_KEY);
+        if (dom.loginPassword) dom.loginPassword.value = '';
+        showDashboard();
+        showToast('¡Bienvenido al Panel de Gestión, Andrés!');
+        return;
       }
     } catch (err) {
-      if (dom.loginError) {
-        dom.loginError.textContent = 'Error verificando credenciales.';
+      const now = Date.now();
+      if (err && err.status === 401) {
+        const lockState = JSON.parse(sessionStorage.getItem(LOGIN_LOCK_KEY) || '{"count":0,"until":0}');
+        const nextCount = (lockState.count || 0) + 1;
+        const nextUntil = nextCount >= MAX_LOGIN_ATTEMPTS ? now + LOCKOUT_MS : 0;
+        sessionStorage.setItem(LOGIN_LOCK_KEY, JSON.stringify({ count: nextCount, until: nextUntil }));
+
+        if (dom.loginError) {
+          dom.loginError.textContent = nextUntil
+            ? 'Contraseña incorrecta. Acceso bloqueado temporalmente durante 60 segundos.'
+            : 'Usuario o contraseña incorrectos. Por favor, verifica tus datos.';
+          dom.loginError.style.display = 'block';
+        }
+      } else if (dom.loginError) {
+        dom.loginError.textContent =
+          (err && err.message) || 'No se pudo verificar el acceso con Cloudflare Pages Functions.';
         dom.loginError.style.display = 'block';
       }
+    } finally {
+      if (dom.btnLoginSubmit) dom.btnLoginSubmit.disabled = false;
     }
   }
 
@@ -253,10 +266,12 @@
       });
     }
 
-    // Logout
+    // Logout en servidor (borra cookie HttpOnly)
     if (dom.btnLogout) {
-      dom.btnLogout.addEventListener('click', () => {
-        sessionStorage.removeItem('andres_admin_auth');
+      dom.btnLogout.addEventListener('click', async () => {
+        if (db && db.logoutAdmin) {
+          await db.logoutAdmin();
+        }
         showLogin();
         showToast('Sesión cerrada correctamente.');
       });
@@ -512,16 +527,22 @@
       });
     }
 
-    // Guardar nueva contraseña
+    // Cambiar usuario y contraseña directamente en servidor (Cloudflare KV + PBKDF2)
     if (dom.passwordForm) {
       dom.passwordForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const username = dom.settingUsername.value.trim();
-        const newPass = dom.settingNewPassword.value;
-        const confirmPass = dom.settingConfirmPassword.value;
+        const username = (dom.settingUsername ? dom.settingUsername.value : '').trim();
+        const currentPass = dom.settingCurrentPassword ? dom.settingCurrentPassword.value : '';
+        const newPass = dom.settingNewPassword ? dom.settingNewPassword.value : '';
+        const confirmPass = dom.settingConfirmPassword ? dom.settingConfirmPassword.value : '';
 
-        if (newPass.length < 8) {
-          alert('Por seguridad, la nueva contraseña debe tener al menos 8 caracteres.');
+        if (!currentPass) {
+          alert('Introduce tu contraseña actual para confirmar el cambio.');
+          return;
+        }
+
+        if (newPass.length < 10) {
+          alert('Por seguridad, la nueva contraseña debe tener al menos 10 caracteres.');
           return;
         }
 
@@ -530,10 +551,30 @@
           return;
         }
 
-        await db.saveAdminCredentials(username, newPass);
-        dom.settingNewPassword.value = '';
-        dom.settingConfirmPassword.value = '';
-        showToast('Credenciales actualizadas correctamente.');
+        const btn = dom.btnSavePassword;
+        const origText = btn ? btn.textContent : '';
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = 'Guardando en servidor...';
+        }
+
+        try {
+          const res = await db.changeAdminPassword(currentPass, username, newPass);
+          if (dom.settingCurrentPassword) dom.settingCurrentPassword.value = '';
+          if (dom.settingNewPassword) dom.settingNewPassword.value = '';
+          if (dom.settingConfirmPassword) dom.settingConfirmPassword.value = '';
+          if (res && res.username && dom.settingUsername) {
+            dom.settingUsername.value = res.username;
+          }
+          showToast('✓ Usuario y contraseña actualizados de forma segura en Cloudflare KV.');
+        } catch (err) {
+          alert('No se pudo actualizar la contraseña:\n\n' + (err.message || err));
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = origText;
+          }
+        }
       });
     }
 
@@ -747,10 +788,14 @@
     dom.photoModal.classList.remove('active');
   }
 
-  // Sesiones Proofing
+  // Sesiones Proofing (100 % almacenadas en servidor / Cloudflare KV)
   async function refreshSessions() {
     if (!db || !db.getAllClientSessions) return;
-    currentClientSessions = await db.getAllClientSessions();
+    try {
+      currentClientSessions = await db.getAllClientSessions();
+    } catch (err) {
+      currentClientSessions = [];
+    }
     renderSessionsGrid();
   }
 
@@ -760,9 +805,9 @@
 
     if (currentClientSessions.length === 0) {
       dom.sessionsGrid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted); background: var(--bg-surface); border-radius: 12px; border: 1px dashed var(--border-hairline);">
-          <p style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-primary);">Aún no has creado ninguna galería de cliente.</p>
-          <p style="font-size: 0.85rem; margin-bottom: 1.5rem;">Crea tu primera sesión para entregar fotos a novios o clientes con un PIN seguro.</p>
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3.5rem 1.25rem; color: var(--text-muted); background: var(--bg-surface); border-radius: 12px; border: 1px dashed var(--border-hairline);">
+          <p style="font-size: 1.05rem; margin-bottom: 0.5rem; color: var(--text-primary);">No hay galerías privadas activas en el servidor.</p>
+          <p style="font-size: 0.84rem; max-width: 560px; margin: 0 auto;">Las sesiones de clientes se almacenan de forma privada en Cloudflare KV (<code>PRIVATE_GALLERIES_KV</code>) y sus fotografías en R2 (<code>PRIVATE_MEDIA_R2</code>), nunca en el código público ni en <code>site-data.json</code>.</p>
         </div>
       `;
       return;
@@ -772,11 +817,7 @@
       const card = document.createElement('div');
       card.className = 'session-card';
 
-      let slug = 'cliente-1';
-      if (session.id === 'boda-laura-carlos') slug = 'boda-laura-carlos';
-      else if (session.id === 'inmobiliaria-villa-mediterranea') slug = 'cliente-1';
-      else slug = session.id;
-
+      const slug = session.id;
       const photosCount = session.photos ? session.photos.length : 0;
       const previewThumbs = (session.photos || []).slice(0, 5).map((p) => `
         <img src="${escapeHtml(p.thumbUrl || p.fullUrl)}" class="session-preview-thumb" alt="Foto">
@@ -784,7 +825,7 @@
 
       const safeTitle = escapeHtml(session.title);
       const safeClient = escapeHtml(session.clientName || 'Cliente');
-      const safePin = escapeHtml(session.pin || (session.pinHash ? 'SHA-256' : '—'));
+      const safePin = session.hasPin ? 'PBKDF2 ✓' : '—';
       const safeDate = escapeHtml(session.date || 'Sin fecha');
       const safeLocation = escapeHtml(session.location || 'Local');
       const safeSlug = escapeHtml(slug);
@@ -796,7 +837,7 @@
             <h3 class="session-card-title">${safeTitle}</h3>
             <span class="session-card-client">${safeClient}</span>
           </div>
-          <div class="pin-chip" title="PIN de acceso privado">
+          <div class="pin-chip" title="PIN cifrado en servidor (no visible)">
             <span>PIN:</span>
             <span>${safePin}</span>
           </div>
@@ -806,7 +847,7 @@
           <span>📅 ${safeDate}</span>
           <span>📍 ${safeLocation}</span>
           <span>🖼️ ${photosCount} fotos</span>
-          <span style="color: var(--accent-gold); font-weight: 500;">🔗 /galeria/${safeSlug}</span>
+          <span style="color: var(--accent-gold); font-weight: 500;">🔗 /proofing.html?session=${safeSlug}</span>
         </div>
 
         <div class="session-preview-strip">
@@ -814,15 +855,15 @@
         </div>
 
         <div class="session-actions-bar">
-          <button class="btn-copy-link" data-slug="${safeSlug}" data-pin="${safePin}">
-            📋 Copiar Enlace Directo (/galeria/${safeSlug})
+          <button type="button" class="btn-copy-link" data-slug="${safeSlug}">
+            📋 Copiar Enlace Privado de Cliente
           </button>
 
           <div class="session-btn-row">
-            <a href="galeria/${encodeURIComponent(slug)}/" target="_blank" rel="noopener" class="btn-secondary" style="flex: 1; justify-content: center; font-size: 0.78rem; padding: 0.5rem; text-decoration: none;">
-              👁️ Probar Galería
+            <a href="proofing.html?session=${encodeURIComponent(slug)}" target="_blank" rel="noopener" class="btn-secondary" style="flex: 1; justify-content: center; font-size: 0.78rem; padding: 0.5rem; text-decoration: none;">
+              👁️ Probar Acceso
             </a>
-            <button class="btn-danger btn-delete-session" data-id="${safeSessionId}" style="padding: 0.5rem 0.8rem; font-size: 0.78rem;" title="Eliminar">
+            <button type="button" class="btn-danger btn-delete-session" data-id="${safeSessionId}" style="padding: 0.5rem 0.8rem; font-size: 0.78rem;" title="Eliminar">
               🗑️
             </button>
           </div>
@@ -831,48 +872,29 @@
 
       card.querySelector('.btn-copy-link').addEventListener('click', () => {
         const baseUrl = window.location.href.split('admin.html')[0].split('admin')[0];
-        const clientUrl = `${baseUrl}galeria/${slug}/`;
-        const pinNotice = session.pin ? ` (PIN: ${session.pin})` : '';
+        const clientUrl = `${baseUrl}proofing.html?session=${encodeURIComponent(slug)}`;
         navigator.clipboard.writeText(clientUrl).then(() => {
-          showToast(`¡Enlace copiado! ${clientUrl}${pinNotice}`);
+          showToast(`¡Enlace copiado! ${clientUrl}`);
         }).catch(() => {
-          prompt(`Copia este enlace para tu cliente${pinNotice}:`, clientUrl);
+          prompt('Copia este enlace privado para tu cliente:', clientUrl);
         });
       });
 
       card.querySelector('.btn-delete-session').addEventListener('click', async () => {
         const conf = confirm(`¿Estás seguro de eliminar la sesión "${session.title}"?`);
         if (conf) {
-          await db.deleteClientSession(session.id);
-          await refreshSessions();
-          showToast('Sesión eliminada.');
+          try {
+            await db.deleteClientSession(session.id);
+            await refreshSessions();
+            showToast('Sesión privada eliminada del servidor.');
+          } catch (err) {
+            alert(err.message || 'No se pudo eliminar la sesión.');
+          }
         }
       });
 
       dom.sessionsGrid.appendChild(card);
     });
-
-    // Tarjeta para nueva plantilla estática
-    const templateCard = document.createElement('div');
-    templateCard.className = 'session-card';
-    templateCard.style.border = '1px dashed rgba(197, 160, 89, 0.5)';
-    templateCard.innerHTML = `
-      <div class="session-card-header">
-        <div>
-          <h3 class="session-card-title" style="color: var(--accent-gold);">+ Añadir Nueva Galería</h3>
-          <span class="session-card-client">Sistema Estático Cloudflare Pages</span>
-        </div>
-      </div>
-      <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; margin: 0.75rem 0 1rem;">
-        Para crear una nueva galería privada, duplica la carpeta <code>galeria/plantilla</code> con el nombre que elijas (ej. <code>galeria/cliente-2</code>) y define su PIN y fotos en su <code>index.html</code>.
-      </div>
-      <div class="session-actions-bar">
-        <a href="galeria/plantilla/" target="_blank" class="btn-secondary" style="width: 100%; text-align: center; justify-content: center; text-decoration: none; font-size: 0.8rem; padding: 0.6rem;">
-          👁️ Ver Plantilla (/galeria/plantilla)
-        </a>
-      </div>
-    `;
-    dom.sessionsGrid.appendChild(templateCard);
   }
 
   function openSessionModal(sessionToEdit = null) {
@@ -1221,27 +1243,11 @@ USING (bucket_id = 'portfolio');`;
     const btnBannerConnect = document.getElementById('btn-banner-connect');
     const modal = document.getElementById('modal-supabase-config');
     const btnCloseModal = document.getElementById('btn-close-supabase-modal');
-    const form = document.getElementById('supabase-config-form');
-    const btnDisconnect = document.getElementById('btn-disconnect-supabase');
-    const inputOwner = document.getElementById('gh-owner');
-    const inputRepo = document.getElementById('gh-repo');
-    const inputBranch = document.getElementById('gh-branch');
-    const inputToken = document.getElementById('gh-token');
-
-    const populateInputs = () => {
-      const cfg = db && db.getGitHubConfig ? db.getGitHubConfig() : null;
-      if (cfg) {
-        if (inputOwner) inputOwner.value = cfg.owner || 'andresreginensi';
-        if (inputRepo) inputRepo.value = cfg.repo || 'andresreginensi';
-        if (inputBranch) inputBranch.value = cfg.branch || 'main';
-        if (inputToken) inputToken.value = cfg.token || '';
-      }
-    };
-    populateInputs();
+    const btnRefreshStatus = document.getElementById('btn-refresh-server-status');
 
     const openModal = () => {
-      populateInputs();
       if (modal) modal.classList.add('active');
+      checkSupabaseState();
     };
     const closeModal = () => {
       if (modal) modal.classList.remove('active');
@@ -1252,20 +1258,19 @@ USING (bucket_id = 'portfolio');`;
     if (btnPortfolioConnect) btnPortfolioConnect.addEventListener('click', openModal);
     if (btnBannerConnect) btnBannerConnect.addEventListener('click', openModal);
     if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+    if (btnRefreshStatus) btnRefreshStatus.addEventListener('click', () => checkSupabaseState());
 
-    // Botón para publicar manualmente todas las fotos locales de este Mac hacia GitHub
     if (btnSyncLocalToCloud) {
       btnSyncLocalToCloud.addEventListener('click', async () => {
         if (!db || !db.syncLocalDataToGitHub) return;
         const origTxt = btnSyncLocalToCloud.textContent;
         btnSyncLocalToCloud.disabled = true;
-        btnSyncLocalToCloud.textContent = '⏳ Publicando en GitHub...';
+        btnSyncLocalToCloud.textContent = '⏳ Publicando vía servidor...';
         try {
           const result = await db.syncLocalDataToGitHub();
           await refreshPortfolio();
           await loadCurrentSettings();
-          await refreshSessions();
-          showToast(`✓ ¡${result.syncedPhotos} fotos publicadas en GitHub! Se verán en móviles en ~20s.`);
+          showToast(`✓ ¡${result.syncedPhotos} fotos publicadas de forma segura en GitHub! Se verán en ~20s.`);
         } catch (err) {
           alert('No se pudo publicar en GitHub: ' + (err.message || err));
         } finally {
@@ -1275,71 +1280,9 @@ USING (bucket_id = 'portfolio');`;
       });
     }
 
-    // Cerrar al hacer clic fuera del cuadro
     if (modal) {
       modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
-      });
-    }
-
-    // Conectar y sincronizar con GitHub
-    if (form) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const owner = (inputOwner ? inputOwner.value : 'andresreginensi').trim();
-        const repo = (inputRepo ? inputRepo.value : 'andresreginensi').trim();
-        const branch = (inputBranch ? inputBranch.value : 'main').trim();
-        const token = (inputToken ? inputToken.value : '').trim();
-
-        if (!token) {
-          alert('Por favor, pega tu Personal Access Token de GitHub (empieza por ghp_ o github_pat_).');
-          return;
-        }
-
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const origText = submitBtn ? submitBtn.textContent : '';
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = 'Verificando repositorio en GitHub...';
-        }
-
-        try {
-          const cfg = { owner, repo, branch, token };
-          await db.verifyGitHubToken(cfg);
-          db.setGitHubConfig(cfg);
-
-          if (submitBtn) {
-            submitBtn.textContent = 'Publicando tus fotos actuales en GitHub...';
-          }
-          await db.syncLocalDataToGitHub(cfg);
-
-          showToast('✓ ¡GitHub conectado! Tus fotos ya se están desplegando en Cloudflare Pages (~20s).');
-          closeModal();
-          checkSupabaseState();
-          await refreshPortfolio();
-          await loadCurrentSettings();
-          await refreshSessions();
-        } catch (err) {
-          alert('No se pudo conectar con GitHub:\n\n' + (err.message || err));
-        } finally {
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = origText;
-          }
-        }
-      });
-    }
-
-    // Desconectar GitHub
-    if (btnDisconnect) {
-      btnDisconnect.addEventListener('click', async () => {
-        if (db && db.clearGitHubConfig) db.clearGitHubConfig();
-        if (inputToken) inputToken.value = '';
-        showToast('GitHub desconectado en este navegador.');
-        closeModal();
-        checkSupabaseState();
-        await refreshPortfolio();
-        await loadCurrentSettings();
       });
     }
   }
@@ -1351,42 +1294,59 @@ USING (bucket_id = 'portfolio');`;
     return null;
   }
 
-  function checkSupabaseState() {
-    const ghCfg = db && db.getGitHubConfig ? db.getGitHubConfig() : null;
+  async function checkSupabaseState() {
+    const ghStatus = db && db.getGitHubServerStatus
+      ? await db.getGitHubServerStatus()
+      : { configured: false, owner: 'andresreginensi', repo: 'andresreginensi', branch: 'main' };
+    const sessionInfo = db && db.getAdminSession ? await db.getAdminSession() : {};
     const sbCfg = getSupabaseSavedConfig();
-    // Elementos Topbar
+
     const topbarDot = document.getElementById('topbar-db-dot');
     const topbarText = document.getElementById('topbar-db-text');
-    // Elementos Pestaña Portafolio
     const pBanner = document.getElementById('portfolio-cloud-banner');
     const pBadge = document.getElementById('portfolio-cloud-badge');
     const pText = document.getElementById('portfolio-cloud-text');
     const pBtnConnect = document.getElementById('btn-portfolio-connect-cloud');
     const pBtnSync = document.getElementById('btn-sync-local-to-cloud');
-    // Elementos Pestaña Analíticas
     const dot = document.getElementById('db-status-dot');
     const statusText = document.getElementById('db-status-text');
+    const serverStatusBox = document.getElementById('server-env-status-box');
 
-    if (ghCfg && ghCfg.token) {
+    if (serverStatusBox) {
+      const ghBadge = ghStatus.configured ? '✅ Configurado en servidor' : '⚠️ Falta secreto GITHUB_TOKEN';
+      const kvBadge =
+        sessionInfo.galleriesStorage === 'kv'
+          ? '✅ Cloudflare KV vinculado'
+          : sessionInfo.galleriesStorage === 'env_secret'
+            ? '✅ Secreto PRIVATE_GALLERIES_JSON activo'
+            : '⚠️ Pendiente de vincular PRIVATE_GALLERIES_KV';
+      serverStatusBox.innerHTML = `
+        <strong>Estado actual del entorno Cloudflare Pages:</strong><br>
+        &bull; Proxy GitHub (<code>${escapeHtml(ghStatus.owner)}/${escapeHtml(ghStatus.repo)}</code> · <code>${escapeHtml(ghStatus.branch)}</code>): ${ghBadge}<br>
+        &bull; Galerías privadas: ${kvBadge}
+      `;
+    }
+
+    if (ghStatus && ghStatus.configured) {
       if (topbarDot) topbarDot.className = 'db-status-dot connected';
-      if (topbarText) topbarText.textContent = `GitHub: ${ghCfg.repo} (${ghCfg.branch})`;
+      if (topbarText) topbarText.textContent = `Cloudflare Proxy: ${ghStatus.repo}`;
 
       if (pBanner) pBanner.className = 'analytics-mode-banner connected';
       if (pBadge) {
         pBadge.className = 'banner-badge connected';
-        pBadge.textContent = 'GitHub + Cloudflare Activo';
+        pBadge.textContent = 'Proxy Servidor Activo';
       }
       if (pText) {
-        pText.innerHTML = `<strong>✓ Conectado directamente a GitHub (${ghCfg.owner}/${ghCfg.repo}).</strong> Cada foto o portada que edites aquí hace commit automático y se publica en todos los móviles y dispositivos en ~20 segundos.`;
+        pText.innerHTML = `<strong>✓ Conectado de forma segura mediante Cloudflare Functions (${escapeHtml(ghStatus.owner)}/${escapeHtml(ghStatus.repo)}).</strong> El token de GitHub nunca se expone en el navegador.`;
       }
-      if (pBtnConnect) pBtnConnect.innerHTML = '⚙️ Gestionar GitHub';
+      if (pBtnConnect) pBtnConnect.textContent = 'Estado del Servidor';
       if (pBtnSync) pBtnSync.style.display = 'inline-flex';
 
       if (dot) dot.className = 'db-status-dot connected';
-      if (statusText) statusText.textContent = 'GitHub: Conectado';
+      if (statusText) statusText.textContent = 'Cloudflare: Activo';
     } else {
       if (topbarDot) topbarDot.className = 'db-status-dot';
-      if (topbarText) topbarText.textContent = 'GitHub: Desconectado';
+      if (topbarText) topbarText.textContent = 'Cloudflare: Configurar';
 
       if (pBanner) pBanner.className = 'analytics-mode-banner';
       if (pBadge) {
@@ -1394,15 +1354,13 @@ USING (bucket_id = 'portfolio');`;
         pBadge.textContent = 'Modo Local';
       }
       if (pText) {
-        pText.innerHTML = 'Actualmente tus cambios se guardan solo en este navegador. Conecta tu repositorio de <strong>GitHub</strong> para publicar tus fotos directamente en Cloudflare Pages y que se actualicen en todos los móviles y dispositivos.';
+        pText.innerHTML = 'Añade el secreto <code>GITHUB_TOKEN</code> en <strong>Cloudflare Pages &gt; Settings &gt; Environment variables</strong> para publicar cambios desde el servidor sin exponer credenciales en el navegador.';
       }
-      if (pBtnConnect) {
-        pBtnConnect.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg> Conectar con GitHub`;
-      }
+      if (pBtnConnect) pBtnConnect.textContent = 'Ver Configuración Segura';
       if (pBtnSync) pBtnSync.style.display = 'none';
 
       if (dot) dot.className = 'db-status-dot';
-      if (statusText) statusText.textContent = 'GitHub: Desconectado';
+      if (statusText) statusText.textContent = 'Cloudflare: Pendiente';
     }
 
     if (sbCfg && sbCfg.url && sbCfg.key) {

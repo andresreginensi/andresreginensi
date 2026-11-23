@@ -139,10 +139,25 @@
     </image:image>
   </url>
 
+  <!-- Páginas legales (LSSI-CE y RGPD) -->
+  <url>
+    <loc>https://andresreginensi.es/aviso-legal.html</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://andresreginensi.es/politica-privacidad.html</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
   <!-- Política de Cookies y Privacidad -->
   <url>
     <loc>https://andresreginensi.es/cookies.html</loc>
-    <lastmod>2026-10-31</lastmod>
+    <lastmod>2026-11-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

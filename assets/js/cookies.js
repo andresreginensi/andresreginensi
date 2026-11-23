@@ -60,11 +60,11 @@
   }
 
   function setupEventListeners() {
-    // Banner: Aceptar todas
+    // Banner: Aceptar analítica
     const btnAcceptAll = document.getElementById('cookie-btn-accept-all');
     if (btnAcceptAll) {
       btnAcceptAll.addEventListener('click', () => {
-        saveConsent({ essential: true, analytics: true, marketing: true });
+        saveConsent({ essential: true, analytics: true, marketing: false });
       });
     }
 
@@ -102,11 +102,11 @@
       });
     }
 
-    // Modal: Aceptar todas desde el modal
+    // Modal: Aceptar analítica desde el modal
     const btnModalAcceptAll = document.getElementById('cookie-btn-modal-accept-all');
     if (btnModalAcceptAll) {
       btnModalAcceptAll.addEventListener('click', () => {
-        saveConsent({ essential: true, analytics: true, marketing: true });
+        saveConsent({ essential: true, analytics: true, marketing: false });
       });
     }
 

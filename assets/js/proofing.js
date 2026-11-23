@@ -1,3 +1,9 @@
+/**
+ * Andrés Reginensi Photography — Área Privada de Selección (Proofing)
+ * Validación 100 % en servidor (/api/galleries/unlock y /api/galleries/session).
+ * Cero sesiones, nombres de clientes, URLs privadas ni PINs almacenados en el cliente.
+ */
+
 (function () {
   'use strict';
 
@@ -42,7 +48,6 @@
     authModal: document.getElementById('auth-modal'),
     authForm: document.getElementById('auth-form'),
     authCodeInput: document.getElementById('auth-code-input'),
-    authSessionSelect: document.getElementById('auth-session-select'),
     authPinInput: document.getElementById('auth-pin-input'),
     authError: document.getElementById('auth-error'),
 
@@ -70,93 +75,29 @@
       .replace(/'/g, '&#39;');
   }
 
-  async function sha256Hex(value) {
-    const str = String(value || '');
-    if (window.crypto && window.crypto.subtle && window.TextEncoder) {
-      const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
-    }
-    return '';
-  }
-
-  async function isPinValid(sessionData, enteredPin) {
-    const cleanPin = String(enteredPin || '').trim();
-    if (!sessionData.pin && !sessionData.pinHash) return true;
-    if (sessionData.pinHash) {
-      const hash = await sha256Hex(cleanPin);
-      if (hash && hash === sessionData.pinHash) return true;
-    }
-    if (sessionData.pin && String(sessionData.pin).trim() === cleanPin) {
-      return true;
-    }
-    return false;
-  }
-
-  // Datos de respaldo local con hash SHA-256 en lugar de PIN en texto plano
-  const FALLBACK_DATA = {
-    'boda-laura-carlos': {
-      id: 'boda-laura-carlos',
-      pinHash: '158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab',
-      title: 'Boda Laura & Carlos — Reportaje Documental',
-      date: '18 de Octubre, 2026',
-      location: 'Finca Bellver, Mallorca',
-      clientName: 'Laura Gómez & Carlos Martínez',
-      maxSelectable: 50,
-      photos: [
-        { id: 'AR_LC_001', thumbUrl: 'assets/images/bodas/boda-salida-arroz-thumb.jpg', fullUrl: 'assets/images/bodas/boda-salida-arroz.jpg' },
-        { id: 'AR_LC_002', thumbUrl: 'assets/images/bodas/boda-editorial-calle-thumb.jpg', fullUrl: 'assets/images/bodas/boda-editorial-calle.jpg' },
-        { id: 'AR_LC_003', thumbUrl: 'assets/images/bodas/boda-playa-orilla-thumb.jpg', fullUrl: 'assets/images/bodas/boda-playa-orilla.jpg' },
-        { id: 'AR_LC_004', thumbUrl: 'assets/images/bodas/boda-alianzas-manos-thumb.jpg', fullUrl: 'assets/images/bodas/boda-alianzas-manos.jpg' }
-      ]
-    },
-    'inmobiliaria-villa-mediterranea': {
-      id: 'inmobiliaria-villa-mediterranea',
-      pinHash: '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',
-      title: 'Villa Galileu - Reportaje Arquitectura & Lujo',
-      date: '20 de Octubre, 2026',
-      location: 'Jávea, Alicante',
-      clientName: 'Habitat Luxury Real Estate',
-      maxSelectable: 25,
-      photos: [
-        { id: 'AR_VM_001', thumbUrl: 'assets/images/realestate/galileu-piscina-thumb.jpg', fullUrl: 'assets/images/realestate/galileu-piscina.jpg' },
-        { id: 'AR_VM_002', thumbUrl: 'assets/images/realestate/galileu-salon-thumb.jpg', fullUrl: 'assets/images/realestate/galileu-salon.jpg' },
-        { id: 'AR_VM_003', thumbUrl: 'assets/images/realestate/galileu-cocina-thumb.jpg', fullUrl: 'assets/images/realestate/galileu-cocina.jpg' },
-        { id: 'AR_VM_004', thumbUrl: 'assets/images/realestate/galileu-escalera-thumb.jpg', fullUrl: 'assets/images/realestate/galileu-escalera.jpg' },
-        { id: 'AR_VM_005', thumbUrl: 'assets/images/realestate/galileu-exterior-noche-thumb.jpg', fullUrl: 'assets/images/realestate/galileu-exterior-noche.jpg' },
-        { id: 'AR_VM_006', thumbUrl: 'assets/images/realestate/burgueras-fachada-thumb.jpg', fullUrl: 'assets/images/realestate/burgueras-fachada.jpg' }
-      ]
-    }
-  };
-
   async function init() {
     if (emailService.initEmailService) emailService.initEmailService();
-    if (db.initStorage) await db.initStorage();
 
     const params = new URLSearchParams(window.location.search);
     const sessionId = (params.get('session') || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
-    const legacyPin = params.get('pin');
 
-    // Higiene de seguridad: eliminar el PIN de la barra de direcciones si venía en un enlace antiguo
-    if (legacyPin !== null && window.history && window.history.replaceState) {
+    // Higiene de seguridad: eliminar cualquier parámetro pin heredado de la URL
+    if (params.has('pin') && window.history && window.history.replaceState) {
       params.delete('pin');
       const qs = params.toString();
-      const cleanUrl = window.location.pathname + (qs ? '?' + qs : '');
-      window.history.replaceState({}, document.title, cleanUrl);
+      window.history.replaceState({}, document.title, window.location.pathname + (qs ? '?' + qs : ''));
     }
 
-    if (sessionId && legacyPin) {
-      try {
-        const sessionData = await getSessionData(sessionId);
-        if (sessionData && await isPinValid(sessionData, legacyPin)) {
-          unlockSession(sessionData);
+    // Comprobar si ya existe una cookie de sesión privada válida en servidor
+    try {
+      if (db.getActiveClientGallery) {
+        const activeSession = await db.getActiveClientGallery(sessionId);
+        if (activeSession) {
+          unlockSession(activeSession);
           return;
         }
-      } catch (e) {
-        console.warn('No se pudo cargar sesión directa:', e);
       }
-    }
+    } catch (e) {}
 
     showAuthModal(sessionId);
   }
@@ -174,94 +115,75 @@
     dom.authForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // Protección frente a fuerza bruta en cliente
+      // Límite de intentos en interfaz (complementario a la protección del servidor)
       try {
         const lock = JSON.parse(sessionStorage.getItem(PIN_LOCK_KEY) || '{"count":0,"until":0}');
         const now = Date.now();
         if (lock.until && now < lock.until) {
           const waitSec = Math.ceil((lock.until - now) / 1000);
           if (dom.authError) {
-            dom.authError.textContent = `Demasiados intentos. Espera ${waitSec} segundos antes de intentarlo de nuevo.`;
+            dom.authError.textContent = `Demasiados intentos. Espera ${waitSec} segundos antes de volver a intentarlo.`;
             dom.authError.style.display = 'block';
           }
           return;
         }
-      } catch (err) { }
+      } catch (err) {}
 
       const rawCode = (dom.authCodeInput ? dom.authCodeInput.value.trim() : '').toLowerCase();
       const enteredCode = rawCode.replace(/[^a-z0-9_-]/g, '');
       const enteredPin = dom.authPinInput ? dom.authPinInput.value.trim() : '';
 
-      const directSlugs = ['cliente-1', 'villa-galileu', 'boda-laura-carlos'];
-      if (directSlugs.includes(enteredCode) && enteredCode !== 'boda-laura-carlos') {
-        window.location.href = `galeria/${encodeURIComponent(enteredCode)}/`;
+      if (!enteredCode || !enteredPin) {
+        if (dom.authError) {
+          dom.authError.textContent = 'Introduce el identificador de galería y el código PIN.';
+          dom.authError.style.display = 'block';
+        }
         return;
       }
 
+      const submitBtn = dom.authForm.querySelector('button[type="submit"]');
+      const origText = submitBtn ? submitBtn.textContent : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verificando acceso...';
+      }
+
       try {
-        const selectedSessionId = enteredCode || (dom.authSessionSelect ? dom.authSessionSelect.value : '');
-        const sessionData = await getSessionData(selectedSessionId);
-        if (!sessionData) {
-          if (enteredCode && directSlugs.includes(enteredCode)) {
-            window.location.href = `galeria/${encodeURIComponent(enteredCode)}/`;
-            return;
-          }
-          throw new Error('Sesión no encontrada');
+        if (!db.unlockClientGallery) {
+          throw new Error('Servicio de autenticación no disponible.');
         }
 
-        const pinOk = await isPinValid(sessionData, enteredPin);
-        if (!pinOk) {
+        const sessionData = await db.unlockClientGallery(enteredCode, enteredPin);
+        try {
+          sessionStorage.removeItem(PIN_LOCK_KEY);
+        } catch (e3) {}
+
+        if (dom.authError) dom.authError.style.display = 'none';
+        if (dom.authPinInput) dom.authPinInput.value = '';
+        if (dom.authModal) dom.authModal.close();
+        unlockSession(sessionData);
+      } catch (err) {
+        if (err && err.status === 401) {
           try {
             const lock = JSON.parse(sessionStorage.getItem(PIN_LOCK_KEY) || '{"count":0,"until":0}');
             const nextCount = (lock.count || 0) + 1;
             const nextUntil = nextCount >= MAX_PIN_ATTEMPTS ? Date.now() + PIN_LOCKOUT_MS : 0;
             sessionStorage.setItem(PIN_LOCK_KEY, JSON.stringify({ count: nextCount, until: nextUntil }));
-          } catch (e2) { }
-
-          if (dom.authError) {
-            dom.authError.textContent = 'Código PIN incorrecto. Por favor verifícalo con el fotógrafo.';
-            dom.authError.style.display = 'block';
-          }
-          return;
+          } catch (e2) {}
         }
 
-        try {
-          sessionStorage.removeItem(PIN_LOCK_KEY);
-        } catch (e3) { }
-        if (dom.authError) dom.authError.style.display = 'none';
-        if (dom.authModal) dom.authModal.close();
-        unlockSession(sessionData);
-      } catch (err) {
         if (dom.authError) {
-          dom.authError.textContent = 'Galería no encontrada o código PIN no válido.';
+          dom.authError.textContent =
+            (err && err.message) || 'Identificador de galería o código PIN incorrecto.';
           dom.authError.style.display = 'block';
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = origText;
         }
       }
     });
-  }
-
-  async function getSessionData(sessionId) {
-    if (!sessionId || !/^[a-zA-Z0-9_-]+$/.test(sessionId)) return null;
-
-    try {
-      if (db && db.getClientSessionById) {
-        const dbSession = await db.getClientSessionById(sessionId);
-        if (dbSession) return dbSession;
-      }
-    } catch (e) {
-      console.warn('Error consultando base de datos:', e);
-    }
-
-    if (FALLBACK_DATA[sessionId]) {
-      return FALLBACK_DATA[sessionId];
-    }
-
-    try {
-      const res = await fetch(`data/sessions/${encodeURIComponent(sessionId)}.json`);
-      if (res.ok) return await res.json();
-    } catch (e) { }
-
-    return null;
   }
 
   function unlockSession(sessionData) {
@@ -269,8 +191,13 @@
     state.isUnlocked = true;
 
     dom.sessionBadge.textContent = sessionData.clientName || 'Cliente';
-    dom.sessionTitle.textContent = sessionData.title;
-    dom.sessionMeta.textContent = `${sessionData.date || ''} • ${sessionData.location || ''} • Límite sugerido: ${sessionData.maxSelectable || 'Ilimitado'} fotos`;
+    dom.sessionTitle.textContent = sessionData.title || 'Galería Privada';
+    const metaParts = [
+      sessionData.date || '',
+      sessionData.location || '',
+      `Límite sugerido: ${sessionData.maxSelectable || 'Ilimitado'} fotos`
+    ].filter(Boolean);
+    dom.sessionMeta.textContent = metaParts.join(' • ');
     dom.totalCount.textContent = (sessionData.photos || []).length;
 
     if (sessionData.clientName) {
@@ -287,9 +214,10 @@
     dom.grid.innerHTML = '';
 
     const photos = state.session.photos || [];
-    const photosToDisplay = state.activeFilter === 'selected'
-      ? photos.filter((p) => state.selectedPhotoIds.has(p.id))
-      : photos;
+    const photosToDisplay =
+      state.activeFilter === 'selected'
+        ? photos.filter((p) => state.selectedPhotoIds.has(p.id))
+        : photos;
 
     if (photosToDisplay.length === 0 && state.activeFilter === 'selected') {
       dom.grid.innerHTML = `
@@ -437,7 +365,7 @@
   function closeProofingLightbox() {
     dom.lightbox.classList.remove('active');
     dom.lightbox.setAttribute('aria-hidden', 'true');
-    dom.lightboxImg.src = '';
+    dom.lightboxImg.removeAttribute('src');
     currentLightboxPhoto = null;
     document.body.style.overflow = 'auto';
   }
@@ -508,14 +436,17 @@
   if (dom.btnOrderCopy) {
     dom.btnOrderCopy.addEventListener('click', () => {
       if (!lastSummaryText) return;
-      navigator.clipboard.writeText(lastSummaryText).then(() => {
-        dom.btnOrderCopy.textContent = '✓ Lista copiada al portapapeles';
-        setTimeout(() => {
-          dom.btnOrderCopy.textContent = 'Copiar lista de fotos al portapapeles';
-        }, 2500);
-      }).catch(() => {
-        prompt('Copia tu selección de fotos:', lastSummaryText);
-      });
+      navigator.clipboard
+        .writeText(lastSummaryText)
+        .then(() => {
+          dom.btnOrderCopy.textContent = '✓ Lista copiada al portapapeles';
+          setTimeout(() => {
+            dom.btnOrderCopy.textContent = 'Copiar lista de fotos al portapapeles';
+          }, 2500);
+        })
+        .catch(() => {
+          prompt('Copia tu selección de fotos:', lastSummaryText);
+        });
     });
   }
 
@@ -543,11 +474,18 @@
         lastSummaryText = result.summaryText || payload.selectedPhotos.join(', ');
 
         if (window.AndresAnalytics && window.AndresAnalytics.trackEvent) {
-          window.AndresAnalytics.trackEvent('conversion', 'submit_proofing_order', payload.sessionId, payload.selectedPhotos.length);
+          window.AndresAnalytics.trackEvent(
+            'conversion',
+            'submit_proofing_order',
+            payload.sessionId,
+            payload.selectedPhotos.length
+          );
         }
 
         if (result.success) {
-          alert(`¡Listo! Se ha enviado tu selección de ${payload.selectedPhotos.length} fotos a Andrés Reginensi.\n\n${result.message}`);
+          alert(
+            `¡Listo! Se ha enviado tu selección de ${payload.selectedPhotos.length} fotos a Andrés Reginensi.\n\n${result.message}`
+          );
           dom.orderModal.close();
         } else if (dom.directPanel) {
           if (dom.orderFieldsWrap) dom.orderFieldsWrap.style.display = 'none';

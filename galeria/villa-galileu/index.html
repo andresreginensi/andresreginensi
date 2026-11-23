@@ -3,18 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex, nofollow">
+  <meta name="robots" content="noindex, nofollow, noarchive">
   <meta name="referrer" content="no-referrer">
-  <title>Galería Privada — Villa Galileu | Andrés Reginensi Photography</title>
+  <title>Galería Privada | Andrés Reginensi Photography</title>
 
-  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="../../assets/css/gallery.css">
+  <link rel="stylesheet" href="../../assets/css/gallery.css?v=26">
 </head>
-<body>
+<body data-gallery-slug="villa-galileu">
 
   <div class="ambient-glow" aria-hidden="true">
     <div class="ambient-orb orb-1"></div>
@@ -24,24 +23,24 @@
   <section class="pin-screen-container" id="pin-screen">
     <div class="pin-card">
       <div class="pin-brand">Andrés Reginensi Photography</div>
-      <h1 class="pin-title">Villa Galileu</h1>
-      <p class="pin-subtitle">Introduce tu código PIN personal para acceder a tu sesión y descargar las fotografías.</p>
+      <h1 class="pin-title">Galería Privada</h1>
+      <p class="pin-subtitle">Introduce tu código PIN personal para verificar el acceso en servidor y ver tus fotografías.</p>
 
       <form class="pin-form" id="pin-form">
         <div class="pin-input-wrap">
-          <input 
-            type="password" 
-            id="pin-input" 
-            class="pin-input" 
-            placeholder="Introduce tu PIN" 
-            maxlength="12" 
-            autocomplete="off" 
-            required 
+          <input
+            type="password"
+            id="pin-input"
+            class="pin-input"
+            placeholder="Introduce tu PIN"
+            maxlength="32"
+            autocomplete="off"
+            required
             autofocus
           >
         </div>
 
-        <div class="pin-error" id="pin-error"></div>
+        <div class="pin-error" id="pin-error" role="alert"></div>
 
         <button type="submit" class="btn-unlock" id="btn-unlock">
           Acceder a la Galería
@@ -49,41 +48,40 @@
       </form>
 
       <div class="pin-footer-note">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
-        Espacio privado y protegido para clientes
+        Acceso verificado en servidor · Sin datos expuestos en cliente
       </div>
     </div>
   </section>
 
   <div class="gallery-layout" id="gallery-layout">
-    
     <header class="gallery-header">
       <div class="gallery-header-left">
         <a href="../../index.html" class="header-brand-link">Andrés Reginensi</a>
-        <span class="header-badge" id="gallery-client">Habitat Luxury Real Estate</span>
+        <span class="header-badge" id="gallery-client">Área Privada</span>
       </div>
 
       <div class="gallery-header-actions">
-        <button class="btn-download-all" id="btn-download-all" title="Descargar todas las fotos de la sesión">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <button type="button" class="btn-download-all" id="btn-download-all" title="Descargar todas las fotos de la sesión">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
           Descargar Fotos
         </button>
-        <button class="btn-lock" id="btn-lock" title="Cerrar sesión de la galería">
+        <button type="button" class="btn-lock" id="btn-lock" title="Cerrar sesión de la galería">
           🔒 Salir
         </button>
       </div>
     </header>
 
     <section class="gallery-hero">
-      <span class="hero-client-name">Reportaje Arquitectura & Lujo</span>
-      <h1 class="hero-title" id="gallery-title">Villa Galileu</h1>
+      <span class="hero-client-name">Entrega Privada de Cliente</span>
+      <h2 class="hero-title" id="gallery-title">Galería Privada</h2>
       <div class="hero-meta-row">
         <span class="hero-meta-item" id="gallery-meta-date"></span>
         <span class="hero-meta-item" id="gallery-meta-location"></span>
@@ -96,21 +94,21 @@
     </main>
 
     <footer class="gallery-footer">
-      <div>Andrés Reginensi &copy; 2026. Fotografías para uso personal y corporativo del cliente.</div>
+      <div>Andrés Reginensi &copy; 2026. Fotografías para uso personal y corporativo autorizado del cliente.</div>
     </footer>
   </div>
 
-  <div class="gallery-lightbox" id="gallery-lightbox" aria-hidden="true">
-    <button class="lightbox-close" id="lightbox-btn-close" aria-label="Cerrar">✕</button>
-    <button class="lightbox-nav-btn lightbox-prev" id="lightbox-btn-prev" aria-label="Anterior">‹</button>
-    <button class="lightbox-nav-btn lightbox-next" id="lightbox-btn-next" aria-label="Siguiente">›</button>
+  <div class="gallery-lightbox" id="gallery-lightbox" role="dialog" aria-modal="true" aria-label="Visor de fotografía" aria-hidden="true">
+    <button type="button" class="lightbox-close" id="lightbox-btn-close" aria-label="Cerrar">✕</button>
+    <button type="button" class="lightbox-nav-btn lightbox-prev" id="lightbox-btn-prev" aria-label="Anterior">‹</button>
+    <button type="button" class="lightbox-nav-btn lightbox-next" id="lightbox-btn-next" aria-label="Siguiente">›</button>
 
     <div class="lightbox-content">
-      <img id="lightbox-img" class="lightbox-img" src="" alt="Fotografía">
+      <img id="lightbox-img" class="lightbox-img" alt="Fotografía">
       <div class="lightbox-bar">
         <span class="lightbox-caption" id="lightbox-caption"></span>
-        <button class="btn-photo-download" id="lightbox-btn-download">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <button type="button" class="btn-photo-download" id="lightbox-btn-download">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -121,56 +119,6 @@
     </div>
   </div>
 
-  <script>
-    window.GALLERY_CONFIG = {
-      title: "Villa Galileu — Reportaje Arquitectura & Lujo",
-      client: "Habitat Luxury Real Estate",
-      date: "20 de Octubre, 2026",
-      location: "Jávea, Alicante",
-      pinHash: "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
-      zipDownloadUrl: "",
-      photos: [
-        {
-          id: "AR_VM_001",
-          caption: "Villa Galileu — Exterior & Piscina Infinity",
-          thumb: "../../assets/images/realestate/galileu-piscina-thumb.jpg",
-          full: "../../assets/images/realestate/galileu-piscina.jpg"
-        },
-        {
-          id: "AR_VM_002",
-          caption: "Villa Galileu — Foyer & Sala Principal",
-          thumb: "../../assets/images/realestate/galileu-salon-thumb.jpg",
-          full: "../../assets/images/realestate/galileu-salon.jpg"
-        },
-        {
-          id: "AR_VM_003",
-          caption: "Villa Galileu — Cocina Integrada de Diseño",
-          thumb: "../../assets/images/realestate/galileu-cocina-thumb.jpg",
-          full: "../../assets/images/realestate/galileu-cocina.jpg"
-        },
-        {
-          id: "AR_VM_004",
-          caption: "Villa Galileu — Escalera Arquitectónica",
-          thumb: "../../assets/images/realestate/galileu-escalera-thumb.jpg",
-          full: "../../assets/images/realestate/galileu-escalera.jpg"
-        },
-        {
-          id: "AR_VM_005",
-          caption: "Villa Galileu — Fachada en Hora Mágica",
-          thumb: "../../assets/images/realestate/galileu-exterior-noche-thumb.jpg",
-          full: "../../assets/images/realestate/galileu-exterior-noche.jpg"
-        },
-        {
-          id: "AR_VM_006",
-          caption: "Residencia Burgueras — Volumetría & Hormigón",
-          thumb: "../../assets/images/realestate/burgueras-fachada-thumb.jpg",
-          full: "../../assets/images/realestate/burgueras-fachada.jpg"
-        }
-      ]
-    };
-  </script>
-
-  <script src="../../assets/js/client-gallery.js?v=6" defer></script>
+  <script src="../../assets/js/client-gallery.js?v=26" defer></script>
 </body>
 </html>
-

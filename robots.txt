@@ -11,6 +11,7 @@ Disallow: /admin.html
 Disallow: /proofing
 Disallow: /proofing.html
 Disallow: /galeria/
+Disallow: /api/
 Disallow: /data/
 Disallow: /assets/data/
 

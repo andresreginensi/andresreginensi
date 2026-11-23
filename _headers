@@ -10,7 +10,13 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://api.emailjs.com https://formspree.io https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://formspree.io mailto:; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://api.emailjs.com https://formspree.io https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://formspree.io mailto:; object-src 'none'; upgrade-insecure-requests
+
+# 1b. API serverless de Cloudflare Pages Functions (sin caché ni indexación)
+/api/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store, no-cache, must-revalidate
 
 # 2. Protección adicional y bloqueo de indexación en áreas privadas y panel admin
 /admin
